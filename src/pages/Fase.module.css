@@ -2,18 +2,29 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  background: var(--color-surface);
+  /* Slowly drifting starfield behind the activity + results screens. The prompt
+     and each option carry their own light pill, so the dark shows through the
+     gaps rather than one solid panel covering the screen. */
+  background-color: var(--color-backdrop);
+  background-image:
+    radial-gradient(1.5px 1.5px at 40px 60px, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 130px 180px, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 90px 250px, rgba(160, 180, 255, 0.4), transparent);
+  background-size: 220px 240px, 300px 320px, 180px 200px;
+  background-repeat: repeat;
+  animation: starDrift 150s linear infinite;
 }
 
-@media (min-width: 600px) {
+/* Each layer drifts by exactly one tile, so the loop is seamless. */
+@keyframes starDrift {
+  to {
+    background-position: 220px 240px, -300px 320px, 180px -200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
   .root {
-    max-width: 640px;
-    margin: 2rem auto;
-    min-height: unset;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    box-shadow: var(--shadow-card);
-    overflow: clip; /* clips border-radius without breaking position:sticky */
+    animation: none; /* freeze to a static frame */
   }
 }
 
@@ -24,8 +35,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.625rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(11, 18, 36, 0.82);
+  backdrop-filter: blur(6px);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -34,7 +46,6 @@
 @media (min-width: 600px) {
   .header {
     padding: 0.75rem 1.5rem;
-    top: 2rem; /* sticks at card's visual top edge */
   }
 }
 
@@ -45,7 +56,7 @@
   background: none;
   border: none;
   font-size: 0.9375rem;
-  color: var(--color-primary);
+  color: #A5B4FC;
   font-weight: 600;
   cursor: pointer;
   border-radius: 6px;
@@ -53,14 +64,14 @@
 }
 
 .backBtn:active {
-  background: var(--color-primary-bg);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .phaseName {
   flex: 1;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: #E2E8F0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -70,8 +81,8 @@
   flex-shrink: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-text-muted);
-  background: var(--color-bg);
+  color: #CBD5E1;
+  background: rgba(255, 255, 255, 0.1);
   padding: 0.25rem 0.5rem;
   border-radius: 999px;
 }
@@ -80,6 +91,9 @@
 
 .activityWrap {
   flex: 1;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 /* ── Next bar ───────────────────────────── */
@@ -88,8 +102,9 @@
   position: sticky;
   bottom: 0;
   padding: 0.75rem 1rem;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  background: rgba(11, 18, 36, 0.82);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 @media (min-width: 600px) {
@@ -101,6 +116,8 @@
 .nextBtn {
   display: block;
   width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
   min-height: 48px;
   background: var(--color-secondary);
   color: var(--color-surface);
@@ -123,6 +140,9 @@
   flex-direction: column;
   gap: 1.25rem;
   padding: 1.75rem 1rem 3rem;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 @media (min-width: 600px) {
@@ -144,21 +164,21 @@
 .score {
   margin: 0;
   font-size: 1.125rem;
-  color: var(--color-text);
+  color: #E2E8F0;
   text-align: center;
 }
 
 .comboStat {
   margin: 0;
   font-size: 0.9375rem;
-  color: var(--color-text-muted);
+  color: #94A3B8;
   text-align: center;
 }
 
 .unlockNote {
   margin: 0;
   font-size: 0.9375rem;
-  color: var(--color-text-muted);
+  color: #CBD5E1;
   text-align: center;
 }
 
@@ -417,5 +437,5 @@
   gap: 1.25rem;
   padding: 3rem 1.5rem;
   text-align: center;
-  color: var(--color-text-muted);
+  color: #94A3B8;
 }
