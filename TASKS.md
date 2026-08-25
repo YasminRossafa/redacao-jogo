@@ -2,9 +2,11 @@
 
 ## Engine Build Milestones
 
-- [ ] **M1 — Types + Progress Hook**
-  - Definir tipos TypeScript para fases, atividades e progresso
-  - Implementar hook `useProgress` com leitura/escrita em localStorage
+- [x] **M1 — Types + Progress Hook**
+  - Definir tipos TypeScript para fases, atividades e progresso → `src/engine/types.ts`
+  - Implementar hook `useProgress` com leitura/escrita em localStorage → `src/progress/useProgress.ts`
+  - ⚠️ Testes unitários pendentes — nenhum test runner configurado no projeto ainda.
+    Adicionar Vitest + @testing-library/react antes de M2 para cobrir: unlock logic, error counting, localStorage fallback.
 
 - [ ] **M2 — OrderPuzzle**
   - Componente de arrastar e soltar (ou clicar em ordem) partes da redação
