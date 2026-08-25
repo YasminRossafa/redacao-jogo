@@ -1,0 +1,119 @@
+import { useState, useCallback } from 'react';
+import type { ErrorSpotActivity } from './types';
+import styles from './ErrorSpot.module.css';
+
+interface Props {
+  activity: ErrorSpotActivity;
+  onComplete: (success: boolean) => void;
+}
+
+type CheckState = 'idle' | 'unselected' | 'correct' | 'incorrect';
+
+export function ErrorSpot({ activity, onComplete }: Props) {
+  const { prompt, sentences, errorSentenceId, explanation } = activity;
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [checkState, setCheckState] = useState<CheckState>('idle');
+
+  const isRevealed = checkState === 'correct' || checkState === 'incorrect';
+  const isSuccess = checkState === 'correct';
+
+  const handleSelect = useCallback(
+    (id: string) => {
+      if (isRevealed) return;
+      setSelectedId(id);
+      setCheckState('idle');
+    },
+    [isRevealed]
+  );
+
+  const check = useCallback(() => {
+    if (!selectedId) {
+      setCheckState('unselected');
+      return;
+    }
+    if (selectedId === errorSentenceId) {
+      setCheckState('correct');
+      onComplete(true);
+    } else {
+      setCheckState('incorrect');
+      onComplete(false);
+    }
+  }, [selectedId, errorSentenceId, onComplete]);
+
+  const retry = useCallback(() => {
+    setSelectedId(null);
+    setCheckState('idle');
+  }, []);
+
+  return (
+    <div className={styles.root}>
+      <p className={styles.prompt}>{prompt}</p>
+
+      <ul className={styles.list} aria-label="Frases">
+        {sentences.map((sentence) => {
+          const isSelected = selectedId === sentence.id;
+          const isCorrectSentence = sentence.id === errorSentenceId;
+
+          let stateClass = '';
+          if (checkState === 'correct' && isSelected) stateClass = styles.correct;
+          if (checkState === 'incorrect' && isSelected) stateClass = styles.wrong;
+          if (checkState === 'incorrect' && isCorrectSentence) stateClass = styles.reveal;
+
+          return (
+            <li key={sentence.id}>
+              <button
+                className={[
+                  styles.sentenceBlock,
+                  !isRevealed && isSelected ? styles.selected : '',
+                  stateClass,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={() => handleSelect(sentence.id)}
+                aria-pressed={!isRevealed ? isSelected : undefined}
+                disabled={isRevealed}
+              >
+                {sentence.text}
+                {checkState === 'incorrect' && isCorrectSentence && (
+                  <span className={styles.correctLabel} aria-label="Esta era a frase com erro">
+                    ← com erro
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {!isRevealed && (
+        <button className={styles.checkBtn} onClick={check}>
+          Conferir
+        </button>
+      )}
+
+      {checkState === 'unselected' && (
+        <p className={styles.msgInfo} role="alert">
+          Toque em uma frase antes de conferir.
+        </p>
+      )}
+
+      {isRevealed && (
+        <div className={styles.explanation} role="alert">
+          <p className={styles.explanationText}>{explanation}</p>
+          {checkState === 'incorrect' && (
+            <button className={styles.retryBtn} onClick={retry}>
+              Tentar novamente
+            </button>
+          )}
+        </div>
+      )}
+
+      {isSuccess && (
+        <p className={styles.msgSuccess} role="status">
+          Correto! Você identificou o erro.
+        </p>
+      )}
+    </div>
+  );
+}
