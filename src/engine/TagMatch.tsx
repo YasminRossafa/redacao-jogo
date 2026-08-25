@@ -66,6 +66,21 @@ export function TagMatch({ activity, onComplete }: Props) {
     setWrongIds(new Set());
   };
 
+  // Link a sentence↔tag pair while keeping the mapping a strict bijection: in a
+  // single atomic update, drop any OTHER sentence that held this tag (tag → one
+  // sentence) and overwrite this sentence's tag (sentence → one tag).
+  const linkPair = useCallback((sentenceId: string, tagId: string) => {
+    setLinks((prev) => {
+      const next: Record<string, string> = {};
+      for (const [sid, tid] of Object.entries(prev)) {
+        if (tid === tagId) continue; // release the tag from its previous sentence
+        next[sid] = tid;
+      }
+      next[sentenceId] = tagId;
+      return next;
+    });
+  }, []);
+
   const handleSentenceTap = useCallback(
     (sentenceId: string) => {
       if (isSuccess) return;
@@ -73,8 +88,7 @@ export function TagMatch({ activity, onComplete }: Props) {
 
       // 1. A tag is pending → link (or relink) this sentence to it.
       if (selection.type === 'tag') {
-        const tagId = selection.id;
-        setLinks((prev) => ({ ...prev, [sentenceId]: tagId }));
+        linkPair(sentenceId, selection.id);
         setSelection({ type: 'none' });
         return;
       }
@@ -97,7 +111,7 @@ export function TagMatch({ activity, onComplete }: Props) {
           : { type: 'sentence', id: sentenceId }
       );
     },
-    [selection, links, isSuccess]
+    [selection, links, isSuccess, linkPair]
   );
 
   const handleTagTap = useCallback(
@@ -107,8 +121,7 @@ export function TagMatch({ activity, onComplete }: Props) {
 
       // 1. A sentence is pending → link it to this tag.
       if (selection.type === 'sentence') {
-        const sentenceId = selection.id;
-        setLinks((prev) => ({ ...prev, [sentenceId]: tagId }));
+        linkPair(selection.id, tagId);
         setSelection({ type: 'none' });
         return;
       }
@@ -133,22 +146,28 @@ export function TagMatch({ activity, onComplete }: Props) {
           : { type: 'tag', id: tagId }
       );
     },
-    [selection, links, isSuccess]
+    [selection, links, isSuccess, linkPair]
   );
 
   const check = useCallback(() => {
-    // Only sentences present in mapping are required; partial-mapping activities
-    // (single-target) have fewer required entries than total displayed sentences.
-    const requiredIds = Object.keys(mapping);
-    if (Object.keys(links).length < requiredIds.length) {
+    const correctEntries = Object.entries(mapping);
+    const linkedIds = Object.keys(links);
+
+    // Still fewer links than required pairs → not finished yet.
+    if (linkedIds.length < correctEntries.length) {
       setCheckState('incomplete');
       return;
     }
 
+    // Highlight required sentences with a wrong/missing tag, plus any EXTRA link
+    // on a sentence that shouldn't be mapped at all (single-target variants).
     const wrong = new Set<string>();
-    requiredIds.forEach((sentenceId) => {
-      if (links[sentenceId] !== mapping[sentenceId]) wrong.add(sentenceId);
-    });
+    for (const [sentenceId, tagId] of correctEntries) {
+      if (links[sentenceId] !== tagId) wrong.add(sentenceId);
+    }
+    for (const sentenceId of linkedIds) {
+      if (!(sentenceId in mapping)) wrong.add(sentenceId);
+    }
 
     // Report the full mapping across every displayed sentence (null = unmapped).
     const userMapping: Record<string, string | null> = Object.fromEntries(
@@ -156,7 +175,13 @@ export function TagMatch({ activity, onComplete }: Props) {
     );
     const detail: TagMatchAnswer = { userMapping };
 
-    if (wrong.size === 0) {
+    // Exact match: the linked (non-null) entries must deep-equal the correct
+    // mapping — same count, same values, nothing extra, nothing missing.
+    const exact =
+      linkedIds.length === correctEntries.length &&
+      correctEntries.every(([sentenceId, tagId]) => links[sentenceId] === tagId);
+
+    if (exact) {
       setCheckState('correct');
       onComplete(true, detail);
     } else {
