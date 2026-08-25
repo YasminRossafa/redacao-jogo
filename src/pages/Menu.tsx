@@ -22,7 +22,7 @@ function nodeIcon(state: NodeState, isFinal: boolean): string {
 
 export function Menu() {
   const navigate = useNavigate();
-  const { isPhaseUnlocked, unlockPhase, getPhaseScore } = useProgress();
+  const { isPhaseUnlocked, unlockPhase, getPhaseScore, hasBadge } = useProgress();
 
   useEffect(() => {
     unlockPhase('fase1');
@@ -78,16 +78,23 @@ export function Menu() {
               </span>
 
               {stars !== null && (
-                <div className={styles.stars} aria-label={`${stars} de 3 estrelas`}>
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className={i < stars ? styles.starOn : styles.starOff}
-                      aria-hidden
-                    >
-                      ★
+                <div className={styles.starRow}>
+                  <div className={styles.stars} aria-label={`${stars} de 3 estrelas`}>
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className={i < stars ? styles.starOn : styles.starOff}
+                        aria-hidden
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  {hasBadge(`sabichao-${phase.id}`) && (
+                    <span className={styles.nodeBadge} aria-label="Sabichão" title="Sabichão">
+                      🏆
                     </span>
-                  ))}
+                  )}
                 </div>
               )}
             </div>

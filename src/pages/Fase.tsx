@@ -78,11 +78,145 @@ function ActivityRenderer({
   }
 }
 
+/** Renders what the student answered vs. the correct answer, per activity kind. */
+function ReviewDetail({ result }: { result: ActivityResult }) {
+  const { detail, activity, success } = result;
+
+  // Each guard narrows both the detail union and the activity union together.
+  if (detail.kind === 'order' && activity.kind === 'order') {
+    const label = (id: string) => activity.items.find((it) => it.id === id)?.label ?? id;
+    return (
+      <>
+        <div className={styles.reviewBlock}>
+          <span className={styles.reviewLabel}>Sua ordem</span>
+          <ol className={styles.reviewSeq}>
+            {detail.userOrder.map((id, i) => (
+              <li key={i} className={styles.reviewSeqItem}>{label(id)}</li>
+            ))}
+          </ol>
+        </div>
+        {!success && (
+          <div className={styles.reviewBlock}>
+            <span className={styles.reviewLabel}>Ordem certa</span>
+            <ol className={styles.reviewSeq}>
+              {activity.items.map((it) => (
+                <li key={it.id} className={[styles.reviewSeqItem, styles.reviewCorrect].join(' ')}>
+                  {it.label}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  if (detail.kind === 'tag-match' && activity.kind === 'tag-match') {
+    const tagLabel = (id: string | null) =>
+      id ? activity.tags.find((t) => t.id === id)?.label ?? id : 'não marcado';
+    return (
+      <div className={styles.reviewBlock}>
+        {activity.sentences.map((s) => {
+          const assigned = detail.userMapping[s.id] ?? null;
+          const correct = activity.mapping[s.id]; // undefined for non-target sentences
+          const isWrong = correct !== undefined && assigned !== correct;
+          return (
+            <div key={s.id} className={styles.reviewTagRow}>
+              <p className={styles.reviewSentence}>{s.text}</p>
+              <p className={styles.reviewLine}>
+                <span className={styles.reviewLineKey}>Você marcou:</span>{' '}
+                <span className={assigned === null ? styles.reviewMuted : undefined}>
+                  {tagLabel(assigned)}
+                </span>
+              </p>
+              {isWrong && (
+                <p className={styles.reviewLine}>
+                  <span className={styles.reviewLineKey}>Correto:</span>{' '}
+                  <span className={styles.reviewCorrect}>{tagLabel(correct)}</span>
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (detail.kind === 'error-spot' && activity.kind === 'error-spot') {
+    const text = (id: string) => activity.sentences.find((s) => s.id === id)?.text ?? id;
+    return (
+      <>
+        {!success && (
+          <div className={styles.reviewBlock}>
+            <p className={styles.reviewLine}>
+              <span className={styles.reviewLineKey}>Você escolheu:</span>{' '}
+              {text(detail.selectedSentenceId)}
+            </p>
+            <p className={styles.reviewLine}>
+              <span className={styles.reviewLineKey}>Frase com erro:</span>{' '}
+              <span className={styles.reviewCorrect}>{text(activity.errorSentenceId)}</span>
+            </p>
+          </div>
+        )}
+        {!success && <p className={styles.reviewExplanation}>{activity.explanation}</p>}
+      </>
+    );
+  }
+
+  if (detail.kind === 'build' && activity.kind === 'build') {
+    const frag = (id: string) => activity.fragments.find((f) => f.id === id);
+    return (
+      <>
+        <div className={styles.reviewBlock}>
+          <span className={styles.reviewLabel}>Você usou</span>
+          <ol className={styles.reviewSeq}>
+            {detail.userFragmentIds.map((id, i) => {
+              const f = frag(id);
+              const isDistractor = f ? !f.correct : false;
+              return (
+                <li
+                  key={i}
+                  className={[styles.reviewSeqItem, isDistractor ? styles.reviewDistractor : '']
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  {f?.text ?? id}
+                  {isDistractor && <span className={styles.reviewFlag}>fragmento incorreto</span>}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+        {!success && (
+          <div className={styles.reviewBlock}>
+            <span className={styles.reviewLabel}>Sequência certa</span>
+            <ol className={styles.reviewSeq}>
+              {activity.correctSequence.map((id) => (
+                <li key={id} className={[styles.reviewSeqItem, styles.reviewCorrect].join(' ')}>
+                  {frag(id)?.text ?? id}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  return null;
+}
+
 export function Fase() {
   const { phaseId } = useParams<{ phaseId: string }>();
   const navigate = useNavigate();
-  const { recordActivityResult, unlockPhase, incrementPhaseErrors, resetPhaseErrors, recordPhaseScore } =
-    useProgress();
+  const {
+    recordActivityResult,
+    unlockPhase,
+    incrementPhaseErrors,
+    resetPhaseErrors,
+    recordPhaseScore,
+    awardBadge,
+  } = useProgress();
 
   const baseActivities = phaseId ? (CONTENT[phaseId] ?? []) : [];
   const phase = PHASES.find((p) => p.id === phaseId);
@@ -147,7 +281,11 @@ export function Fase() {
     if (!showResults || !phaseId) return;
     const correctCount = results.filter((r) => r.success).length;
     recordPhaseScore(phaseId, correctCount, results.length, bestCombo);
-  }, [showResults, phaseId, results, bestCombo, recordPhaseScore]);
+    // Perfect run → award the persistent Sabichão badge for this phase.
+    if (results.length > 0 && correctCount === results.length) {
+      awardBadge(`sabichao-${phaseId}`);
+    }
+  }, [showResults, phaseId, results, bestCombo, recordPhaseScore, awardBadge]);
 
   const advance = useCallback(() => {
     if (activityIndex < shuffledActivities.length - 1) {
@@ -224,6 +362,12 @@ export function Fase() {
             {tier.label}
           </div>
 
+          {correctCount === totalCount && (
+            <div className={styles.sabichaoBadge}>
+              <span aria-hidden>🏆</span> Sabichão
+            </div>
+          )}
+
           <p className={styles.score}>
             <strong>{correctCount}</strong> de <strong>{totalCount}</strong> corretas
           </p>
@@ -260,9 +404,7 @@ export function Fase() {
                   </span>
                   <div className={styles.reviewContent}>
                     <p className={styles.reviewPrompt}>{result.prompt}</p>
-                    {result.explanation && (
-                      <p className={styles.reviewExplanation}>{result.explanation}</p>
-                    )}
+                    <ReviewDetail result={result} />
                   </div>
                 </li>
               ))}

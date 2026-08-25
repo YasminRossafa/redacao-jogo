@@ -13,6 +13,7 @@ interface ProgressState {
   completedActivities: Record<string, boolean>;
   phaseErrorCounts: Record<string, number>;
   phaseScores: Record<string, PhaseScore>;
+  badges: string[];
 }
 
 const INITIAL_STATE: ProgressState = {
@@ -20,6 +21,7 @@ const INITIAL_STATE: ProgressState = {
   completedActivities: {},
   phaseErrorCounts: {},
   phaseScores: {},
+  badges: [],
 };
 
 function readStorage(): ProgressState {
@@ -71,6 +73,8 @@ export interface ProgressHook {
   resetPhaseErrors: (phaseId: string) => void;
   getPhaseScore: (phaseId: string) => PhaseScore | null;
   recordPhaseScore: (phaseId: string, correctCount: number, total: number, bestCombo: number) => void;
+  hasBadge: (badgeId: string) => boolean;
+  awardBadge: (badgeId: string) => void;
   resetAllProgress: () => void;
 }
 
@@ -158,6 +162,21 @@ export function useProgress(): ProgressHook {
     [update]
   );
 
+  const hasBadge = useCallback(
+    (badgeId: string) => state.badges.includes(badgeId),
+    [state.badges]
+  );
+
+  const awardBadge = useCallback(
+    (badgeId: string) => {
+      update((prev) => {
+        if (prev.badges.includes(badgeId)) return prev;
+        return { ...prev, badges: [...prev.badges, badgeId] };
+      });
+    },
+    [update]
+  );
+
   const resetAllProgress = useCallback(() => {
     update(() => ({ ...INITIAL_STATE }));
   }, [update]);
@@ -170,6 +189,8 @@ export function useProgress(): ProgressHook {
     resetPhaseErrors,
     getPhaseScore,
     recordPhaseScore,
+    hasBadge,
+    awardBadge,
     resetAllProgress,
   };
 }
