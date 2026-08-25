@@ -14,6 +14,7 @@ interface BurstConfig {
   bg: string;
   color: string;
   size: BurstSize;
+  legend?: boolean; // top tier — adds a short sparkle flourish
 }
 
 // Combo tiers as a space-crew rank progression. Icons are emoji glyphs
@@ -25,6 +26,16 @@ function getConfig(success: boolean, combo: number): BurstConfig {
     return { icon: '✕', text: null, bg: 'var(--color-danger-bg)', color: 'var(--color-danger)', size: 'md' };
   }
 
+  if (combo >= 9) {
+    return {
+      icon: '✨', // ti-sparkles
+      text: 'Lenda estelar',
+      bg: 'var(--color-primary)',
+      color: '#fff',
+      size: 'xl',
+      legend: true,
+    };
+  }
   if (combo >= 7) {
     return {
       icon: '🪐', // ti-planet
@@ -77,6 +88,13 @@ export function FeedbackBurst({ success, combo }: Props) {
       style={{ backgroundColor: config.bg, color: config.color }}
       aria-hidden
     >
+      {config.legend && (
+        <span className={styles.sparkles}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <span key={i} className={styles.sparkle} />
+          ))}
+        </span>
+      )}
       <span className={styles.icon}>{config.icon}</span>
       {config.text && <span className={styles.text}>{config.text}</span>}
     </div>
