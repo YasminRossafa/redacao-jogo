@@ -28,7 +28,7 @@ const PPATINHOFEIO = {
 
 const PANNESULLIVAN = {
   rep:  "Em 'O Milagre de Anne Sullivan', Helen Keller, uma menina surda, enfrenta dificuldades no seu processo de alfabetização.",
-  tema: "Assim como a personagem, muitos alunos com eficiência auditiva sofrem com os desafios para sua formação educacional no Brasil.",
+  tema: "Assim como a personagem, muitos alunos com deficiência auditiva sofrem com os desafios para sua formação educacional no Brasil.",
   prob: "A falta de acessibilidade nas escolas e a exclusão dessas pessoas no mercado de trabalho são problemas desse tema.",
 };
 
