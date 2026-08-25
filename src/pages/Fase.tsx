@@ -7,7 +7,7 @@ import { TagMatch } from '../engine/TagMatch';
 import { ErrorSpot } from '../engine/ErrorSpot';
 import { BuildFromScratch } from '../engine/BuildFromScratch';
 import { FeedbackBurst } from '../engine/FeedbackBurst';
-import type { ActivityData } from '../engine/types';
+import type { ActivityData, AnswerDetail } from '../engine/types';
 import styles from './Fase.module.css';
 
 interface ActivityResult {
@@ -16,6 +16,10 @@ interface ActivityResult {
   prompt: string;
   success: boolean;
   explanation?: string;
+  /** What the student actually answered, kind-tagged. */
+  detail: AnswerDetail;
+  /** The activity's own data, kept so correct answers resolve for display. */
+  activity: ActivityData;
 }
 
 interface BurstState {
@@ -38,17 +42,39 @@ function ActivityRenderer({
   onComplete,
 }: {
   activity: ActivityData;
-  onComplete: (success: boolean) => void;
+  onComplete: (success: boolean, detail: AnswerDetail) => void;
 }) {
+  // Each engine reports a bare answer object; we tag it with `kind` here so the
+  // result screen can discriminate the union without re-checking activity data.
   switch (activity.kind) {
     case 'order':
-      return <OrderPuzzle activity={activity} onComplete={onComplete} />;
+      return (
+        <OrderPuzzle
+          activity={activity}
+          onComplete={(s, d) => onComplete(s, { kind: 'order', ...d })}
+        />
+      );
     case 'tag-match':
-      return <TagMatch activity={activity} onComplete={onComplete} />;
+      return (
+        <TagMatch
+          activity={activity}
+          onComplete={(s, d) => onComplete(s, { kind: 'tag-match', ...d })}
+        />
+      );
     case 'error-spot':
-      return <ErrorSpot activity={activity} onComplete={onComplete} />;
+      return (
+        <ErrorSpot
+          activity={activity}
+          onComplete={(s, d) => onComplete(s, { kind: 'error-spot', ...d })}
+        />
+      );
     case 'build':
-      return <BuildFromScratch activity={activity} onComplete={onComplete} />;
+      return (
+        <BuildFromScratch
+          activity={activity}
+          onComplete={(s, d) => onComplete(s, { kind: 'build', ...d })}
+        />
+      );
   }
 }
 
@@ -78,7 +104,7 @@ export function Fase() {
   const [burst, setBurst] = useState<BurstState | null>(null);
 
   const handleComplete = useCallback(
-    (success: boolean) => {
+    (success: boolean, detail: AnswerDetail) => {
       if (!phaseId) return;
 
       const activity = shuffledActivities[activityIndex];
@@ -98,7 +124,15 @@ export function Fase() {
           activity.kind === 'error-spot' && !success ? activity.explanation : undefined;
         return [
           ...prev,
-          { activityId: activity.id, kind: activity.kind, prompt: activity.prompt, success, explanation },
+          {
+            activityId: activity.id,
+            kind: activity.kind,
+            prompt: activity.prompt,
+            success,
+            explanation,
+            detail,
+            activity,
+          },
         ];
       });
 

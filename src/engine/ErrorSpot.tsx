@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
-import type { ErrorSpotActivity } from './types';
+import type { ErrorSpotActivity, ErrorSpotAnswer } from './types';
 import styles from './ErrorSpot.module.css';
 
 interface Props {
   activity: ErrorSpotActivity;
-  onComplete: (success: boolean) => void;
+  onComplete: (success: boolean, detail: ErrorSpotAnswer) => void;
 }
 
 type CheckState = 'idle' | 'unselected' | 'correct' | 'incorrect';
@@ -44,12 +44,13 @@ export function ErrorSpot({ activity, onComplete }: Props) {
       setCheckState('unselected');
       return;
     }
+    const detail: ErrorSpotAnswer = { selectedSentenceId: selectedId };
     if (selectedId === errorSentenceId) {
       setCheckState('correct');
-      onComplete(true);
+      onComplete(true, detail);
     } else {
       setCheckState('incorrect');
-      onComplete(false);
+      onComplete(false, detail);
     }
   }, [selectedId, errorSentenceId, onComplete]);
 

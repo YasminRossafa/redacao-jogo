@@ -39,3 +39,32 @@ export type ActivityData =
   | TagMatchActivity
   | ErrorSpotActivity
   | BuildActivity;
+
+// ─── Answer detail passed up through each engine's onComplete ─────────────────
+
+/** Item ids in the order the student placed them. */
+export interface OrderAnswer {
+  userOrder: string[];
+}
+
+/** Sentence id → tag id the student assigned (null when left unmapped). */
+export interface TagMatchAnswer {
+  userMapping: Record<string, string | null>;
+}
+
+/** The sentence id the student picked as the error. */
+export interface ErrorSpotAnswer {
+  selectedSentenceId: string;
+}
+
+/** Fragment ids the student placed, in order. */
+export interface BuildAnswer {
+  userFragmentIds: string[];
+}
+
+/** Kind-tagged union assembled in Fase.tsx from each engine's answer. */
+export type AnswerDetail =
+  | ({ kind: 'order' } & OrderAnswer)
+  | ({ kind: 'tag-match' } & TagMatchAnswer)
+  | ({ kind: 'error-spot' } & ErrorSpotAnswer)
+  | ({ kind: 'build' } & BuildAnswer);

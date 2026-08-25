@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
-import type { TagMatchActivity } from './types';
+import type { TagMatchActivity, TagMatchAnswer } from './types';
 import styles from './TagMatch.module.css';
 
 interface Props {
   activity: TagMatchActivity;
-  onComplete: (success: boolean) => void;
+  onComplete: (success: boolean, detail: TagMatchAnswer) => void;
 }
 
 type Selection =
@@ -150,15 +150,21 @@ export function TagMatch({ activity, onComplete }: Props) {
       if (links[sentenceId] !== mapping[sentenceId]) wrong.add(sentenceId);
     });
 
+    // Report the full mapping across every displayed sentence (null = unmapped).
+    const userMapping: Record<string, string | null> = Object.fromEntries(
+      sentences.map((s) => [s.id, links[s.id] ?? null])
+    );
+    const detail: TagMatchAnswer = { userMapping };
+
     if (wrong.size === 0) {
       setCheckState('correct');
-      onComplete(true);
+      onComplete(true, detail);
     } else {
       setWrongIds(wrong);
       setCheckState('incorrect');
-      onComplete(false);
+      onComplete(false, detail);
     }
-  }, [links, mapping, onComplete]);
+  }, [links, mapping, sentences, onComplete]);
 
   const retry = useCallback(() => {
     setCheckState('idle');

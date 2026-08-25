@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
-import type { BuildActivity } from './types';
+import type { BuildActivity, BuildAnswer } from './types';
 import styles from './BuildFromScratch.module.css';
 
 interface Props {
   activity: BuildActivity;
-  onComplete: (success: boolean) => void;
+  onComplete: (success: boolean, detail: BuildAnswer) => void;
 }
 
 type CheckState = 'idle' | 'wrong-set' | 'wrong-order' | 'correct';
@@ -52,6 +52,7 @@ export function BuildFromScratch({ activity, onComplete }: Props) {
 
   const check = useCallback(() => {
     const placedIds = placed.map((f) => f.id);
+    const detail: BuildAnswer = { userFragmentIds: placedIds };
     const correctSet = new Set(correctSequence);
     const placedSet = new Set(placedIds);
 
@@ -62,19 +63,19 @@ export function BuildFromScratch({ activity, onComplete }: Props) {
 
     if (!sameSet) {
       setCheckState('wrong-set');
-      onComplete(false);
+      onComplete(false, detail);
       return;
     }
 
     const inOrder = placedIds.every((id, i) => id === correctSequence[i]);
     if (!inOrder) {
       setCheckState('wrong-order');
-      onComplete(false);
+      onComplete(false, detail);
       return;
     }
 
     setCheckState('correct');
-    onComplete(true);
+    onComplete(true, detail);
   }, [placed, correctSequence, onComplete]);
 
   const retry = useCallback(() => {

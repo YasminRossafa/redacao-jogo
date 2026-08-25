@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
-import type { OrderActivity } from './types';
+import type { OrderActivity, OrderAnswer } from './types';
 import styles from './OrderPuzzle.module.css';
 
 interface Props {
   activity: OrderActivity;
-  onComplete: (success: boolean) => void;
+  onComplete: (success: boolean, detail: OrderAnswer) => void;
 }
 
 type CheckState = 'idle' | 'incomplete' | 'correct' | 'incorrect';
@@ -69,13 +69,14 @@ export function OrderPuzzle({ activity, onComplete }: Props) {
     placed.forEach((id, i) => {
       if (id !== items[i].id) wrong.add(i);
     });
+    const detail: OrderAnswer = { userOrder: [...placed] };
     if (wrong.size === 0) {
       setCheckState('correct');
-      onComplete(true);
+      onComplete(true, detail);
     } else {
       setWrongSlots(wrong);
       setCheckState('incorrect');
-      onComplete(false);
+      onComplete(false, detail);
     }
   }, [placed, items, onComplete]);
 
