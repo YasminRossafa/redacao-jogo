@@ -50,7 +50,7 @@ export function Menu() {
   const { isPhaseUnlocked, unlockPhase, getPhaseScore, hasBadge } = useProgress();
 
   useEffect(() => {
-    unlockPhase('fase1');
+    unlockPhase('fase-repertorio');
   }, [unlockPhase]);
 
   // The astronaut sits on the first unlocked-but-unplayed phase.
@@ -78,7 +78,7 @@ export function Menu() {
           const score = getPhaseScore(phase.id);
 
           const state: NodeState = !unlocked ? 'locked' : score !== null ? 'completed' : 'current';
-          const stars = score !== null ? getTierStars(score.correctCount) : null;
+          const stars = score !== null ? getTierStars(score.correctCount, phase.id) : null;
           const isAstronaut = phase.id === frontierPhaseId;
 
           // Finale and the frontier phase show a planet; other phases show a moon.

@@ -1,11 +1,19 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
-import { useProgress, UNLOCK_THRESHOLDS } from '../progress/useProgress';
-import { CONTENT, PHASES, getNextPhaseId, getTier } from '../content/index';
+import { useProgress } from '../progress/useProgress';
+import {
+  CONTENT,
+  PHASES,
+  getNextPhaseId,
+  getTier,
+  getPhaseTotal,
+  getUnlockThreshold,
+} from '../content/index';
 import { OrderPuzzle } from '../engine/OrderPuzzle';
 import { TagMatch } from '../engine/TagMatch';
 import { ErrorSpot } from '../engine/ErrorSpot';
 import { BuildFromScratch } from '../engine/BuildFromScratch';
+import { ChoiceSelect } from '../engine/ChoiceSelect';
 import { FeedbackBurst } from '../engine/FeedbackBurst';
 import type { ActivityData, AnswerDetail } from '../engine/types';
 import styles from './Fase.module.css';
@@ -80,6 +88,14 @@ function ActivityRenderer({
         <BuildFromScratch
           activity={activity}
           onComplete={(s, d) => onComplete(s, { kind: 'build', ...d })}
+          onSkip={onSkip}
+        />
+      );
+    case 'choice':
+      return (
+        <ChoiceSelect
+          activity={activity}
+          onComplete={(s, d) => onComplete(s, { kind: 'choice', ...d })}
           onSkip={onSkip}
         />
       );
@@ -228,6 +244,31 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
     );
   }
 
+  if (activity.kind === 'choice') {
+    const text = (id: string) => activity.options.find((o) => o.id === id)?.text ?? id;
+    const answer = detail && detail.kind === 'choice' ? detail : null;
+    return (
+      <>
+        {showCorrect && (
+          <div className={styles.reviewBlock}>
+            {answer && (
+              <p className={styles.reviewLine}>
+                <span className={styles.reviewLineKey}>Você escolheu:</span>{' '}
+                {text(answer.selectedOptionId)}
+              </p>
+            )}
+            <p className={styles.reviewLine}>
+              <span className={styles.reviewLineKey}>Correto:</span>{' '}
+              <span className={styles.reviewCorrect}>{text(activity.correctOptionId)}</span>
+            </p>
+          </div>
+        )}
+        {/* Explanation is shown after answering regardless of correct/incorrect */}
+        <p className={styles.reviewExplanation}>{activity.explanation}</p>
+      </>
+    );
+  }
+
   return null;
 }
 
@@ -306,11 +347,12 @@ export function Fase() {
   useEffect(() => {
     if (!showResults || !phaseId) return;
     const correctCount = results.filter((r) => r.success).length;
-    recordPhaseScore(phaseId, correctCount, results.length, bestCombo);
-    if (results.length > 0 && correctCount === results.length) {
+    const total = getPhaseTotal(phaseId);
+    recordPhaseScore(phaseId, correctCount, total, bestCombo);
+    if (total > 0 && correctCount === total) {
       awardBadge(`sabichao-${phaseId}`);
     }
-    const threshold = UNLOCK_THRESHOLDS[phaseId] ?? 0;
+    const threshold = getUnlockThreshold(phaseId);
     if (correctCount >= threshold) {
       const nextId = getNextPhaseId(phaseId);
       if (nextId) unlockPhase(nextId);
@@ -406,11 +448,11 @@ export function Fase() {
   // Results screen
   if (showResults) {
     const correctCount = results.filter((r) => r.success).length;
-    const totalCount = shuffledActivities.length;
-    const tier = getTier(correctCount);
+    const totalCount = getPhaseTotal(phaseId);
+    const tier = getTier(correctCount, phaseId);
     const nextId = phaseId ? getNextPhaseId(phaseId) : null;
     const nextPhase = nextId ? PHASES.find((p) => p.id === nextId) : null;
-    const threshold = phaseId ? (UNLOCK_THRESHOLDS[phaseId] ?? 0) : 0;
+    const threshold = getUnlockThreshold(phaseId);
     const meetsThreshold = correctCount >= threshold;
 
     return (

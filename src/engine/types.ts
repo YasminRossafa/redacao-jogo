@@ -34,11 +34,23 @@ export interface BuildActivity {
   correctSequence: string[];
 }
 
+export interface ChoiceActivity {
+  id: string;
+  kind: 'choice';
+  prompt: string;
+  options: { id: string; text: string }[];
+  /** Id of the single correct option */
+  correctOptionId: string;
+  /** Shown after answering, regardless of correct/incorrect */
+  explanation: string;
+}
+
 export type ActivityData =
   | OrderActivity
   | TagMatchActivity
   | ErrorSpotActivity
-  | BuildActivity;
+  | BuildActivity
+  | ChoiceActivity;
 
 // ─── Answer detail passed up through each engine's onComplete ─────────────────
 
@@ -62,9 +74,15 @@ export interface BuildAnswer {
   userFragmentIds: string[];
 }
 
+/** The option id the student picked. */
+export interface ChoiceAnswer {
+  selectedOptionId: string;
+}
+
 /** Kind-tagged union assembled in Fase.tsx from each engine's answer. */
 export type AnswerDetail =
   | ({ kind: 'order' } & OrderAnswer)
   | ({ kind: 'tag-match' } & TagMatchAnswer)
   | ({ kind: 'error-spot' } & ErrorSpotAnswer)
-  | ({ kind: 'build' } & BuildAnswer);
+  | ({ kind: 'build' } & BuildAnswer)
+  | ({ kind: 'choice' } & ChoiceAnswer);
