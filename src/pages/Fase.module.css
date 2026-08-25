@@ -1,0 +1,160 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* ── Header ─────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.backBtn {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  background: none;
+  border: none;
+  font-size: 0.9375rem;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+
+.backBtn:active {
+  background: #eff6ff;
+}
+
+.phaseName {
+  flex: 1;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progress {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+}
+
+/* ── Activity area ──────────────────────── */
+
+.activityWrap {
+  flex: 1;
+  padding-bottom: 1rem;
+}
+
+/* ── Next bar ───────────────────────────── */
+
+.nextBar {
+  position: sticky;
+  bottom: 0;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.nextBtn {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.nextBtn:active {
+  background: #16a34a;
+}
+
+/* ── Completion screen ──────────────────── */
+
+.completion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.completionIcon {
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dcfce7;
+  border-radius: 50%;
+  font-size: 1.75rem;
+  margin: 0;
+  color: #166534;
+}
+
+.completionTitle {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.completionSub {
+  font-size: 0.9375rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 320px;
+}
+
+.menuBtn {
+  min-height: 48px;
+  padding: 0 1.75rem;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.menuBtn:active {
+  background: #2563eb;
+}
+
+/* ── Coming soon ────────────────────────── */
+
+.comingSoon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #64748b;
+}

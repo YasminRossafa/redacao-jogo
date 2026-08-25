@@ -8,27 +8,28 @@
   - ⚠️ Testes unitários pendentes — nenhum test runner configurado no projeto ainda.
     Adicionar Vitest + @testing-library/react antes de M2 para cobrir: unlock logic, error counting, localStorage fallback.
 
-- [ ] **M2 — OrderPuzzle**
-  - Componente de arrastar e soltar (ou clicar em ordem) partes da redação
-  - Recebe lista de blocos de texto; valida sequência correta
+- [x] **M2 — OrderPuzzle** → `src/engine/OrderPuzzle.tsx`
 
-- [ ] **M3 — TagMatch**
-  - Componente de classificação: dado um trecho, o estudante seleciona a qual parte pertence
-  - Recebe pares (trecho, rótulo correto)
+- [x] **M3 — TagMatch** → `src/engine/TagMatch.tsx`
 
-- [ ] **M4 — ErrorSpot**
-  - Componente de identificação de erros: trecho com problemas destacáveis
-  - Estudante clica nos trechos incorretos; recebe feedback
+- [x] **M4 — ErrorSpot** → `src/engine/ErrorSpot.tsx`
 
-- [ ] **M5 — BuildFromScratch**
-  - Componente de escrita guiada: campo de texto por seção com checklist de critérios
-  - Avaliação local (heurísticas simples de comprimento/palavras-chave)
+- [x] **M5 — BuildFromScratch** → `src/engine/BuildFromScratch.tsx`
 
-- [ ] **M6 — Página Orquestradora de Fase**
-  - Página que sequencia atividades de uma fase
-  - Integra `useProgress` para marcar fase como concluída
+- [x] **M6 — Página Orquestradora de Fase** → `src/pages/Fase.tsx`
+  - Sequencia atividades; avança só após onComplete(true)
+  - Desbloqueia próxima fase ao concluir; unlock persiste via localStorage
 
-- [ ] **M7 — Menu Principal + Roteamento + Conteúdo Dummy**
-  - Página de menu listando fases com status (bloqueado/disponível/concluído)
-  - Configuração de rotas com react-router-dom
-  - Conteúdo dummy para testar o fluxo completo end-to-end
+- [x] **M7 — Menu Principal + Roteamento + Conteúdo Real (Fase 1)**
+  - `src/pages/Menu.tsx` — lista 5 fases com estado bloqueado/desbloqueado
+  - `src/content/fase1-introducao.ts` — 4 atividades com conteúdo real (tema: desinformação no Brasil)
+  - `src/content/index.ts` — registry de conteúdo + metadados de fases
+  - `src/App.tsx` — BrowserRouter + Routes (`/` e `/fase/:phaseId`)
+
+## Próximos passos
+
+- [ ] **Testes (pendente desde M1)** — adicionar Vitest + @testing-library/react; cobrir useProgress e lógica dos componentes
+- [ ] **Conteúdo fase 2** — Desenvolvimento 1
+- [ ] **Conteúdo fase 3** — Desenvolvimento 2
+- [ ] **Conteúdo fase 4** — Conclusão
+- [ ] **Conteúdo fase 5** — Redação completa
