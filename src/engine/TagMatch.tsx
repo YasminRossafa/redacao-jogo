@@ -42,6 +42,9 @@ function shuffle<T>(arr: T[]): T[] {
 export function TagMatch({ activity, onComplete, onSkip }: Props) {
   const { prompt, sentences, tags, mapping } = activity;
 
+  // When there is only one tag the user shouldn't have to click it first.
+  const isSingleTag = tags.length === 1;
+
   // Color is assigned by original tag position (stable regardless of display order)
   const colorOf = useCallback(
     (tagId: string): TagColor => {
@@ -56,9 +59,18 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
   const [displayTags] = useState(() => shuffle([...tags]));
 
   const [links, setLinks] = useState<Record<string, string>>({}); // sentenceId → tagId
-  const [selection, setSelection] = useState<Selection>({ type: 'none' });
+  // Single-tag mode: pre-select the only tag so the user just taps sentences.
+  const [selection, setSelection] = useState<Selection>(() =>
+    isSingleTag ? { type: 'tag', id: tags[0].id } : { type: 'none' }
+  );
   const [checkState, setCheckState] = useState<CheckState>('idle');
   const [wrongIds, setWrongIds] = useState<Set<string>>(new Set());
+
+  // The selection to restore after any action: keep the tag selected in single-tag mode.
+  const defaultSelection = useCallback(
+    (): Selection => (isSingleTag ? { type: 'tag', id: tags[0].id } : { type: 'none' }),
+    [isSingleTag, tags]
+  );
 
   const isSuccess = checkState === 'correct';
 
@@ -90,7 +102,7 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
       // 1. A tag is pending → link (or relink) this sentence to it.
       if (selection.type === 'tag') {
         linkPair(sentenceId, selection.id);
-        setSelection({ type: 'none' });
+        setSelection(defaultSelection());
         return;
       }
 
@@ -101,18 +113,18 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
           delete next[sentenceId];
           return next;
         });
-        setSelection({ type: 'none' });
+        setSelection(defaultSelection());
         return;
       }
 
       // 3. Otherwise toggle this sentence as the pending selection.
       setSelection((sel) =>
         sel.type === 'sentence' && sel.id === sentenceId
-          ? { type: 'none' }
+          ? defaultSelection()
           : { type: 'sentence', id: sentenceId }
       );
     },
-    [selection, links, isSuccess, linkPair]
+    [selection, links, isSuccess, linkPair, defaultSelection]
   );
 
   const handleTagTap = useCallback(
@@ -123,7 +135,7 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
       // 1. A sentence is pending → link it to this tag.
       if (selection.type === 'sentence') {
         linkPair(selection.id, tagId);
-        setSelection({ type: 'none' });
+        setSelection(defaultSelection());
         return;
       }
 
@@ -136,18 +148,20 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
           for (const sid of linkedSentences) delete next[sid];
           return next;
         });
-        setSelection({ type: 'none' });
+        setSelection(defaultSelection());
         return;
       }
 
-      // 3. Otherwise toggle this tag as the pending selection.
+      // 3. Toggle this tag as the pending selection.
+      //    In single-tag mode never deselect — the tag must stay active.
+      if (isSingleTag) return;
       setSelection((sel) =>
         sel.type === 'tag' && sel.id === tagId
           ? { type: 'none' }
           : { type: 'tag', id: tagId }
       );
     },
-    [selection, links, isSuccess, linkPair]
+    [selection, links, isSuccess, linkPair, defaultSelection, isSingleTag]
   );
 
   const check = useCallback(() => {
@@ -195,8 +209,8 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
   const retry = useCallback(() => {
     setCheckState('idle');
     setWrongIds(new Set());
-    setSelection({ type: 'none' });
-  }, []);
+    setSelection(defaultSelection());
+  }, [defaultSelection]);
 
   const hintText =
     selection.type === 'sentence'
