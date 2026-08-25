@@ -1,0 +1,266 @@
+import { useState, useCallback } from 'react';
+import type { TagMatchActivity } from './types';
+import styles from './TagMatch.module.css';
+
+interface Props {
+  activity: TagMatchActivity;
+  onComplete: (success: boolean) => void;
+}
+
+type Selection =
+  | { type: 'none' }
+  | { type: 'sentence'; id: string }
+  | { type: 'tag'; id: string };
+
+type CheckState = 'idle' | 'incomplete' | 'correct' | 'incorrect';
+
+interface TagColor {
+  bg: string;
+  border: string;
+  text: string;
+}
+
+const COLORS: TagColor[] = [
+  { bg: '#dbeafe', border: '#3b82f6', text: '#1d4ed8' },
+  { bg: '#fce7f3', border: '#ec4899', text: '#be185d' },
+  { bg: '#d1fae5', border: '#10b981', text: '#065f46' },
+  { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
+  { bg: '#ede9fe', border: '#8b5cf6', text: '#5b21b6' },
+  { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' },
+];
+
+export function TagMatch({ activity, onComplete }: Props) {
+  const { prompt, sentences, tags, mapping } = activity;
+
+  const colorOf = useCallback(
+    (tagId: string): TagColor => {
+      const idx = tags.findIndex((t) => t.id === tagId);
+      return COLORS[idx % COLORS.length];
+    },
+    [tags]
+  );
+
+  const [links, setLinks] = useState<Record<string, string>>({}); // sentenceId → tagId
+  const [selection, setSelection] = useState<Selection>({ type: 'none' });
+  const [checkState, setCheckState] = useState<CheckState>('idle');
+  const [wrongIds, setWrongIds] = useState<Set<string>>(new Set());
+
+  const isSuccess = checkState === 'correct';
+
+  const resetFeedback = () => {
+    setCheckState('idle');
+    setWrongIds(new Set());
+  };
+
+  const handleSentenceTap = useCallback(
+    (sentenceId: string) => {
+      if (isSuccess) return;
+      resetFeedback();
+
+      if (selection.type === 'tag') {
+        setLinks((l) => ({ ...l, [sentenceId]: selection.id }));
+        setSelection({ type: 'none' });
+        return;
+      }
+
+      if (selection.type === 'sentence' && selection.id === sentenceId) {
+        // Tap same selected sentence → unlink + deselect
+        setLinks((l) => {
+          const next = { ...l };
+          delete next[sentenceId];
+          return next;
+        });
+        setSelection({ type: 'none' });
+        return;
+      }
+
+      setSelection({ type: 'sentence', id: sentenceId });
+    },
+    [selection, isSuccess]
+  );
+
+  const handleTagTap = useCallback(
+    (tagId: string) => {
+      if (isSuccess) return;
+      resetFeedback();
+
+      if (selection.type === 'sentence') {
+        setLinks((l) => ({ ...l, [selection.id]: tagId }));
+        setSelection({ type: 'none' });
+        return;
+      }
+
+      if (selection.type === 'tag' && selection.id === tagId) {
+        setSelection({ type: 'none' });
+        return;
+      }
+
+      setSelection({ type: 'tag', id: tagId });
+    },
+    [selection, isSuccess]
+  );
+
+  const check = useCallback(() => {
+    if (Object.keys(links).length < sentences.length) {
+      setCheckState('incomplete');
+      return;
+    }
+
+    const wrong = new Set<string>();
+    sentences.forEach((s) => {
+      if (links[s.id] !== mapping[s.id]) wrong.add(s.id);
+    });
+
+    if (wrong.size === 0) {
+      setCheckState('correct');
+      onComplete(true);
+    } else {
+      setWrongIds(wrong);
+      setCheckState('incorrect');
+      onComplete(false);
+    }
+  }, [links, sentences, mapping, onComplete]);
+
+  const retry = useCallback(() => {
+    setCheckState('idle');
+    setWrongIds(new Set());
+    setSelection({ type: 'none' });
+  }, []);
+
+  const hintText =
+    selection.type === 'sentence'
+      ? 'Toque uma categoria para associar.'
+      : selection.type === 'tag'
+      ? 'Toque uma frase para associar.'
+      : null;
+
+  return (
+    <div className={styles.root}>
+      <p className={styles.prompt}>{prompt}</p>
+
+      {/* Tag palette */}
+      <div className={styles.palette} role="group" aria-label="Categorias">
+        {tags.map((tag, i) => {
+          const color = COLORS[i % COLORS.length];
+          const isTagSelected = selection.type === 'tag' && selection.id === tag.id;
+          const linkedCount = Object.values(links).filter((v) => v === tag.id).length;
+
+          return (
+            <button
+              key={tag.id}
+              className={[styles.tagChip, isTagSelected ? styles.tagSelected : '']
+                .filter(Boolean)
+                .join(' ')}
+              style={{
+                backgroundColor: color.bg,
+                borderColor: isTagSelected ? color.text : color.border,
+                color: color.text,
+              }}
+              onClick={() => handleTagTap(tag.id)}
+              aria-pressed={isTagSelected}
+            >
+              {tag.label}
+              {linkedCount > 0 && (
+                <span
+                  className={styles.tagBadge}
+                  style={{ backgroundColor: color.text, color: color.bg }}
+                >
+                  {linkedCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Hint live region */}
+      <p
+        className={styles.hint}
+        aria-live="polite"
+        aria-atomic="true"
+        style={{ visibility: hintText ? 'visible' : 'hidden' }}
+      >
+        {hintText ?? ' '}
+      </p>
+
+      {/* Sentences */}
+      <ul className={styles.sentences} aria-label="Frases">
+        {sentences.map((sentence) => {
+          const linkedTagId = links[sentence.id];
+          const linkedTag = linkedTagId ? tags.find((t) => t.id === linkedTagId) : undefined;
+          const color = linkedTagId ? colorOf(linkedTagId) : undefined;
+          const isSelected =
+            selection.type === 'sentence' && selection.id === sentence.id;
+          const isWrong = wrongIds.has(sentence.id);
+
+          const chipStyle = isWrong
+            ? { backgroundColor: '#fef2f2', borderColor: '#ef4444' }
+            : isSuccess && color
+            ? { backgroundColor: color.bg, borderColor: color.border }
+            : color
+            ? { backgroundColor: color.bg, borderColor: color.border }
+            : {};
+
+          return (
+            <li key={sentence.id}>
+              <button
+                className={[
+                  styles.sentenceChip,
+                  isSelected ? styles.sentenceSelected : '',
+                  isWrong ? styles.sentenceWrong : '',
+                  isSuccess && linkedTagId ? styles.sentenceCorrect : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                style={chipStyle}
+                onClick={() => handleSentenceTap(sentence.id)}
+                aria-pressed={isSelected}
+              >
+                <span className={styles.sentenceText}>{sentence.text}</span>
+                {linkedTag && color && (
+                  <span
+                    className={styles.sentenceBadge}
+                    style={{
+                      backgroundColor: color.bg,
+                      borderColor: color.border,
+                      color: color.text,
+                    }}
+                  >
+                    {linkedTag.label}
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {!isSuccess && (
+        <button className={styles.checkBtn} onClick={check}>
+          Conferir
+        </button>
+      )}
+
+      {checkState === 'incomplete' && (
+        <p className={styles.msgInfo} role="alert">
+          Associe todas as frases antes de conferir.
+        </p>
+      )}
+
+      {checkState === 'incorrect' && (
+        <div className={styles.msgError} role="alert">
+          <p>Algumas associações estão incorretas. Ajuste as frases marcadas em vermelho.</p>
+          <button className={styles.retryBtn} onClick={retry}>
+            Tentar novamente
+          </button>
+        </div>
+      )}
+
+      {isSuccess && (
+        <p className={styles.msgSuccess} role="alert">
+          Correto! Todas as associações estão certas.
+        </p>
+      )}
+    </div>
+  );
+}
