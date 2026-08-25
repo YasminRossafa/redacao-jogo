@@ -9,27 +9,27 @@ import type { ActivityData } from '../engine/types';
 // ─── Source paragraphs ───────────────────────────────────────────────────────
 
 const P1984 = {
-  rep:  "Na obra 'Í984' de George Orwell, o governo controla informações e limita a liberdade da população por meio da manipulação da verdade.",
+  rep:  "Na obra 'Í984', de George Orwell, o governo controla informações e limita a liberdade da população por meio da manipulação da verdade.",
   tema: "Embora seja uma obra fictícia, a manipulação do usuário pela informação na internet é uma realidade na sociedade brasileira.",
-  prob: "A falta de educação midiática, que dificulta a análise das informações recebidas, e a ausência de regulamentação eficaz contra a desinformação são problemas decorrentes desse tema.",
+  prob: "A falta de educação midiática, que dificulta a análise das informações recebidas, e a ausência de regulamentação eficaz contra a desinformação, são problemas decorrentes desse tema.",
 };
 
 const PVOZSILENCIO = {
-  rep:  "No desenho japonês 'A voz do silêncio', uma menina surda entra em uma escola comum e começa a enfrentar preconceito e diversos atos de violência, tendo assim que mudar de escola.",
-  tema: "Fora da ficção, existem desafios para a formação educacional de surdos no Brasil.",
+  rep:  "No desenho japonês 'A voz do silêncio', uma menina surda entra em uma escola comum e começa a enfrentar preconceito unido de diversos atos de violência, tendo assim que mudar de escola.",
+  tema: "Fora da ficção também existem desafios para a formação educacional de surdos no Brasil.",
   prob: "A ausência de inclusão social na formação de Libras e o preconceito pela individualidade de pessoas surdas são problemas decorrentes desse tema.",
 };
 
 const PPATINHOFEIO = {
-  rep:  "Como no conto do Patinho Feio, havia a exclusão do personagem por ser diferente, assim como acontece na forma de educação oferecida às pessoas com deficiência auditiva no Brasil.",
-  tema: "Em paralelo com a realidade, existem muitos desafios para a formação educacional de surdos.",
-  prob: "Esses desafios se mostram na falta de acessibilidade a esses alunos, como a inclusão tardia do sistema de Libras e a falta de rigorosidade nas leis de integração social.",
+  rep:  "No conto 'O Patinho Feio' havia a exclusão do personagem principal por ser diferente, demonstrando o preconceito que partia dos outros patos da história.",
+  tema: "Em paralelo com a realidade, o preconceito e exclusão geram muitos desafios para a formação educacional de surdos no Brasil.",
+  prob: "Esses desafios se mostram na falta de acessibilidade a esses alunos, como acontece na inclusão tardia do sistema de Libras e na falta de rigorosidade nas leis de integração social.",
 };
 
 const PANNESULLIVAN = {
   rep:  "Em 'O Milagre de Anne Sullivan', Helen Keller, uma menina surda, enfrenta dificuldades no seu processo de alfabetização.",
-  tema: "Assim como a personagem, muitos alunos sofrem com os desafios para a formação educacional de surdos no Brasil.",
-  prob: "A falta de acessibilidade nas escolas e a exclusão de pessoas surdas no mercado de trabalho são problemas desse tema.",
+  tema: "Assim como a personagem, muitos alunos com eficiência auditiva sofrem com os desafios para sua formação educacional no Brasil.",
+  prob: "A falta de acessibilidade nas escolas e a exclusão dessas pessoas no mercado de trabalho são problemas desse tema.",
 };
 
 const PEXTRAORDINARIO = {
