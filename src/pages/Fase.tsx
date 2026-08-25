@@ -43,10 +43,10 @@ export function Fase() {
   const handleComplete = useCallback(
     (success: boolean) => {
       if (!phaseId) return;
-      recordActivityResult(phaseId, `activity-${activityIndex}`, success);
+      recordActivityResult(phaseId, activities[activityIndex].id, success);
       if (success) setSucceeded(true);
     },
-    [phaseId, activityIndex, recordActivityResult]
+    [phaseId, activityIndex, activities, recordActivityResult]
   );
 
   const advance = useCallback(() => {

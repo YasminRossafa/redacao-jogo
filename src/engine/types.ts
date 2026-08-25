@@ -1,10 +1,12 @@
 export interface OrderActivity {
+  id: string;
   kind: 'order';
   prompt: string;
   items: { id: string; label: string }[];
 }
 
 export interface TagMatchActivity {
+  id: string;
   kind: 'tag-match';
   prompt: string;
   sentences: { id: string; text: string }[];
@@ -14,6 +16,7 @@ export interface TagMatchActivity {
 }
 
 export interface ErrorSpotActivity {
+  id: string;
   kind: 'error-spot';
   prompt: string;
   sentences: { id: string; text: string }[];
@@ -23,6 +26,7 @@ export interface ErrorSpotActivity {
 }
 
 export interface BuildActivity {
+  id: string;
   kind: 'build';
   prompt: string;
   fragments: { id: string; text: string; correct: boolean }[];

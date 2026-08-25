@@ -101,14 +101,17 @@ export function TagMatch({ activity, onComplete }: Props) {
   );
 
   const check = useCallback(() => {
-    if (Object.keys(links).length < sentences.length) {
+    // Only sentences present in mapping are required; partial-mapping activities
+    // (single-target) have fewer required entries than total displayed sentences.
+    const requiredIds = Object.keys(mapping);
+    if (Object.keys(links).length < requiredIds.length) {
       setCheckState('incomplete');
       return;
     }
 
     const wrong = new Set<string>();
-    sentences.forEach((s) => {
-      if (links[s.id] !== mapping[s.id]) wrong.add(s.id);
+    requiredIds.forEach((sentenceId) => {
+      if (links[sentenceId] !== mapping[sentenceId]) wrong.add(sentenceId);
     });
 
     if (wrong.size === 0) {
@@ -119,7 +122,7 @@ export function TagMatch({ activity, onComplete }: Props) {
       setCheckState('incorrect');
       onComplete(false);
     }
-  }, [links, sentences, mapping, onComplete]);
+  }, [links, mapping, onComplete]);
 
   const retry = useCallback(() => {
     setCheckState('idle');
