@@ -2,23 +2,32 @@ import { useState, useCallback } from 'react';
 
 const STORAGE_KEY = 'redacao-jogo:progress';
 
+interface PhaseScore {
+  correctCount: number;
+  total: number;
+  bestCombo: number;
+}
+
 interface ProgressState {
   unlockedPhases: string[];
   completedActivities: Record<string, boolean>;
   phaseErrorCounts: Record<string, number>;
+  phaseScores: Record<string, PhaseScore>;
 }
 
 const INITIAL_STATE: ProgressState = {
   unlockedPhases: [],
   completedActivities: {},
   phaseErrorCounts: {},
+  phaseScores: {},
 };
 
 function readStorage(): ProgressState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...INITIAL_STATE, unlockedPhases: [] };
-    return JSON.parse(raw) as ProgressState;
+    if (!raw) return { ...INITIAL_STATE };
+    // Spread INITIAL_STATE first so new fields get defaults when loading old saves
+    return { ...INITIAL_STATE, ...(JSON.parse(raw) as Partial<ProgressState>) };
   } catch {
     return { ...INITIAL_STATE };
   }
@@ -60,6 +69,8 @@ export interface ProgressHook {
   recordActivityResult: (phaseId: string, activityId: string, success: boolean) => void;
   incrementPhaseErrors: (phaseId: string) => void;
   resetPhaseErrors: (phaseId: string) => void;
+  getPhaseScore: (phaseId: string) => PhaseScore | null;
+  recordPhaseScore: (phaseId: string, correctCount: number, total: number, bestCombo: number) => void;
   resetAllProgress: () => void;
 }
 
@@ -124,6 +135,29 @@ export function useProgress(): ProgressHook {
     [update]
   );
 
+  const getPhaseScore = useCallback(
+    (phaseId: string): PhaseScore | null => state.phaseScores[phaseId] ?? null,
+    [state.phaseScores]
+  );
+
+  const recordPhaseScore = useCallback(
+    (phaseId: string, correctCount: number, total: number, bestCombo: number) => {
+      update((prev) => {
+        const existing = prev.phaseScores[phaseId];
+        // Only overwrite if new correctCount is strictly better
+        if (existing && existing.correctCount >= correctCount) return prev;
+        return {
+          ...prev,
+          phaseScores: {
+            ...prev.phaseScores,
+            [phaseId]: { correctCount, total, bestCombo },
+          },
+        };
+      });
+    },
+    [update]
+  );
+
   const resetAllProgress = useCallback(() => {
     update(() => ({ ...INITIAL_STATE }));
   }, [update]);
@@ -134,6 +168,8 @@ export function useProgress(): ProgressHook {
     recordActivityResult,
     incrementPhaseErrors,
     resetPhaseErrors,
+    getPhaseScore,
+    recordPhaseScore,
     resetAllProgress,
   };
 }

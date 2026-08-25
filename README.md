@@ -30,3 +30,21 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+## Como instalar no celular
+
+O Jogo da Redação pode ser instalado como um aplicativo direto na tela inicial do seu celular, sem precisar da loja de aplicativos.
+
+**Android (Chrome):**
+1. Acesse o jogo no navegador Chrome.
+2. Toque no menu do navegador (⋮) no canto superior direito.
+3. Selecione **"Adicionar à tela inicial"** (ou "Instalar aplicativo").
+4. Confirme o nome e toque em **Adicionar**.
+
+**iOS (Safari):**
+1. Acesse o jogo no Safari.
+2. Toque no ícone de **compartilhar** (quadrado com seta para cima) na barra inferior.
+3. Role e selecione **"Adicionar à Tela de Início"**.
+4. Confirme o nome e toque em **Adicionar**.
+
+> **Importante:** Após instalar, abra o jogo sempre pelo ícone na tela inicial — não pelo navegador embutido de aplicativos de mensagens (WhatsApp, Instagram etc.). Isso garante que o progresso salvo no dispositivo seja preservado entre as sessões.

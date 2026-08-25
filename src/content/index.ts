@@ -47,3 +47,13 @@ export const RESULT_TIERS: ResultTier[] = [
 export function getTier(correctCount: number): ResultTier {
   return RESULT_TIERS.find((t) => correctCount >= t.minCorrect) ?? RESULT_TIERS[RESULT_TIERS.length - 1];
 }
+
+/** Maps a correct count to a 0–3 star rating via RESULT_TIERS thresholds.
+ *  Reusable by the results screen and the trail menu. */
+export function getTierStars(correctCount: number): 0 | 1 | 2 | 3 {
+  const { minCorrect } = getTier(correctCount);
+  if (minCorrect >= 15) return 3;
+  if (minCorrect >= 10) return 2;
+  if (minCorrect >= 5) return 1;
+  return 0;
+}

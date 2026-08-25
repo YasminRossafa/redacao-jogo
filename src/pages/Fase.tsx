@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
 import { CONTENT, PHASES, getNextPhaseId, getTier } from '../content/index';
@@ -55,7 +55,7 @@ function ActivityRenderer({
 export function Fase() {
   const { phaseId } = useParams<{ phaseId: string }>();
   const navigate = useNavigate();
-  const { recordActivityResult, unlockPhase, incrementPhaseErrors, resetPhaseErrors } =
+  const { recordActivityResult, unlockPhase, incrementPhaseErrors, resetPhaseErrors, recordPhaseScore } =
     useProgress();
 
   const baseActivities = phaseId ? (CONTENT[phaseId] ?? []) : [];
@@ -106,6 +106,14 @@ export function Fase() {
     },
     [phaseId, activityIndex, shuffledActivities, recordActivityResult, incrementPhaseErrors]
   );
+
+  // Record the best score for this phase when results screen is shown.
+  // useEffect ensures all state (results, bestCombo) is settled before recording.
+  useEffect(() => {
+    if (!showResults || !phaseId) return;
+    const correctCount = results.filter((r) => r.success).length;
+    recordPhaseScore(phaseId, correctCount, results.length, bestCombo);
+  }, [showResults, phaseId, results, bestCombo, recordPhaseScore]);
 
   const advance = useCallback(() => {
     if (activityIndex < shuffledActivities.length - 1) {

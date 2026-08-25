@@ -1,26 +1,24 @@
-.root {
+/* ── Page shell ─────────────────────────── */
+
+.page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.25rem 1rem 3rem;
+  min-height: 100dvh;
+  background: var(--color-bg);
 }
 
 @media (min-width: 600px) {
-  .root {
-    max-width: 640px;
-    margin: 2rem auto;
-    padding: 2rem 2rem 2.5rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    box-shadow: var(--shadow-card);
+  .page {
+    max-width: 520px;
+    margin: 0 auto;
   }
 }
 
 /* ── Header ─────────────────────────────── */
 
 .header {
-  padding-top: 0.5rem;
+  padding: 2rem 1.5rem 0.75rem;
+  text-align: center;
 }
 
 .title {
@@ -36,106 +34,158 @@
   margin: 0;
 }
 
-/* ── Phase list ─────────────────────────── */
+/* ── Trail ──────────────────────────────── */
 
-.phaseList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.trail {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  padding: 0.5rem 0.5rem 4rem;
 }
 
-.phaseCard {
+/* Dashed center line — spans full trail height; nodes (z-index:1) sit on top */
+.trail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--color-border) 0px,
+    var(--color-border) 8px,
+    transparent 8px,
+    transparent 18px
+  );
+  pointer-events: none;
+}
+
+/* ── Trail step ─────────────────────────── */
+
+.step {
+  position: relative;
+  z-index: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.875rem;
-  width: 100%;
-  min-height: 64px;
-  padding: 0.75rem 1rem;
-  border: 2px solid;
-  border-radius: 12px;
-  text-align: left;
-  transition: background 0.12s, border-color 0.12s;
+  gap: 0.5rem;
+  padding: 1.25rem 0;
+  width: 134px; /* fixed width: node (72px) + label padding */
+}
+
+.stepLeft {
+  align-self: flex-start;
+  padding-left: 0.5rem;
+}
+
+.stepRight {
+  align-self: flex-end;
+  padding-right: 0.5rem;
 }
 
 @media (min-width: 600px) {
-  .phaseCard {
-    min-height: 72px;
-    padding: 1rem 1.25rem;
+  .step {
+    padding: 1.75rem 0;
+    width: 150px;
+  }
+
+  .stepLeft {
+    margin-left: 1.5rem;
+    padding-left: 0;
+  }
+
+  .stepRight {
+    margin-right: 1.5rem;
+    padding-right: 0;
   }
 }
 
-.unlocked {
-  background: var(--color-surface);
-  border-color: var(--color-primary);
-  cursor: pointer;
-  color: var(--color-text);
-}
+/* ── Node button ────────────────────────── */
 
-.unlocked:active {
-  background: var(--color-primary-bg);
-}
-
-.locked {
-  background: var(--color-bg);
-  border-color: var(--color-border);
-  cursor: default;
-  color: var(--color-border-strong);
-}
-
-/* ── Card internals ─────────────────────── */
-
-.phaseNumber {
-  flex-shrink: 0;
+.node {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  font-weight: 700;
-  font-size: 0.875rem;
+  border: none;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.12s;
+}
+
+.node:not(:disabled):active {
+  transform: scale(0.88);
+}
+
+/* Final phase node is slightly larger */
+.nodeFinal {
+  width: 88px;
+  height: 88px;
+}
+
+.nodeCompleted {
+  background: var(--color-success);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+}
+
+.nodeCurrent {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow:
+    0 0 0 5px var(--color-primary-bg),
+    0 2px 12px rgba(79, 70, 229, 0.28);
+}
+
+.nodeLocked {
   background: var(--color-border);
   color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
 }
 
-.unlocked .phaseNumber {
-  background: var(--color-primary-bg);
-  color: var(--color-primary);
+.nodeIcon {
+  font-size: 1.625rem;
+  line-height: 1;
+  display: block;
 }
 
-.phaseInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
+.nodeFinal .nodeIcon {
+  font-size: 2rem;
 }
 
-.phaseLabel {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.25;
-}
+/* ── Label & stars ──────────────────────── */
 
-.phaseSubtitle {
+.nodeLabel {
   font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
   line-height: 1.3;
+  max-width: 120px;
+}
+
+.nodeLabelMuted {
   color: var(--color-text-muted);
+  opacity: 0.7;
 }
 
-.locked .phaseSubtitle {
+.stars {
+  display: flex;
+  gap: 1px;
+}
+
+.starOn {
+  color: #F59E0B;
+  font-size: 0.9375rem;
+}
+
+.starOff {
   color: var(--color-border);
-}
-
-.phaseStatus {
-  flex-shrink: 0;
-  font-size: 1rem;
-  color: var(--color-border-strong);
-}
-
-.unlocked .phaseStatus {
-  color: var(--color-primary);
-  font-weight: 700;
+  font-size: 0.9375rem;
 }
