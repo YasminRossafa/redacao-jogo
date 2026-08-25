@@ -71,15 +71,18 @@ export function TagMatch({ activity, onComplete }: Props) {
       if (isSuccess) return;
       resetFeedback();
 
+      // 1. A tag is pending → link (or relink) this sentence to it.
       if (selection.type === 'tag') {
-        setLinks((l) => ({ ...l, [sentenceId]: selection.id }));
+        const tagId = selection.id;
+        setLinks((prev) => ({ ...prev, [sentenceId]: tagId }));
         setSelection({ type: 'none' });
         return;
       }
 
-      if (selection.type === 'sentence' && selection.id === sentenceId) {
-        setLinks((l) => {
-          const next = { ...l };
+      // 2. This sentence is already linked → unlink in a single tap.
+      if (links[sentenceId] != null) {
+        setLinks((prev) => {
+          const next = { ...prev };
           delete next[sentenceId];
           return next;
         });
@@ -87,9 +90,14 @@ export function TagMatch({ activity, onComplete }: Props) {
         return;
       }
 
-      setSelection({ type: 'sentence', id: sentenceId });
+      // 3. Otherwise toggle this sentence as the pending selection.
+      setSelection((sel) =>
+        sel.type === 'sentence' && sel.id === sentenceId
+          ? { type: 'none' }
+          : { type: 'sentence', id: sentenceId }
+      );
     },
-    [selection, isSuccess]
+    [selection, links, isSuccess]
   );
 
   const handleTagTap = useCallback(
@@ -97,20 +105,35 @@ export function TagMatch({ activity, onComplete }: Props) {
       if (isSuccess) return;
       resetFeedback();
 
+      // 1. A sentence is pending → link it to this tag.
       if (selection.type === 'sentence') {
-        setLinks((l) => ({ ...l, [selection.id]: tagId }));
+        const sentenceId = selection.id;
+        setLinks((prev) => ({ ...prev, [sentenceId]: tagId }));
         setSelection({ type: 'none' });
         return;
       }
 
-      if (selection.type === 'tag' && selection.id === tagId) {
+      // 2. This tag is linked to one or more sentences → unlink the pair(s)
+      //    in a single tap (one pair in the common 1:1 case).
+      const linkedSentences = Object.keys(links).filter((sid) => links[sid] === tagId);
+      if (linkedSentences.length > 0) {
+        setLinks((prev) => {
+          const next = { ...prev };
+          for (const sid of linkedSentences) delete next[sid];
+          return next;
+        });
         setSelection({ type: 'none' });
         return;
       }
 
-      setSelection({ type: 'tag', id: tagId });
+      // 3. Otherwise toggle this tag as the pending selection.
+      setSelection((sel) =>
+        sel.type === 'tag' && sel.id === tagId
+          ? { type: 'none' }
+          : { type: 'tag', id: tagId }
+      );
     },
-    [selection, isSuccess]
+    [selection, links, isSuccess]
   );
 
   const check = useCallback(() => {
