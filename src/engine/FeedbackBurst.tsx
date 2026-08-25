@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from './FeedbackBurst.module.css';
 
 export interface Props {
@@ -6,67 +6,74 @@ export interface Props {
   combo: number; // updated combo value after this answer (0 if failure)
 }
 
+type BurstSize = 'md' | 'lg' | 'xl';
+
 interface BurstConfig {
   icon: string;
   text: string | null;
   bg: string;
   color: string;
+  size: BurstSize;
 }
 
-function pick<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
+// Combo tiers as a space-crew rank progression. Icons are emoji glyphs
+// (no icon library is installed); each is the nearest sensible match to the
+// requested Tabler icon.
 function getConfig(success: boolean, combo: number): BurstConfig {
   if (!success) {
-    return { icon: '✕', text: null, bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' };
+    // Low-key, non-punishing — soft danger cue, no crew character.
+    return { icon: '✕', text: null, bg: 'var(--color-danger-bg)', color: 'var(--color-danger)', size: 'md' };
   }
 
   if (combo >= 7) {
     return {
-      icon: '🚀',
-      text: pick(['Decolando!', 'Fora da órbita!'] as const),
-      bg: 'var(--color-secondary)',
+      icon: '🪐', // ti-planet
+      text: 'Comandante estelar',
+      bg: 'var(--color-primary)',
       color: '#fff',
+      size: 'xl',
     };
   }
   if (combo >= 4) {
     return {
-      icon: '🔍',
-      text: pick(['Modo detetive!', 'Nada escapa de você!'] as const),
+      icon: '🛸', // ti-command / rocket (bold) → saucer
+      text: 'Capitã(o) da nave',
       bg: 'var(--color-secondary)',
       color: '#fff',
+      size: 'lg',
     };
   }
   if (combo >= 2) {
     return {
-      icon: pick(['📖', '✏️'] as const),
-      text: pick(['Sequência!', 'Cada vez melhor!'] as const),
+      icon: '🚀', // ti-rocket
+      text: 'Piloto',
       bg: 'var(--color-secondary)',
       color: '#fff',
+      size: 'md',
     };
   }
   return {
-    icon: '✓',
-    text: pick(['Boa!', 'Isso aí!', 'Show!'] as const),
+    icon: '⭐', // ti-star / badge
+    text: 'Cadete',
     bg: 'var(--color-success)',
     color: '#fff',
+    size: 'md',
   };
 }
 
-export function FeedbackBurst({ success, combo }: Props) {
-  // Config frozen at mount — component is keyed externally so it always remounts fresh
-  const [config] = useState<BurstConfig>(() => getConfig(success, combo));
-  const [exiting, setExiting] = useState(false);
+const SIZE_CLASS: Record<BurstSize, string> = {
+  md: styles.sizeMd,
+  lg: styles.sizeLg,
+  xl: styles.sizeXl,
+};
 
-  useEffect(() => {
-    const t = setTimeout(() => setExiting(true), 900);
-    return () => clearTimeout(t);
-  }, []);
+export function FeedbackBurst({ success, combo }: Props) {
+  // Config frozen at mount — component is keyed externally so it always remounts fresh.
+  const [config] = useState<BurstConfig>(() => getConfig(success, combo));
 
   return (
     <div
-      className={[styles.burst, exiting ? styles.exiting : ''].filter(Boolean).join(' ')}
+      className={[styles.burst, SIZE_CLASS[config.size]].join(' ')}
       style={{ backgroundColor: config.bg, color: config.color }}
       aria-hidden
     >

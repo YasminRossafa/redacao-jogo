@@ -12,8 +12,12 @@
   --color-secondary-hover:#0D8A75;
 
   /* ── Neutrals ─────────────────────────────────────────────── */
-  --color-bg:             #F1F5F9; /* page background (light slate) */
+  --color-bg:             #F1F5F9; /* light subtle fill — used INSIDE cards */
   --color-surface:        #FFFFFF; /* card / component surfaces */
+
+  /* ── Space backdrop (applied to body only; cards stay light) ── */
+  --color-backdrop:       #0B1224; /* dark navy app background */
+  --color-backdrop-elev:  #182238; /* elevated disc on the backdrop, e.g. trail nodes */
   --color-border:         #E2E8F0; /* default dividers and outlines */
   --color-border-strong:  #94A3B8; /* stronger borders, e.g. pool blocks */
 

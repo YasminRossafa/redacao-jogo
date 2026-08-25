@@ -3,51 +3,102 @@
   position: fixed;
   top: 42%;
   left: 50%;
-  /* base transform used by the entrance keyframe's final frame */
-  transform: translate(-50%, -50%);
   z-index: 200;
 
-  /* Never intercept taps — engine buttons and Próxima atividade remain reachable */
+  /* Never intercept taps — engine buttons and Próxima atividade stay reachable */
   pointer-events: none;
 
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.375rem;
+  gap: 0.75rem;
+  padding: 1rem 1.75rem;
   border-radius: 999px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.28);
   white-space: nowrap;
 
-  /* Fade-out triggered by .exiting class */
-  opacity: 1;
-  transition: opacity 0.3s ease;
-
-  /* Entrance pop */
-  animation: burstIn 0.18s ease-out;
-}
-
-.exiting {
+  /* Slides in from the left, settles centre, slides out to the right.
+     ~1.4s total; rests off-screen + transparent via fill-mode forwards. */
   opacity: 0;
+  animation: burstSlide 1.4s ease-in-out forwards;
 }
 
 .icon {
-  font-size: 1.375rem;
   line-height: 1;
 }
 
 .text {
-  font-size: 1rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
+  letter-spacing: 0.01em;
 }
 
-@keyframes burstIn {
-  from {
+/* ── Size tiers ─────────────────────────────── */
+
+.sizeMd .icon {
+  font-size: 3.25rem;
+}
+.sizeMd .text {
+  font-size: 1.125rem;
+}
+
+.sizeLg {
+  padding: 1.125rem 2rem;
+}
+.sizeLg .icon {
+  font-size: 3.5rem;
+}
+.sizeLg .text {
+  font-size: 1.1875rem;
+}
+
+.sizeXl {
+  padding: 1.25rem 2.25rem;
+}
+.sizeXl .icon {
+  font-size: 4rem;
+}
+.sizeXl .text {
+  font-size: 1.375rem;
+}
+
+@keyframes burstSlide {
+  0% {
     opacity: 0;
-    transform: translate(-50%, -62%) scale(0.78);
+    transform: translate(calc(-50% - 70vw), -50%) scale(0.9);
   }
-  to {
+  18% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + 70vw), -50%) scale(0.9);
+  }
+}
+
+/* Reduced motion: fade in/out in place, no horizontal travel. */
+@media (prefers-reduced-motion: reduce) {
+  .burst {
+    animation: burstFade 1.4s ease-in-out forwards;
+  }
+
+  @keyframes burstFade {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+    18%,
+    70% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.95);
+    }
   }
 }

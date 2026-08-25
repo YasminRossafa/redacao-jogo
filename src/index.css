@@ -17,8 +17,25 @@
 
 body {
   margin: 0;
-  background: var(--color-bg);
   color: var(--color-text);
+  /* Dark navy backdrop with a subtle scattered starfield. Layered radial
+     gradients tile at different sizes so the dots don't form a visible grid.
+     Content lives in light cards on top of this — never body text directly. */
+  background-color: var(--color-backdrop);
+  background-image:
+    radial-gradient(1.5px 1.5px at 40px 60px, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 130px 180px, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 200px 90px, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 90px 250px, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1.5px 1.5px at 280px 300px, rgba(160, 180, 255, 0.35), transparent);
+  background-size:
+    300px 320px,
+    300px 320px,
+    260px 300px,
+    320px 340px,
+    340px 360px;
+  background-repeat: repeat;
+  background-attachment: fixed;
 }
 
 #root {
