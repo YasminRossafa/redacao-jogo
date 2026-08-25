@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
 import { PHASES, getTierStars } from '../content/index';
@@ -12,7 +12,7 @@ const NODE_STATE_CLASS: Record<NodeState, string> = {
   completed: styles.nodeCompleted,
 };
 
-/** Crescent moon — locked & completed non-final phases. Uses currentColor. */
+/** Crescent moon — fase-repertorio. Uses currentColor. */
 function MoonIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
@@ -21,13 +21,25 @@ function MoonIcon() {
   );
 }
 
-/** Planet disc with craters — current phase & the finale. Uses currentColor. */
+/** Planet disc with craters — fase-tema-brasil & finale. Uses currentColor. */
 function PlanetIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
       <circle cx="12" cy="12" r="8" />
       <circle cx="9" cy="9.5" r="1.5" fill="rgba(255,255,255,0.5)" />
       <circle cx="14.5" cy="13.5" r="2.2" fill="rgba(255,255,255,0.32)" />
+    </svg>
+  );
+}
+
+/** Moon with surrounding stars — fase-problematicas. Uses currentColor. */
+function MoonStarsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
+      <path d="M13 3A9 9 0 1 0 21 11a7.4 7.4 0 0 1-8-8z" />
+      <circle cx="20" cy="4.5" r="1.1" />
+      <circle cx="22.5" cy="8.5" r="0.85" />
+      <circle cx="21" cy="1.8" r="0.7" />
     </svg>
   );
 }
@@ -44,6 +56,25 @@ function BookIcon() {
     </svg>
   );
 }
+
+/** Padlock — shown for any locked phase. Uses currentColor. */
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden focusable="false">
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
+const PHASE_ICON: Record<string, () => React.ReactElement> = {
+  'fase-formula': BookIcon,
+  'fase-repertorio': MoonIcon,
+  'fase-tema-brasil': PlanetIcon,
+  'fase-problematicas': MoonStarsIcon,
+  'fase-introducao-completa': PlanetIcon,
+};
 
 /** Simple astronaut silhouette that rides on the current node. */
 function AstronautIcon() {
@@ -94,11 +125,10 @@ export function Menu() {
           const stars = score !== null ? getTierStars(score.correctCount, phase.id) : null;
           const isAstronaut = phase.id === frontierPhaseId;
 
-          // fase-formula is the explanation step: distinct icon, navigates to /formula.
+          // fase-formula navigates to the explanation page rather than the quiz.
           const isFormulaStep = phase.id === 'fase-formula';
-          // Finale and the frontier phase show a planet; other phases show a moon.
-          const usePlanet = !isFormulaStep && (isFinal || isAstronaut);
           const nodeTarget = isFormulaStep ? '/formula' : `/fase/${phase.id}`;
+          const PhaseNodeIcon = PHASE_ICON[phase.id] ?? MoonIcon;
 
           return (
             <div
@@ -123,7 +153,7 @@ export function Menu() {
                   aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : ''}`}
                 >
                   <span className={styles.nodeIcon}>
-                    {isFormulaStep ? <BookIcon /> : usePlanet ? <PlanetIcon /> : <MoonIcon />}
+                    {state === 'locked' ? <LockIcon /> : <PhaseNodeIcon />}
                   </span>
                 </button>
 
