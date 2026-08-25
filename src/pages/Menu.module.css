@@ -194,13 +194,15 @@
 
 .astronaut {
   position: absolute;
-  top: -14px;
-  right: -14px;
-  width: 34px;
-  height: 34px;
+  /* ~1.5x larger, offset up-and-right so it reads as the focal point of the
+     current node without overlapping the label below. */
+  top: -24px;
+  right: -20px;
+  width: 52px;
+  height: 52px;
   z-index: 2;
   pointer-events: none;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45));
   animation: astronautFloat 3.2s ease-in-out infinite;
 }
 
