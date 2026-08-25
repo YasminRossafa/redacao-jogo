@@ -1,4 +1,5 @@
 import type { ActivityData } from '../engine/types';
+import { faseFormulaActivities } from './fase-formula';
 import { fase1Activities } from './fase1-introducao';
 import { faseRepertorioActivities } from './fase-repertorio';
 import { faseTemaBrasilActivities } from './fase-tema-brasil';
@@ -11,6 +12,7 @@ export interface PhaseInfo {
 }
 
 export const PHASES: PhaseInfo[] = [
+  { id: 'fase-formula',             label: 'Fórmula',            subtitle: 'Como funciona a introdução' },
   { id: 'fase-repertorio',          label: 'Repertório',         subtitle: 'Construção do repertório sociocultural' },
   { id: 'fase-tema-brasil',         label: 'Tema + Brasil',      subtitle: 'Contextualização do tema na sociedade' },
   { id: 'fase-problematicas',       label: 'Problemáticas',      subtitle: 'Problematização do tema' },
@@ -24,6 +26,7 @@ export const PHASES: PhaseInfo[] = [
 export const PHASE_SEQUENCE: string[] = PHASES.map((p) => p.id);
 
 export const CONTENT: Record<string, ActivityData[]> = {
+  'fase-formula': faseFormulaActivities,
   'fase-repertorio': faseRepertorioActivities,
   'fase-tema-brasil': faseTemaBrasilActivities,
   'fase-problematicas': faseProblematicasActivities,
@@ -47,6 +50,7 @@ export interface PhaseConfig {
 }
 
 export const PHASE_CONFIG: Record<string, PhaseConfig> = {
+  'fase-formula':             { total: 3,  unlockThreshold: 2,  tiers: { expert: 3,  good: 2,  almostThere: 1 } },
   'fase-repertorio':          { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-tema-brasil':         { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-problematicas':       { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },

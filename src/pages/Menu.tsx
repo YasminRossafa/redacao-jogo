@@ -32,6 +32,19 @@ function PlanetIcon() {
   );
 }
 
+/** Open book — used for the explanation step node. Uses currentColor. */
+function BookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden focusable="false">
+      <path d="M2 4.5A2.5 2.5 0 0 1 4.5 2H12v20H4.5A2.5 2.5 0 0 1 2 19.5Z" />
+      <path d="M12 2h7.5A2.5 2.5 0 0 1 22 4.5v15a2.5 2.5 0 0 1-2.5 2.5H12Z" />
+      <path d="M6 8h4M6 12h4" />
+      <path d="M14 8h4M14 12h4" />
+    </svg>
+  );
+}
+
 /** Simple astronaut silhouette that rides on the current node. */
 function AstronautIcon() {
   return (
@@ -50,7 +63,7 @@ export function Menu() {
   const { isPhaseUnlocked, unlockPhase, getPhaseScore, hasBadge } = useProgress();
 
   useEffect(() => {
-    unlockPhase('fase-repertorio');
+    unlockPhase('fase-formula');
   }, [unlockPhase]);
 
   // The astronaut sits on the first unlocked-but-unplayed phase.
@@ -81,8 +94,11 @@ export function Menu() {
           const stars = score !== null ? getTierStars(score.correctCount, phase.id) : null;
           const isAstronaut = phase.id === frontierPhaseId;
 
+          // fase-formula is the explanation step: distinct icon, navigates to /formula.
+          const isFormulaStep = phase.id === 'fase-formula';
           // Finale and the frontier phase show a planet; other phases show a moon.
-          const usePlanet = isFinal || isAstronaut;
+          const usePlanet = !isFormulaStep && (isFinal || isAstronaut);
+          const nodeTarget = isFormulaStep ? '/formula' : `/fase/${phase.id}`;
 
           return (
             <div
@@ -102,12 +118,12 @@ export function Menu() {
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  onClick={() => state !== 'locked' && navigate(`/fase/${phase.id}`)}
+                  onClick={() => state !== 'locked' && navigate(nodeTarget)}
                   disabled={state === 'locked'}
                   aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : ''}`}
                 >
                   <span className={styles.nodeIcon}>
-                    {usePlanet ? <PlanetIcon /> : <MoonIcon />}
+                    {isFormulaStep ? <BookIcon /> : usePlanet ? <PlanetIcon /> : <MoonIcon />}
                   </span>
                 </button>
 
