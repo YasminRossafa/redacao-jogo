@@ -5,6 +5,7 @@ import styles from './OrderPuzzle.module.css';
 interface Props {
   activity: OrderActivity;
   onComplete: (success: boolean, detail: OrderAnswer) => void;
+  onSkip: () => void;
 }
 
 type CheckState = 'idle' | 'incomplete' | 'correct' | 'incorrect';
@@ -22,7 +23,7 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-export function OrderPuzzle({ activity, onComplete }: Props) {
+export function OrderPuzzle({ activity, onComplete, onSkip }: Props) {
   const { prompt, items } = activity;
 
   // Stable shuffled order used to render the unplaced pool.
@@ -166,6 +167,12 @@ export function OrderPuzzle({ activity, onComplete }: Props) {
         <p className={styles.msgSuccess} role="alert">
           Correto! Você acertou a ordem.
         </p>
+      )}
+
+      {!isSuccess && (
+        <button type="button" className={styles.skipBtn} onClick={onSkip}>
+          Pular
+        </button>
       )}
     </div>
   );

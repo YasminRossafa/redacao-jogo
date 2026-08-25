@@ -5,6 +5,7 @@ import styles from './ErrorSpot.module.css';
 interface Props {
   activity: ErrorSpotActivity;
   onComplete: (success: boolean, detail: ErrorSpotAnswer) => void;
+  onSkip: () => void;
 }
 
 type CheckState = 'idle' | 'unselected' | 'correct' | 'incorrect';
@@ -18,7 +19,7 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-export function ErrorSpot({ activity, onComplete }: Props) {
+export function ErrorSpot({ activity, onComplete, onSkip }: Props) {
   const { prompt, sentences, errorSentenceId, explanation } = activity;
 
   // Shuffle display order on mount; errorSentenceId is id-based so validation is unaffected
@@ -126,6 +127,12 @@ export function ErrorSpot({ activity, onComplete }: Props) {
         <p className={styles.msgSuccess} role="status">
           Correto! Você identificou o erro.
         </p>
+      )}
+
+      {!isSuccess && (
+        <button type="button" className={styles.skipBtn} onClick={onSkip}>
+          Pular
+        </button>
       )}
     </div>
   );

@@ -5,6 +5,7 @@ import styles from './TagMatch.module.css';
 interface Props {
   activity: TagMatchActivity;
   onComplete: (success: boolean, detail: TagMatchAnswer) => void;
+  onSkip: () => void;
 }
 
 type Selection =
@@ -38,7 +39,7 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-export function TagMatch({ activity, onComplete }: Props) {
+export function TagMatch({ activity, onComplete, onSkip }: Props) {
   const { prompt, sentences, tags, mapping } = activity;
 
   // Color is assigned by original tag position (stable regardless of display order)
@@ -328,6 +329,12 @@ export function TagMatch({ activity, onComplete }: Props) {
         <p className={styles.msgSuccess} role="alert">
           Correto! Todas as associações estão certas.
         </p>
+      )}
+
+      {!isSuccess && (
+        <button type="button" className={styles.skipBtn} onClick={onSkip}>
+          Pular
+        </button>
       )}
     </div>
   );

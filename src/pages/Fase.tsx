@@ -14,10 +14,12 @@ interface ActivityResult {
   activityId: string;
   kind: ActivityData['kind'];
   prompt: string;
+  /** Kept as false for a skip; `outcome` carries the finer distinction. */
   success: boolean;
+  outcome: 'success' | 'failure' | 'skipped';
   explanation?: string;
-  /** What the student actually answered, kind-tagged. */
-  detail: AnswerDetail;
+  /** What the student actually answered, kind-tagged. Absent for a skip. */
+  detail?: AnswerDetail;
   /** The activity's own data, kept so correct answers resolve for display. */
   activity: ActivityData;
 }
@@ -40,9 +42,11 @@ function shuffle<T>(arr: T[]): T[] {
 function ActivityRenderer({
   activity,
   onComplete,
+  onSkip,
 }: {
   activity: ActivityData;
   onComplete: (success: boolean, detail: AnswerDetail) => void;
+  onSkip: () => void;
 }) {
   // Each engine reports a bare answer object; we tag it with `kind` here so the
   // result screen can discriminate the union without re-checking activity data.
@@ -52,6 +56,7 @@ function ActivityRenderer({
         <OrderPuzzle
           activity={activity}
           onComplete={(s, d) => onComplete(s, { kind: 'order', ...d })}
+          onSkip={onSkip}
         />
       );
     case 'tag-match':
@@ -59,6 +64,7 @@ function ActivityRenderer({
         <TagMatch
           activity={activity}
           onComplete={(s, d) => onComplete(s, { kind: 'tag-match', ...d })}
+          onSkip={onSkip}
         />
       );
     case 'error-spot':
@@ -66,6 +72,7 @@ function ActivityRenderer({
         <ErrorSpot
           activity={activity}
           onComplete={(s, d) => onComplete(s, { kind: 'error-spot', ...d })}
+          onSkip={onSkip}
         />
       );
     case 'build':
@@ -73,29 +80,36 @@ function ActivityRenderer({
         <BuildFromScratch
           activity={activity}
           onComplete={(s, d) => onComplete(s, { kind: 'build', ...d })}
+          onSkip={onSkip}
         />
       );
   }
 }
 
-/** Renders what the student answered vs. the correct answer, per activity kind. */
+/** Renders what the student answered vs. the correct answer, per activity kind.
+ *  A skipped activity has no `detail`, so it shows only the correct answer. */
 function ReviewDetail({ result }: { result: ActivityResult }) {
-  const { detail, activity, success } = result;
+  const { detail, activity, outcome } = result;
+  const skipped = outcome === 'skipped';
+  const showCorrect = outcome !== 'success'; // wrong or skipped
 
-  // Each guard narrows both the detail union and the activity union together.
-  if (detail.kind === 'order' && activity.kind === 'order') {
+  // Branch on activity.kind (always present); use detail only when it exists.
+  if (activity.kind === 'order') {
     const label = (id: string) => activity.items.find((it) => it.id === id)?.label ?? id;
+    const answer = detail && detail.kind === 'order' ? detail : null;
     return (
       <>
-        <div className={styles.reviewBlock}>
-          <span className={styles.reviewLabel}>Sua ordem</span>
-          <ol className={styles.reviewSeq}>
-            {detail.userOrder.map((id, i) => (
-              <li key={i} className={styles.reviewSeqItem}>{label(id)}</li>
-            ))}
-          </ol>
-        </div>
-        {!success && (
+        {answer && (
+          <div className={styles.reviewBlock}>
+            <span className={styles.reviewLabel}>Sua ordem</span>
+            <ol className={styles.reviewSeq}>
+              {answer.userOrder.map((id, i) => (
+                <li key={i} className={styles.reviewSeqItem}>{label(id)}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+        {showCorrect && (
           <div className={styles.reviewBlock}>
             <span className={styles.reviewLabel}>Ordem certa</span>
             <ol className={styles.reviewSeq}>
@@ -111,25 +125,30 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
     );
   }
 
-  if (detail.kind === 'tag-match' && activity.kind === 'tag-match') {
+  if (activity.kind === 'tag-match') {
     const tagLabel = (id: string | null) =>
       id ? activity.tags.find((t) => t.id === id)?.label ?? id : 'não marcado';
+    const answer = detail && detail.kind === 'tag-match' ? detail : null;
     return (
       <div className={styles.reviewBlock}>
         {activity.sentences.map((s) => {
-          const assigned = detail.userMapping[s.id] ?? null;
           const correct = activity.mapping[s.id]; // undefined for non-target sentences
+          // Skipped: show only the sentences that actually have a correct tag.
+          if (skipped && correct === undefined) return null;
+          const assigned = answer ? answer.userMapping[s.id] ?? null : null;
           const isWrong = correct !== undefined && assigned !== correct;
           return (
             <div key={s.id} className={styles.reviewTagRow}>
               <p className={styles.reviewSentence}>{s.text}</p>
-              <p className={styles.reviewLine}>
-                <span className={styles.reviewLineKey}>Você marcou:</span>{' '}
-                <span className={assigned === null ? styles.reviewMuted : undefined}>
-                  {tagLabel(assigned)}
-                </span>
-              </p>
-              {isWrong && (
+              {answer && (
+                <p className={styles.reviewLine}>
+                  <span className={styles.reviewLineKey}>Você marcou:</span>{' '}
+                  <span className={assigned === null ? styles.reviewMuted : undefined}>
+                    {tagLabel(assigned)}
+                  </span>
+                </p>
+              )}
+              {correct !== undefined && (skipped || isWrong) && (
                 <p className={styles.reviewLine}>
                   <span className={styles.reviewLineKey}>Correto:</span>{' '}
                   <span className={styles.reviewCorrect}>{tagLabel(correct)}</span>
@@ -142,52 +161,58 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
     );
   }
 
-  if (detail.kind === 'error-spot' && activity.kind === 'error-spot') {
+  if (activity.kind === 'error-spot') {
     const text = (id: string) => activity.sentences.find((s) => s.id === id)?.text ?? id;
+    const answer = detail && detail.kind === 'error-spot' ? detail : null;
     return (
       <>
-        {!success && (
+        {showCorrect && (
           <div className={styles.reviewBlock}>
-            <p className={styles.reviewLine}>
-              <span className={styles.reviewLineKey}>Você escolheu:</span>{' '}
-              {text(detail.selectedSentenceId)}
-            </p>
+            {answer && (
+              <p className={styles.reviewLine}>
+                <span className={styles.reviewLineKey}>Você escolheu:</span>{' '}
+                {text(answer.selectedSentenceId)}
+              </p>
+            )}
             <p className={styles.reviewLine}>
               <span className={styles.reviewLineKey}>Frase com erro:</span>{' '}
               <span className={styles.reviewCorrect}>{text(activity.errorSentenceId)}</span>
             </p>
           </div>
         )}
-        {!success && <p className={styles.reviewExplanation}>{activity.explanation}</p>}
+        {showCorrect && <p className={styles.reviewExplanation}>{activity.explanation}</p>}
       </>
     );
   }
 
-  if (detail.kind === 'build' && activity.kind === 'build') {
+  if (activity.kind === 'build') {
     const frag = (id: string) => activity.fragments.find((f) => f.id === id);
+    const answer = detail && detail.kind === 'build' ? detail : null;
     return (
       <>
-        <div className={styles.reviewBlock}>
-          <span className={styles.reviewLabel}>Você usou</span>
-          <ol className={styles.reviewSeq}>
-            {detail.userFragmentIds.map((id, i) => {
-              const f = frag(id);
-              const isDistractor = f ? !f.correct : false;
-              return (
-                <li
-                  key={i}
-                  className={[styles.reviewSeqItem, isDistractor ? styles.reviewDistractor : '']
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  {f?.text ?? id}
-                  {isDistractor && <span className={styles.reviewFlag}>fragmento incorreto</span>}
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-        {!success && (
+        {answer && (
+          <div className={styles.reviewBlock}>
+            <span className={styles.reviewLabel}>Você usou</span>
+            <ol className={styles.reviewSeq}>
+              {answer.userFragmentIds.map((id, i) => {
+                const f = frag(id);
+                const isDistractor = f ? !f.correct : false;
+                return (
+                  <li
+                    key={i}
+                    className={[styles.reviewSeqItem, isDistractor ? styles.reviewDistractor : '']
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    {f?.text ?? id}
+                    {isDistractor && <span className={styles.reviewFlag}>fragmento incorreto</span>}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )}
+        {showCorrect && (
           <div className={styles.reviewBlock}>
             <span className={styles.reviewLabel}>Sequência certa</span>
             <ol className={styles.reviewSeq}>
@@ -263,6 +288,7 @@ export function Fase() {
             kind: activity.kind,
             prompt: activity.prompt,
             success,
+            outcome: success ? 'success' : 'failure',
             explanation,
             detail,
             activity,
@@ -313,6 +339,46 @@ export function Fase() {
     setShowResults(false);
     setShowReview(false);
   }, [phaseId, baseActivities, resetPhaseErrors]);
+
+  const handleSkip = useCallback(() => {
+    if (!phaseId) return;
+    const activity = shuffledActivities[activityIndex];
+
+    // If a wrong attempt was already recorded for this slot, keep it as the
+    // outcome — just advance. Otherwise record a distinct "skipped" outcome.
+    const alreadyRecorded = results.length > activityIndex;
+    if (!alreadyRecorded) {
+      recordActivityResult(phaseId, activity.id, false);
+      incrementPhaseErrors(phaseId); // undemonstrated — counts like a wrong answer
+      comboRef.current = 0; // a skip breaks the combo, same as a wrong answer
+      setResults((prev) =>
+        prev.length > activityIndex
+          ? prev
+          : [
+              ...prev,
+              {
+                activityId: activity.id,
+                kind: activity.kind,
+                prompt: activity.prompt,
+                success: false,
+                outcome: 'skipped',
+                explanation: activity.kind === 'error-spot' ? activity.explanation : undefined,
+                activity,
+              },
+            ]
+      );
+    }
+
+    advance();
+  }, [
+    phaseId,
+    results.length,
+    activityIndex,
+    shuffledActivities,
+    recordActivityResult,
+    incrementPhaseErrors,
+    advance,
+  ]);
 
   // Unknown phase
   if (!phaseId || !phase) return <Navigate to="/" replace />;
@@ -391,23 +457,26 @@ export function Fase() {
 
           {showReview && (
             <ul className={styles.reviewList}>
-              {results.map((result) => (
-                <li key={result.activityId} className={styles.reviewItem}>
-                  <span
-                    className={[
-                      styles.reviewIcon,
-                      result.success ? styles.iconOk : styles.iconFail,
-                    ].join(' ')}
-                    aria-hidden
-                  >
-                    {result.success ? '✓' : '✗'}
-                  </span>
-                  <div className={styles.reviewContent}>
-                    <p className={styles.reviewPrompt}>{result.prompt}</p>
-                    <ReviewDetail result={result} />
-                  </div>
-                </li>
-              ))}
+              {results.map((result) => {
+                const isSkipped = result.outcome === 'skipped';
+                const iconClass = result.success
+                  ? styles.iconOk
+                  : isSkipped
+                  ? styles.iconSkip
+                  : styles.iconFail;
+                return (
+                  <li key={result.activityId} className={styles.reviewItem}>
+                    <span className={[styles.reviewIcon, iconClass].join(' ')} aria-hidden>
+                      {result.success ? '✓' : isSkipped ? '–' : '✗'}
+                    </span>
+                    <div className={styles.reviewContent}>
+                      <p className={styles.reviewPrompt}>{result.prompt}</p>
+                      {isSkipped && <span className={styles.reviewSkipTag}>Pulada</span>}
+                      <ReviewDetail result={result} />
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
 
@@ -439,6 +508,7 @@ export function Fase() {
         <ActivityRenderer
           activity={shuffledActivities[activityIndex]}
           onComplete={handleComplete}
+          onSkip={handleSkip}
         />
       </div>
 

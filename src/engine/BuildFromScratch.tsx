@@ -5,6 +5,7 @@ import styles from './BuildFromScratch.module.css';
 interface Props {
   activity: BuildActivity;
   onComplete: (success: boolean, detail: BuildAnswer) => void;
+  onSkip: () => void;
 }
 
 type CheckState = 'idle' | 'wrong-set' | 'wrong-order' | 'correct';
@@ -20,7 +21,7 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-export function BuildFromScratch({ activity, onComplete }: Props) {
+export function BuildFromScratch({ activity, onComplete, onSkip }: Props) {
   const { prompt, fragments, correctSequence } = activity;
 
   const [pool, setPool] = useState<Fragment[]>(() => shuffle(fragments));
@@ -175,6 +176,12 @@ export function BuildFromScratch({ activity, onComplete }: Props) {
         <p className={styles.msgSuccess} role="alert">
           Perfeito! Você montou a sequência correta.
         </p>
+      )}
+
+      {!isSuccess && (
+        <button type="button" className={styles.skipBtn} onClick={onSkip}>
+          Pular
+        </button>
       )}
     </div>
   );
