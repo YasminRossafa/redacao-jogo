@@ -40,7 +40,7 @@ export function FormulaExplicacao() {
         ))}
 
         <button className={styles.cta} onClick={() => navigate('/fase/fase-formula')}>
-          Fazer perguntas →
+          Fazer teste →
         </button>
       </div>
     </div>
