@@ -1,0 +1,53 @@
+.burst {
+  /* Fixed so it floats above the Fase card and above engine content */
+  position: fixed;
+  top: 42%;
+  left: 50%;
+  /* base transform used by the entrance keyframe's final frame */
+  transform: translate(-50%, -50%);
+  z-index: 200;
+
+  /* Never intercept taps — engine buttons and Próxima atividade remain reachable */
+  pointer-events: none;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.375rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
+
+  /* Fade-out triggered by .exiting class */
+  opacity: 1;
+  transition: opacity 0.3s ease;
+
+  /* Entrance pop */
+  animation: burstIn 0.18s ease-out;
+}
+
+.exiting {
+  opacity: 0;
+}
+
+.icon {
+  font-size: 1.375rem;
+  line-height: 1;
+}
+
+.text {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+@keyframes burstIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -62%) scale(0.78);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
