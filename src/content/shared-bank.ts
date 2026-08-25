@@ -10,8 +10,12 @@ export interface TemaBankEntry {
   repertorio: string;
   /** The tema contextualized in Brazilian society. */
   temaBrasil: string;
-  /** The problemáticas decorrentes desse tema. */
+  /** The problemáticas decorrentes desse tema (full sentence — used in OrderActivity). */
   problematica: string;
+  /** First problem clause only, no trailing connective. */
+  problematica1: string;
+  /** Second problem clause WITH its leading connective ("e"/"além de") attached. */
+  problematica2: string;
 }
 
 export const TEMA_BANK: TemaBankEntry[] = [
@@ -24,6 +28,8 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'Nesse sentido, os desafios para a garantia do acesso à saúde pública na sociedade brasileira revelam-se um obstáculo à qualidade de vida da população.',
     problematica:
       'A escassez de profissionais em regiões afastadas e a superlotação das unidades de saúde são problemas decorrentes desse tema.',
+    problematica1: 'A escassez de profissionais em regiões afastadas',
+    problematica2: 'e a superlotação das unidades de saúde',
   },
   {
     id: 'preconceito',
@@ -34,6 +40,8 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'Diante disso, os desafios para a superação do preconceito e da exclusão social na sociedade brasileira ainda se mostram evidentes.',
     problematica:
       'A naturalização de discursos discriminatórios e a ausência de punição a atos de exclusão são problemas decorrentes desse tema.',
+    problematica1: 'A naturalização de discursos discriminatórios',
+    problematica2: 'e a ausência de punição a atos de exclusão',
   },
   {
     id: 'meioambiente',
@@ -44,6 +52,8 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'Fora da ficção, os desafios para a preservação do meio ambiente na sociedade brasileira também se mostram urgentes.',
     problematica:
       'O descarte inadequado de resíduos e a fiscalização insuficiente contra o desmatamento são problemas decorrentes desse tema.',
+    problematica1: 'O descarte inadequado de resíduos',
+    problematica2: 'e a fiscalização insuficiente contra o desmatamento',
   },
   {
     id: 'violenciaurbana',
@@ -54,6 +64,8 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'Assim como na série, os desafios para o combate à violência urbana na sociedade brasileira comprometem a sensação de segurança da população.',
     problematica:
       'A ausência de policiamento em áreas periféricas e a impunidade de crimes violentos são problemas decorrentes desse tema.',
+    problematica1: 'A ausência de policiamento em áreas periféricas',
+    problematica2: 'e a impunidade de crimes violentos',
   },
   {
     id: 'solidao',
@@ -64,6 +76,8 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'Fora da ficção, os desafios para o enfrentamento da solidão e do isolamento social na sociedade brasileira atingem principalmente a população idosa.',
     problematica:
       'A falta de espaços de convívio comunitário e o abandono familiar de idosos são problemas decorrentes desse tema.',
+    problematica1: 'A falta de espaços de convívio comunitário',
+    problematica2: 'e o abandono familiar de idosos',
   },
   {
     id: 'luto',
@@ -74,6 +88,8 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'Nesse contexto, os desafios para o acolhimento emocional de pessoas enlutadas na sociedade brasileira ainda carecem de atenção adequada.',
     problematica:
       'A escassez de suporte psicológico gratuito e o silenciamento do luto no ambiente de trabalho são problemas decorrentes desse tema.',
+    problematica1: 'A escassez de suporte psicológico gratuito',
+    problematica2: 'e o silenciamento do luto no ambiente de trabalho',
   },
 ];
 
