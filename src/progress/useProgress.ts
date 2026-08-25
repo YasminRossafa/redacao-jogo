@@ -152,7 +152,6 @@ export function useProgress(): ProgressHook {
     (phaseId: string, correctCount: number, total: number, bestCombo: number) => {
       update((prev) => {
         const existing = prev.phaseScores[phaseId];
-        // Only overwrite if new correctCount is strictly better
         if (existing && existing.correctCount >= correctCount) return prev;
         return {
           ...prev,

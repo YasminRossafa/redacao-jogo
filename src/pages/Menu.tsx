@@ -53,6 +53,16 @@ export function Menu() {
     unlockPhase('fase1');
   }, [unlockPhase]);
 
+  // The astronaut sits on the first unlocked-but-unplayed phase.
+  // If all unlocked phases have been played (player is stuck below threshold),
+  // it falls back to the last unlocked phase so it never disappears.
+  const frontierPhaseId = (() => {
+    const fresh = PHASES.find((p) => isPhaseUnlocked(p.id) && getPhaseScore(p.id) === null);
+    if (fresh) return fresh.id;
+    const lastUnlocked = [...PHASES].reverse().find((p) => isPhaseUnlocked(p.id));
+    return lastUnlocked?.id ?? null;
+  })();
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -69,9 +79,10 @@ export function Menu() {
 
           const state: NodeState = !unlocked ? 'locked' : score !== null ? 'completed' : 'current';
           const stars = score !== null ? getTierStars(score.correctCount) : null;
+          const isAstronaut = phase.id === frontierPhaseId;
 
-          // Finale and the current phase show a planet; other phases show a moon.
-          const usePlanet = isFinal || state === 'current';
+          // Finale and the frontier phase show a planet; other phases show a moon.
+          const usePlanet = isFinal || isAstronaut;
 
           return (
             <div
@@ -86,7 +97,7 @@ export function Menu() {
                   className={[
                     styles.node,
                     isFinal ? styles.nodeFinal : '',
-                    state === 'current' ? styles.nodeBig : '',
+                    isAstronaut ? styles.nodeBig : '',
                     NODE_STATE_CLASS[state],
                   ]
                     .filter(Boolean)
@@ -100,7 +111,7 @@ export function Menu() {
                   </span>
                 </button>
 
-                {state === 'current' && (
+                {isAstronaut && (
                   <span className={styles.astronaut} aria-hidden>
                     <AstronautIcon />
                   </span>
