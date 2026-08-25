@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
-import { useProgress } from '../progress/useProgress';
+import { useProgress, UNLOCK_THRESHOLDS } from '../progress/useProgress';
 import { CONTENT, PHASES, getNextPhaseId, getTier } from '../content/index';
 import { OrderPuzzle } from '../engine/OrderPuzzle';
 import { TagMatch } from '../engine/TagMatch';
@@ -301,17 +301,21 @@ export function Fase() {
     [phaseId, activityIndex, shuffledActivities, recordActivityResult, incrementPhaseErrors]
   );
 
-  // Record the best score for this phase when results screen is shown.
-  // useEffect ensures all state (results, bestCombo) is settled before recording.
+  // Record the best score, award badges, and conditionally unlock the next phase
+  // when the results screen is shown. useEffect ensures all state is settled first.
   useEffect(() => {
     if (!showResults || !phaseId) return;
     const correctCount = results.filter((r) => r.success).length;
     recordPhaseScore(phaseId, correctCount, results.length, bestCombo);
-    // Perfect run → award the persistent Sabichão badge for this phase.
     if (results.length > 0 && correctCount === results.length) {
       awardBadge(`sabichao-${phaseId}`);
     }
-  }, [showResults, phaseId, results, bestCombo, recordPhaseScore, awardBadge]);
+    const threshold = UNLOCK_THRESHOLDS[phaseId] ?? 0;
+    if (correctCount >= threshold) {
+      const nextId = getNextPhaseId(phaseId);
+      if (nextId) unlockPhase(nextId);
+    }
+  }, [showResults, phaseId, results, bestCombo, recordPhaseScore, awardBadge, unlockPhase]);
 
   const advance = useCallback(() => {
     if (activityIndex < shuffledActivities.length - 1) {
@@ -319,13 +323,9 @@ export function Fase() {
       setSucceeded(false);
       setBurst(null);
     } else {
-      if (phaseId) {
-        const nextId = getNextPhaseId(phaseId);
-        if (nextId) unlockPhase(nextId);
-      }
       setShowResults(true);
     }
-  }, [activityIndex, shuffledActivities.length, phaseId, unlockPhase]);
+  }, [activityIndex, shuffledActivities.length]);
 
   const restart = useCallback(() => {
     if (phaseId) resetPhaseErrors(phaseId);
@@ -410,6 +410,8 @@ export function Fase() {
     const tier = getTier(correctCount);
     const nextId = phaseId ? getNextPhaseId(phaseId) : null;
     const nextPhase = nextId ? PHASES.find((p) => p.id === nextId) : null;
+    const threshold = phaseId ? (UNLOCK_THRESHOLDS[phaseId] ?? 0) : 0;
+    const meetsThreshold = correctCount >= threshold;
 
     return (
       <div className={styles.root}>
@@ -445,7 +447,11 @@ export function Fase() {
           </p>
 
           <p className={styles.unlockNote}>
-            {nextPhase ? `${nextPhase.label} liberada!` : 'Você completou todas as fases!'}
+            {nextPhase
+              ? meetsThreshold
+                ? `${nextPhase.label} liberada!`
+                : `Tente novamente para liberar ${nextPhase.label}`
+              : 'Você completou todas as fases!'}
           </p>
 
           <button

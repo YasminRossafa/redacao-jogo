@@ -2,6 +2,10 @@ import { useState, useCallback } from 'react';
 
 const STORAGE_KEY = 'redacao-jogo:progress';
 
+export const UNLOCK_THRESHOLDS: Record<string, number> = {
+  fase1: 12,
+};
+
 interface PhaseScore {
   correctCount: number;
   total: number;

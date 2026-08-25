@@ -1,43 +1,52 @@
-# React + TypeScript + Vite
+# Jogo da Redação ENEM
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Jogo web para alunos memorizarem a estrutura da redação nota 1000 do ENEM. O progresso é dividido em fases (Introdução, Desenvolvimento 1, Desenvolvimento 2, Conclusão, Redação Completa) e salvo diretamente no `localStorage` do navegador — sem backend nem banco de dados.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Vite + React + TypeScript** — sem bibliotecas de estado externas (sem Redux, Zustand etc.)
+- CSS Modules para todos os estilos
+- PWA instalável via `manifest.webmanifest`
 
-## React Compiler
+## Como rodar localmente
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+O endereço local (geralmente `http://localhost:5173`) aparece no terminal após o servidor iniciar.
 
-## Como instalar no celular
+## Build de produção
 
-O Jogo da Redação pode ser instalado como um aplicativo direto na tela inicial do seu celular, sem precisar da loja de aplicativos.
+```bash
+npm run build       # gera a pasta dist/
+npm run preview     # sobe um servidor local para testar o build
+```
+
+## Estrutura de pastas
+
+```
+src/
+  engine/    # componentes de atividade reutilizáveis (OrderPuzzle, TagMatch, ErrorSpot, BuildFromScratch)
+  content/   # dados de conteúdo por fase — editável sem mexer no motor
+  progress/  # persistência via localStorage (useProgress.ts)
+  pages/     # páginas no nível de rota (Menu, Fase)
+```
+
+## Como editar o conteúdo de uma fase
+
+Os dados de cada fase ficam em `src/content/`. Por exemplo, as atividades da Introdução estão em `src/content/fase1-introducao.ts`.
+
+Cada atividade segue um dos tipos definidos em `src/engine/types.ts` (`order`, `tag-match`, `error-spot`, `build`). Para adicionar ou alterar atividades, edite o arquivo de conteúdo correspondente sem precisar tocar nos componentes do motor.
+
+## Como instalar no celular (PWA)
+
+O jogo pode ser instalado como aplicativo direto na tela inicial, sem passar pela loja de aplicativos.
 
 **Android (Chrome):**
-1. Acesse o jogo no navegador Chrome.
-2. Toque no menu do navegador (⋮) no canto superior direito.
+1. Acesse o jogo no Chrome.
+2. Toque no menu (⋮) no canto superior direito.
 3. Selecione **"Adicionar à tela inicial"** (ou "Instalar aplicativo").
 4. Confirme o nome e toque em **Adicionar**.
 
@@ -48,3 +57,7 @@ O Jogo da Redação pode ser instalado como um aplicativo direto na tela inicial
 4. Confirme o nome e toque em **Adicionar**.
 
 > **Importante:** Após instalar, abra o jogo sempre pelo ícone na tela inicial — não pelo navegador embutido de aplicativos de mensagens (WhatsApp, Instagram etc.). Isso garante que o progresso salvo no dispositivo seja preservado entre as sessões.
+
+## Aviso sobre localStorage
+
+O progresso fica salvo no navegador e no aparelho usados para jogar. Limpar os dados do navegador ou usar um dispositivo diferente apaga o progresso salvo.
