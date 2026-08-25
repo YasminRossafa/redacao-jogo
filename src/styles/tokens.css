@@ -1,0 +1,38 @@
+/* Design tokens — light theme only.
+   Import via index.css; do not import directly in component CSS modules.
+   Semantic colors (success/danger/warning) are reserved for feedback states only. */
+
+:root {
+  /* ── Primary palette ─────────────────────────────────────── */
+  --color-primary:        #4F46E5; /* indigo — buttons, selected rings, active borders */
+  --color-primary-hover:  #4338CA;
+  --color-primary-bg:     #EEF2FF; /* light wash for selected/active backgrounds */
+
+  --color-secondary:      #0F9E86; /* teal — progress & celebration accents only */
+  --color-secondary-hover:#0D8A75;
+
+  /* ── Neutrals ─────────────────────────────────────────────── */
+  --color-bg:             #F1F5F9; /* page background (light slate) */
+  --color-surface:        #FFFFFF; /* card / component surfaces */
+  --color-border:         #E2E8F0; /* default dividers and outlines */
+  --color-border-strong:  #94A3B8; /* stronger borders, e.g. pool blocks */
+
+  --color-text:           #0F172A; /* full-contrast body copy */
+  --color-text-muted:     #64748B; /* secondary / hint text */
+
+  /* ── Semantic — feedback states only, never decorative ──── */
+  --color-success:        #16A34A;
+  --color-success-bg:     #F0FDF4;
+  --color-success-border: #22C55E;
+
+  --color-danger:         #DC2626;
+  --color-danger-bg:      #FEF2F2;
+  --color-danger-border:  #EF4444;
+
+  --color-warning:        #D97706;
+  --color-warning-bg:     #FFFBEB;
+  --color-warning-border: #F59E0B;
+
+  /* ── Elevation ────────────────────────────────────────────── */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+}
