@@ -26,3 +26,24 @@ export function getNextPhaseId(currentId: string): string | null {
   if (idx === -1 || idx === PHASE_SEQUENCE.length - 1) return null;
   return PHASE_SEQUENCE[idx + 1];
 }
+
+// ─── Result tiers ─────────────────────────────────────────────────────────────
+// Thresholds assume an 18-question phase. Adjust per phase as content grows.
+
+export interface ResultTier {
+  minCorrect: number;
+  label: string;
+  color: string;
+  bg: string;
+}
+
+export const RESULT_TIERS: ResultTier[] = [
+  { minCorrect: 15, label: 'Expert',              color: '#166534', bg: '#dcfce7' },
+  { minCorrect: 10, label: 'Good',                color: '#1d4ed8', bg: '#dbeafe' },
+  { minCorrect: 5,  label: 'Almost there',        color: '#92400e', bg: '#fef3c7' },
+  { minCorrect: 0,  label: 'You need to study!',  color: '#991b1b', bg: '#fee2e2' },
+];
+
+export function getTier(correctCount: number): ResultTier {
+  return RESULT_TIERS.find((t) => correctCount >= t.minCorrect) ?? RESULT_TIERS[RESULT_TIERS.length - 1];
+}

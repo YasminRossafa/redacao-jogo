@@ -9,8 +9,20 @@ interface Props {
 
 type CheckState = 'idle' | 'unselected' | 'correct' | 'incorrect';
 
+function shuffle<T>(arr: T[]): T[] {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 export function ErrorSpot({ activity, onComplete }: Props) {
   const { prompt, sentences, errorSentenceId, explanation } = activity;
+
+  // Shuffle display order on mount; errorSentenceId is id-based so validation is unaffected
+  const [displaySentences] = useState(() => shuffle([...sentences]));
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checkState, setCheckState] = useState<CheckState>('idle');
@@ -51,7 +63,7 @@ export function ErrorSpot({ activity, onComplete }: Props) {
       <p className={styles.prompt}>{prompt}</p>
 
       <ul className={styles.list} aria-label="Frases">
-        {sentences.map((sentence) => {
+        {displaySentences.map((sentence) => {
           const isSelected = selectedId === sentence.id;
           const isCorrectSentence = sentence.id === errorSentenceId;
 

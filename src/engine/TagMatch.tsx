@@ -29,9 +29,19 @@ const COLORS: TagColor[] = [
   { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' },
 ];
 
+function shuffle<T>(arr: T[]): T[] {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 export function TagMatch({ activity, onComplete }: Props) {
   const { prompt, sentences, tags, mapping } = activity;
 
+  // Color is assigned by original tag position (stable regardless of display order)
   const colorOf = useCallback(
     (tagId: string): TagColor => {
       const idx = tags.findIndex((t) => t.id === tagId);
@@ -39,6 +49,10 @@ export function TagMatch({ activity, onComplete }: Props) {
     },
     [tags]
   );
+
+  // Shuffle display order independently on mount; ids still drive all logic
+  const [displaySentences] = useState(() => shuffle([...sentences]));
+  const [displayTags] = useState(() => shuffle([...tags]));
 
   const [links, setLinks] = useState<Record<string, string>>({}); // sentenceId → tagId
   const [selection, setSelection] = useState<Selection>({ type: 'none' });
@@ -64,7 +78,6 @@ export function TagMatch({ activity, onComplete }: Props) {
       }
 
       if (selection.type === 'sentence' && selection.id === sentenceId) {
-        // Tap same selected sentence → unlink + deselect
         setLinks((l) => {
           const next = { ...l };
           delete next[sentenceId];
@@ -141,10 +154,10 @@ export function TagMatch({ activity, onComplete }: Props) {
     <div className={styles.root}>
       <p className={styles.prompt}>{prompt}</p>
 
-      {/* Tag palette */}
+      {/* Tag palette — shuffled display order */}
       <div className={styles.palette} role="group" aria-label="Categorias">
-        {tags.map((tag, i) => {
-          const color = COLORS[i % COLORS.length];
+        {displayTags.map((tag) => {
+          const color = colorOf(tag.id);
           const isTagSelected = selection.type === 'tag' && selection.id === tag.id;
           const linkedCount = Object.values(links).filter((v) => v === tag.id).length;
 
@@ -186,9 +199,9 @@ export function TagMatch({ activity, onComplete }: Props) {
         {hintText ?? ' '}
       </p>
 
-      {/* Sentences */}
+      {/* Sentences — shuffled display order */}
       <ul className={styles.sentences} aria-label="Frases">
-        {sentences.map((sentence) => {
+        {displaySentences.map((sentence) => {
           const linkedTagId = links[sentence.id];
           const linkedTag = linkedTagId ? tags.find((t) => t.id === linkedTagId) : undefined;
           const color = linkedTagId ? colorOf(linkedTagId) : undefined;
@@ -198,8 +211,6 @@ export function TagMatch({ activity, onComplete }: Props) {
 
           const chipStyle = isWrong
             ? { backgroundColor: '#fef2f2', borderColor: '#ef4444' }
-            : isSuccess && color
-            ? { backgroundColor: color.bg, borderColor: color.border }
             : color
             ? { backgroundColor: color.bg, borderColor: color.border }
             : {};
