@@ -4,8 +4,10 @@ import { TEMA_BANK } from './shared-bank';
 const rep   = (id: string) => TEMA_BANK.find((e) => e.id === id)!.repertorio;
 const tema  = (id: string) => TEMA_BANK.find((e) => e.id === id)!.tema;
 
-const PROMPT_BUILD  = 'Monte a frase que liga o repertório ao tema, no Brasil.';
-const PROMPT_ORDER  = 'Organize as frases: primeiro o repertório, depois o tema e Brasil.';
+const promptBuild = (id: string) =>
+  `Monte a frase que liga o repertório ao tema, no Brasil, para o tema "${tema(id)}".`;
+const promptOrder = (id: string) =>
+  `Organize as frases: primeiro o repertório, depois o tema e Brasil. Tema: "${tema(id)}".`;
 
 export const faseTemaBrasilActivities: ActivityData[] = [
   // ── 6 × BuildActivity ────────────────────────────────────────────────────
@@ -18,7 +20,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-build-1',
     kind: 'build',
-    prompt: `${PROMPT_BUILD} [tema: ${tema('saude')}]`,
+    prompt: promptBuild('saude'),
     fragments: [
       { id: 'b1-f1', text: 'Nesse sentido,',                                                        correct: true  },
       { id: 'b1-f2', text: 'os desafios para a garantia do acesso à saúde pública',                 correct: true  },
@@ -36,7 +38,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-build-2',
     kind: 'build',
-    prompt: `${PROMPT_BUILD} [tema: ${tema('preconceito')}]`,
+    prompt: promptBuild('preconceito'),
     fragments: [
       { id: 'b2-f1', text: 'Diante disso,',                                                         correct: true  },
       { id: 'b2-f2', text: 'os desafios para a superação do preconceito e da exclusão social',      correct: true  },
@@ -54,7 +56,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-build-3',
     kind: 'build',
-    prompt: `${PROMPT_BUILD} [tema: ${tema('meioambiente')}]`,
+    prompt: promptBuild('meioambiente'),
     fragments: [
       { id: 'b3-f1', text: 'Fora da ficção,',                                                       correct: true  },
       { id: 'b3-f2', text: 'os desafios para a preservação do meio ambiente',                       correct: true  },
@@ -72,7 +74,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-build-4',
     kind: 'build',
-    prompt: `${PROMPT_BUILD} [tema: ${tema('violenciaurbana')}]`,
+    prompt: promptBuild('violenciaurbana'),
     fragments: [
       { id: 'b4-f1', text: 'Assim como na série,',                                                  correct: true  },
       { id: 'b4-f2', text: 'os desafios para o combate à violência urbana',                         correct: true  },
@@ -90,7 +92,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-build-5',
     kind: 'build',
-    prompt: `${PROMPT_BUILD} [tema: ${tema('solidao')}]`,
+    prompt: promptBuild('solidao'),
     fragments: [
       { id: 'b5-f1', text: 'Fora da ficção,',                                                       correct: true  },
       { id: 'b5-f2', text: 'os desafios para o enfrentamento da solidão e do isolamento social',    correct: true  },
@@ -108,7 +110,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-build-6',
     kind: 'build',
-    prompt: `${PROMPT_BUILD} [tema: ${tema('luto')}]`,
+    prompt: promptBuild('luto'),
     fragments: [
       { id: 'b6-f1', text: 'Nesse contexto,',                                                       correct: true  },
       { id: 'b6-f2', text: 'os desafios para o acolhimento emocional de pessoas enlutadas',         correct: true  },
@@ -128,7 +130,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-order-1',
     kind: 'order',
-    prompt: PROMPT_ORDER,
+    prompt: promptOrder('meioambiente'),
     items: [
       { id: 'rep',       label: rep('meioambiente') },
       { id: 'temabrasil', label: TEMA_BANK.find((e) => e.id === 'meioambiente')!.temaBrasil },
@@ -139,7 +141,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-order-2',
     kind: 'order',
-    prompt: PROMPT_ORDER,
+    prompt: promptOrder('violenciaurbana'),
     items: [
       { id: 'rep',       label: rep('violenciaurbana') },
       { id: 'temabrasil', label: TEMA_BANK.find((e) => e.id === 'violenciaurbana')!.temaBrasil },
@@ -150,7 +152,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-order-3',
     kind: 'order',
-    prompt: PROMPT_ORDER,
+    prompt: promptOrder('solidao'),
     items: [
       { id: 'rep',       label: rep('solidao') },
       { id: 'temabrasil', label: TEMA_BANK.find((e) => e.id === 'solidao')!.temaBrasil },
@@ -161,7 +163,7 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   {
     id: 'fase-tema-brasil-order-4',
     kind: 'order',
-    prompt: PROMPT_ORDER,
+    prompt: promptOrder('luto'),
     items: [
       { id: 'rep',       label: rep('luto') },
       { id: 'temabrasil', label: TEMA_BANK.find((e) => e.id === 'luto')!.temaBrasil },

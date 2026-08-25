@@ -5,6 +5,7 @@ const get  = (id: string) => TEMA_BANK.find((e) => e.id === id)!;
 const rep  = (id: string) => get(id).repertorio;
 const tb   = (id: string) => get(id).temaBrasil;
 const prob = (id: string) => get(id).problematica;
+const tema = (id: string) => get(id).tema;
 
 // Each problematica splits cleanly at the closing clause.
 // prob(id) = <clause> + ' são problemas decorrentes desse tema.'
@@ -12,8 +13,8 @@ const prob = (id: string) => get(id).problematica;
 const CLOSING = 'são problemas decorrentes desse tema.';
 const clause = (id: string) => prob(id).replace(` ${CLOSING}`, '');
 
-const PROMPT_BUILD = 'Monte a problemática correta para esse tema.';
-const PROMPT_ORDER = 'Organize as 3 partes da introdução até aqui.';
+const promptBuild = (id: string) => `Monte a problemática correta para o tema "${tema(id)}".`;
+const promptOrder = (id: string) => `Organize as 3 partes da introdução até aqui. Tema: "${tema(id)}".`;
 
 export const faseProblematicasActivities: ActivityData[] = [
   // ── 6 × BuildActivity ────────────────────────────────────────────────────
@@ -25,7 +26,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-build-1',
     kind: 'build',
-    prompt: PROMPT_BUILD,
+    prompt: promptBuild('saude'),
     fragments: [
       { id: 'p1-f1', text: clause('saude'),       correct: true  },
       { id: 'p1-f2', text: CLOSING,               correct: true  },
@@ -39,7 +40,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-build-2',
     kind: 'build',
-    prompt: PROMPT_BUILD,
+    prompt: promptBuild('preconceito'),
     fragments: [
       { id: 'p2-f1', text: clause('preconceito'), correct: true  },
       { id: 'p2-f2', text: CLOSING,               correct: true  },
@@ -53,7 +54,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-build-3',
     kind: 'build',
-    prompt: PROMPT_BUILD,
+    prompt: promptBuild('meioambiente'),
     fragments: [
       { id: 'p3-f1', text: clause('meioambiente'),    correct: true  },
       { id: 'p3-f2', text: CLOSING,                   correct: true  },
@@ -67,7 +68,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-build-4',
     kind: 'build',
-    prompt: PROMPT_BUILD,
+    prompt: promptBuild('violenciaurbana'),
     fragments: [
       { id: 'p4-f1', text: clause('violenciaurbana'), correct: true  },
       { id: 'p4-f2', text: CLOSING,                   correct: true  },
@@ -81,7 +82,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-build-5',
     kind: 'build',
-    prompt: PROMPT_BUILD,
+    prompt: promptBuild('solidao'),
     fragments: [
       { id: 'p5-f1', text: clause('solidao'), correct: true  },
       { id: 'p5-f2', text: CLOSING,           correct: true  },
@@ -95,7 +96,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-build-6',
     kind: 'build',
-    prompt: PROMPT_BUILD,
+    prompt: promptBuild('luto'),
     fragments: [
       { id: 'p6-f1', text: clause('luto'),    correct: true  },
       { id: 'p6-f2', text: CLOSING,           correct: true  },
@@ -113,7 +114,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-order-1',
     kind: 'order',
-    prompt: PROMPT_ORDER,
+    prompt: promptOrder('meioambiente'),
     items: [
       { id: 'rep',  label: rep('meioambiente') },
       { id: 'tb',   label: tb('meioambiente')  },
@@ -125,7 +126,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-order-2',
     kind: 'order',
-    prompt: PROMPT_ORDER,
+    prompt: promptOrder('violenciaurbana'),
     items: [
       { id: 'rep',  label: rep('violenciaurbana') },
       { id: 'tb',   label: tb('violenciaurbana')  },
@@ -137,7 +138,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-order-3',
     kind: 'order',
-    prompt: PROMPT_ORDER,
+    prompt: promptOrder('solidao'),
     items: [
       { id: 'rep',  label: rep('solidao') },
       { id: 'tb',   label: tb('solidao')  },
@@ -149,7 +150,7 @@ export const faseProblematicasActivities: ActivityData[] = [
   {
     id: 'fase-problematicas-order-4',
     kind: 'order',
-    prompt: PROMPT_ORDER,
+    prompt: promptOrder('luto'),
     items: [
       { id: 'rep',  label: rep('luto') },
       { id: 'tb',   label: tb('luto')  },
