@@ -70,10 +70,15 @@ export function SegmentSpot({ activity, onComplete, onSkip }: Props) {
           if (checkState === 'correct' && isSelected) stateClass = styles.correct;
           if (checkState === 'wrong' && isSelected) stateClass = styles.wrong;
 
+          // A <span role="button">, not a <button>: a real button is an atomic
+          // inline-block whose text can't wrap across lines, so each long clause
+          // would drop onto its own line. A span is true inline and flows as
+          // part of the paragraph.
           return (
-            <button
+            <span
               key={segment.id}
-              type="button"
+              role="button"
+              tabIndex={isLocked ? -1 : 0}
               className={[
                 styles.segment,
                 !isLocked && isSelected ? styles.selected : '',
@@ -82,11 +87,18 @@ export function SegmentSpot({ activity, onComplete, onSkip }: Props) {
                 .filter(Boolean)
                 .join(' ')}
               onClick={() => handleSelect(segment.id)}
+              onKeyDown={(e) => {
+                if (isLocked) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelect(segment.id);
+                }
+              }}
               aria-pressed={!isLocked ? isSelected : undefined}
-              disabled={isLocked}
+              aria-disabled={isLocked || undefined}
             >
               {segment.text}
-            </button>
+            </span>
           );
         })}
       </p>

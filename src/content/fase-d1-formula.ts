@@ -10,16 +10,14 @@ const paragraphA = [
   { id: 'a-con', text: 'Primeiramente, ', selectable: false },
   {
     id: 'a-prob',
-    text: 'destaca-se a falta de acessibilidade nas instituições de ensino como um dos principais entraves à inclusão educacional de surdos',
+    text: 'destaca-se a falta de acessibilidade nas instituições de ensino como um dos principais entraves à inclusão educacional de surdos,',
     selectable: true,
   },
-  { id: 'a-sep1', text: ', ', selectable: false },
   {
     id: 'a-mot',
-    text: 'uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral',
+    text: 'uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral.',
     selectable: true,
   },
-  { id: 'a-sep2', text: '. ', selectable: false },
   {
     id: 'a-cit',
     text: 'Segundo dados do IBGE, apenas 1% das escolas brasileiras têm estrutura completa de acessibilidade.',
@@ -38,16 +36,14 @@ const paragraphB = [
   { id: 'b-con', text: 'Em primeiro lugar, ', selectable: false },
   {
     id: 'b-prob',
-    text: 'a normalização do trabalho de cuidado com responsabilidade exclusiva da mulher é um problema',
+    text: 'a normalização do trabalho de cuidado com responsabilidade exclusiva da mulher é um problema, ',
     selectable: true,
   },
-  { id: 'b-sep1', text: ', ', selectable: false },
   {
     id: 'b-mot',
-    text: 'pois contribui para sua desvalorização social econômica',
+    text: 'pois contribui para sua desvalorização social econômica.',
     selectable: true,
   },
-  { id: 'b-sep2', text: '. ', selectable: false },
   {
     id: 'b-cit',
     text: 'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
