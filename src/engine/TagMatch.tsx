@@ -42,6 +42,11 @@ function shuffle<T>(arr: T[]): T[] {
 export function TagMatch({ activity, onComplete, onSkip }: Props) {
   const { prompt, sentences, tags, mapping } = activity;
 
+  // True when any tag is required for more than one sentence.
+  // Many-to-few mode lifts the bijective constraints in linkPair and tag-tap.
+  const allTagValues = Object.values(mapping);
+  const isMultiMap = allTagValues.length !== new Set(allTagValues).size;
+
   // When there is only one tag the user shouldn't have to click it first.
   const isSingleTag = tags.length === 1;
 
@@ -79,19 +84,10 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
     setWrongIds(new Set());
   };
 
-  // Link a sentence↔tag pair while keeping the mapping a strict bijection: in a
-  // single atomic update, drop any OTHER sentence that held this tag (tag → one
-  // sentence) and overwrite this sentence's tag (sentence → one tag).
+  // Link a sentence to a tag, overwriting any previous tag for that sentence.
+  // Multiple sentences may share the same tag (many-to-few mode).
   const linkPair = useCallback((sentenceId: string, tagId: string) => {
-    setLinks((prev) => {
-      const next: Record<string, string> = {};
-      for (const [sid, tid] of Object.entries(prev)) {
-        if (tid === tagId) continue; // release the tag from its previous sentence
-        next[sid] = tid;
-      }
-      next[sentenceId] = tagId;
-      return next;
-    });
+    setLinks((prev) => ({ ...prev, [sentenceId]: tagId }));
   }, []);
 
   const handleSentenceTap = useCallback(
@@ -139,10 +135,12 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
         return;
       }
 
-      // 2. This tag is linked to one or more sentences → unlink the pair(s)
-      //    in a single tap (one pair in the common 1:1 case).
+      // 2. This tag has linked sentences.
+      //    Bijective mode: unlink them so the tag can be reassigned (1:1 invariant).
+      //    Many-to-few mode: skip — fall through to case 3 to re-select the tag,
+      //    allowing the user to keep associating more sentences to it.
       const linkedSentences = Object.keys(links).filter((sid) => links[sid] === tagId);
-      if (linkedSentences.length > 0) {
+      if (linkedSentences.length > 0 && !isMultiMap) {
         setLinks((prev) => {
           const next = { ...prev };
           for (const sid of linkedSentences) delete next[sid];
@@ -161,7 +159,7 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
           : { type: 'tag', id: tagId }
       );
     },
-    [selection, links, isSuccess, linkPair, defaultSelection, isSingleTag]
+    [selection, links, isSuccess, linkPair, defaultSelection, isSingleTag, isMultiMap]
   );
 
   const check = useCallback(() => {
