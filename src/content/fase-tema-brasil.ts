@@ -29,7 +29,11 @@ export const faseTemaBrasilActivities: ActivityData[] = [
       { id: 'b1-d1', text: 'Eu acredito que',                                                       correct: false },
       { id: 'b1-d2', text: 'no contexto mundial',                                                   correct: false },
     ],
-    correctSequence: ['b1-f1', 'b1-f2', 'b1-f3', 'b1-f4'],
+    acceptedOrders: [
+      ['b1-f1', 'b1-f2', 'b1-f3', 'b1-f4'],
+      // Alt: locative "na sociedade brasileira" fronted before the subject.
+      ['b1-f1', 'b1-f3', 'b1-f2', 'b1-f4'],
+    ],
   },
 
   // 2. preconceito
@@ -47,7 +51,11 @@ export const faseTemaBrasilActivities: ActivityData[] = [
       { id: 'b2-d1', text: 'Na minha opinião,',                                                     correct: false },
       { id: 'b2-d2', text: 'a tese que defendo é que',                                              correct: false },
     ],
-    correctSequence: ['b2-f1', 'b2-f2', 'b2-f3', 'b2-f4'],
+    acceptedOrders: [
+      ['b2-f1', 'b2-f2', 'b2-f3', 'b2-f4'],
+      // Alt: locative "na sociedade brasileira" fronted before the subject.
+      ['b2-f1', 'b2-f3', 'b2-f2', 'b2-f4'],
+    ],
   },
 
   // 3. meioambiente
@@ -65,7 +73,11 @@ export const faseTemaBrasilActivities: ActivityData[] = [
       { id: 'b3-d1', text: 'Acredito que',                                                          correct: false },
       { id: 'b3-d2', text: 'no cenário internacional',                                              correct: false },
     ],
-    correctSequence: ['b3-f1', 'b3-f2', 'b3-f3', 'b3-f4'],
+    acceptedOrders: [
+      ['b3-f1', 'b3-f2', 'b3-f3', 'b3-f4'],
+      // Alt: locative "na sociedade brasileira" fronted before the subject.
+      ['b3-f1', 'b3-f3', 'b3-f2', 'b3-f4'],
+    ],
   },
 
   // 4. violenciaurbana
@@ -83,7 +95,10 @@ export const faseTemaBrasilActivities: ActivityData[] = [
       { id: 'b4-d1', text: 'Em minha visão,',                                                       correct: false },
       { id: 'b4-d2', text: 'em todo o mundo',                                                       correct: false },
     ],
-    correctSequence: ['b4-f1', 'b4-f2', 'b4-f3', 'b4-f4'],
+    // Single order only: the connective "Assim como na série," is already a
+    // fronted adverbial, so fronting "na sociedade brasileira" as well stacks
+    // two adjuncts and reads unnaturally.
+    acceptedOrders: [['b4-f1', 'b4-f2', 'b4-f3', 'b4-f4']],
   },
 
   // 5. solidao
@@ -101,7 +116,11 @@ export const faseTemaBrasilActivities: ActivityData[] = [
       { id: 'b5-d1', text: 'Penso que',                                                             correct: false },
       { id: 'b5-d2', text: 'minha tese é que',                                                      correct: false },
     ],
-    correctSequence: ['b5-f1', 'b5-f2', 'b5-f3', 'b5-f4'],
+    acceptedOrders: [
+      ['b5-f1', 'b5-f2', 'b5-f3', 'b5-f4'],
+      // Alt: locative "na sociedade brasileira" fronted before the subject.
+      ['b5-f1', 'b5-f3', 'b5-f2', 'b5-f4'],
+    ],
   },
 
   // 6. luto
@@ -119,7 +138,11 @@ export const faseTemaBrasilActivities: ActivityData[] = [
       { id: 'b6-d1', text: 'Considero que',                                                         correct: false },
       { id: 'b6-d2', text: 'no mundo todo',                                                         correct: false },
     ],
-    correctSequence: ['b6-f1', 'b6-f2', 'b6-f3', 'b6-f4'],
+    acceptedOrders: [
+      ['b6-f1', 'b6-f2', 'b6-f3', 'b6-f4'],
+      // Alt: locative "na sociedade brasileira" fronted before the subject.
+      ['b6-f1', 'b6-f3', 'b6-f2', 'b6-f4'],
+    ],
   },
 
   // ── 4 × OrderActivity ────────────────────────────────────────────────────

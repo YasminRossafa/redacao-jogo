@@ -30,8 +30,13 @@ export interface BuildActivity {
   kind: 'build';
   prompt: string;
   fragments: { id: string; text: string; correct: boolean }[];
-  /** Correct ordered sequence of fragment ids (correct ones only) */
-  correctSequence: string[];
+  /**
+   * One or more accepted fragment-id sequences (correct fragments only).
+   * A submission is correct when it matches ANY of these exactly. Multiple
+   * entries exist when a sentence has more than one grammatically valid order.
+   * Every entry must be a permutation of the same correct-fragment set.
+   */
+  acceptedOrders: string[][];
 }
 
 export interface ChoiceActivity {

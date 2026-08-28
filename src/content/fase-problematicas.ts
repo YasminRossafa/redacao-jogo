@@ -33,7 +33,7 @@ export const faseProblematicasActivities: ActivityData[] = [
       { id: 'p1-d1', text: prob1('preconceito'), correct: false },
       { id: 'p1-d2', text: 'são, na minha visão, os principais problemas.', correct: false },
     ],
-    correctSequence: ['p1-f1', 'p1-f2', 'p1-f3'],
+    acceptedOrders: [['p1-f1', 'p1-f2', 'p1-f3']],
   },
 
   // 2. preconceito  (cross-distractor: saude's problematica1)
@@ -49,7 +49,7 @@ export const faseProblematicasActivities: ActivityData[] = [
       { id: 'p2-d1', text: prob1('saude'),       correct: false },
       { id: 'p2-d2', text: 'eu considero, são os problemas centrais.', correct: false },
     ],
-    correctSequence: ['p2-f1', 'p2-f2', 'p2-f3'],
+    acceptedOrders: [['p2-f1', 'p2-f2', 'p2-f3']],
   },
 
   // 3. meioambiente  (cross-distractor: violenciaurbana's problematica1)
@@ -65,7 +65,7 @@ export const faseProblematicasActivities: ActivityData[] = [
       { id: 'p3-d1', text: prob1('violenciaurbana'), correct: false },
       { id: 'p3-d2', text: 'são, em minha opinião, os maiores problemas.', correct: false },
     ],
-    correctSequence: ['p3-f1', 'p3-f2', 'p3-f3'],
+    acceptedOrders: [['p3-f1', 'p3-f2', 'p3-f3']],
   },
 
   // 4. violenciaurbana  (cross-distractor: meioambiente's problematica1)
@@ -81,7 +81,7 @@ export const faseProblematicasActivities: ActivityData[] = [
       { id: 'p4-d1', text: prob1('meioambiente'),    correct: false },
       { id: 'p4-d2', text: 'são os problemas centrais, na minha perspectiva.', correct: false },
     ],
-    correctSequence: ['p4-f1', 'p4-f2', 'p4-f3'],
+    acceptedOrders: [['p4-f1', 'p4-f2', 'p4-f3']],
   },
 
   // 5. solidao  (cross-distractor: luto's problematica1)
@@ -97,7 +97,7 @@ export const faseProblematicasActivities: ActivityData[] = [
       { id: 'p5-d1', text: prob1('luto'),    correct: false },
       { id: 'p5-d2', text: 'são, a meu ver, os problemas mais relevantes.', correct: false },
     ],
-    correctSequence: ['p5-f1', 'p5-f2', 'p5-f3'],
+    acceptedOrders: [['p5-f1', 'p5-f2', 'p5-f3']],
   },
 
   // 6. luto  (cross-distractor: solidao's problematica1; tese-variant closing)
@@ -113,7 +113,7 @@ export const faseProblematicasActivities: ActivityData[] = [
       { id: 'p6-d1', text: prob1('solidao'), correct: false },
       { id: 'p6-d2', text: 'comprovam, portanto, a minha tese sobre o tema.', correct: false },
     ],
-    correctSequence: ['p6-f1', 'p6-f2', 'p6-f3'],
+    acceptedOrders: [['p6-f1', 'p6-f2', 'p6-f3']],
   },
 
   // ── 4 × OrderActivity ────────────────────────────────────────────────────

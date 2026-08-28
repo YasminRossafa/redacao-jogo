@@ -22,7 +22,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function BuildFromScratch({ activity, onComplete, onSkip }: Props) {
-  const { prompt, fragments, correctSequence } = activity;
+  const { prompt, fragments, acceptedOrders } = activity;
 
   const [pool, setPool] = useState<Fragment[]>(() => shuffle(fragments));
   const [placed, setPlaced] = useState<Fragment[]>([]);
@@ -54,30 +54,32 @@ export function BuildFromScratch({ activity, onComplete, onSkip }: Props) {
   const check = useCallback(() => {
     const placedIds = placed.map((f) => f.id);
     const detail: BuildAnswer = { userFragmentIds: placedIds };
-    const correctSet = new Set(correctSequence);
+
+    // Correct when the placed id-sequence matches ANY accepted order exactly.
+    const inOrder = acceptedOrders.some(
+      (order) =>
+        order.length === placedIds.length &&
+        order.every((id, i) => id === placedIds[i])
+    );
+    if (inOrder) {
+      setCheckState('correct');
+      onComplete(true, detail);
+      return;
+    }
+
+    // Not an accepted order. Distinguish "wrong fragments/set" from "right set,
+    // wrong order" to keep the two feedback messages. All accepted orders are
+    // permutations of the same correct set, so any of them defines that set.
+    const correctSet = new Set(acceptedOrders[0]);
     const placedSet = new Set(placedIds);
-
     const sameSet =
-      placedIds.length === correctSequence.length &&
+      placedIds.length === acceptedOrders[0].length &&
       placedIds.every((id) => correctSet.has(id)) &&
-      correctSequence.every((id) => placedSet.has(id));
+      acceptedOrders[0].every((id) => placedSet.has(id));
 
-    if (!sameSet) {
-      setCheckState('wrong-set');
-      onComplete(false, detail);
-      return;
-    }
-
-    const inOrder = placedIds.every((id, i) => id === correctSequence[i]);
-    if (!inOrder) {
-      setCheckState('wrong-order');
-      onComplete(false, detail);
-      return;
-    }
-
-    setCheckState('correct');
-    onComplete(true, detail);
-  }, [placed, correctSequence, onComplete]);
+    setCheckState(sameSet ? 'wrong-order' : 'wrong-set');
+    onComplete(false, detail);
+  }, [placed, acceptedOrders, onComplete]);
 
   const retry = useCallback(() => {
     setPool((prev) => shuffle([...prev, ...placed]));

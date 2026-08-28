@@ -232,7 +232,7 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
           <div className={styles.reviewBlock}>
             <span className={styles.reviewLabel}>Sequência certa</span>
             <ol className={styles.reviewSeq}>
-              {activity.correctSequence.map((id) => (
+              {activity.acceptedOrders[0].map((id) => (
                 <li key={id} className={[styles.reviewSeqItem, styles.reviewCorrect].join(' ')}>
                   {frag(id)?.text ?? id}
                 </li>
