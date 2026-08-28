@@ -95,10 +95,11 @@ export const faseTemaBrasilActivities: ActivityData[] = [
       { id: 'b4-d1', text: 'Em minha visão,',                                                       correct: false },
       { id: 'b4-d2', text: 'em todo o mundo',                                                       correct: false },
     ],
-    // Single order only: the connective "Assim como na série," is already a
-    // fronted adverbial, so fronting "na sociedade brasileira" as well stacks
-    // two adjuncts and reads unnaturally.
-    acceptedOrders: [['b4-f1', 'b4-f2', 'b4-f3', 'b4-f4']],
+    acceptedOrders: [
+      ['b4-f1', 'b4-f2', 'b4-f3', 'b4-f4'],
+      // Alt: locative "na sociedade brasileira" fronted before the subject.
+      ['b4-f1', 'b4-f3', 'b4-f2', 'b4-f4'],
+    ],
   },
 
   // 5. solidao
