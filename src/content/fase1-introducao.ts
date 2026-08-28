@@ -45,7 +45,7 @@ const PQUEHORASELA = {
 };
 
 const PCORTICO = {
-  rep:  "O livro 'O Cortiço' retrata a história de uma mãe que trabalha como catadora de lixo para conseguir sustentar seus filhos.",
+  rep:  "O livro 'Quarto de Despejo' retrata a história de uma mãe que trabalha como catadora de lixo para conseguir sustentar seus filhos.",
   tema: "Em paralelo com a realidade, ainda existem muitos desafios no enfrentamento da invisibilidade do trabalho de cuidado exercido pela mulher no Brasil.",
   prob: "Dois problemas desse tema são o pensamento estrutural de que esse tipo de serviço deve ser realizado pela mulher, além de que a maior parte dele não é remunerada.",
 };

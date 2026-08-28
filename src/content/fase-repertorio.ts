@@ -141,11 +141,11 @@ export const faseRepertorioActivities: ActivityData[] = [
     sentences: [
       { id: 'fits',  text: rep('meioambiente') },
       { id: 'wrong', text: extra('zootopia') },
-      { id: 'extra', text: rep('saude') },
+      { id: 'wrong', text: rep('saude') },
     ],
     errorSentenceId: 'wrong',
     explanation:
-      'Zootopia trata de preconceito e discriminação, sem relação com questões ambientais.',
+      "Zootopia trata de preconceito e discriminação, sem relação com questões ambientais. Grey's Anatomy trata da escassez e é possível conectar, mas não está conectado nesse caso.",
   },
 
   {
