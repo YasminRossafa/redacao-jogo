@@ -14,6 +14,7 @@ import { TagMatch } from '../engine/TagMatch';
 import { ErrorSpot } from '../engine/ErrorSpot';
 import { BuildFromScratch } from '../engine/BuildFromScratch';
 import { ChoiceSelect } from '../engine/ChoiceSelect';
+import { SegmentSpot } from '../engine/SegmentSpot';
 import { FeedbackBurst } from '../engine/FeedbackBurst';
 import type { ActivityData, AnswerDetail } from '../engine/types';
 import styles from './Fase.module.css';
@@ -96,6 +97,14 @@ function ActivityRenderer({
         <ChoiceSelect
           activity={activity}
           onComplete={(s, d) => onComplete(s, { kind: 'choice', ...d })}
+          onSkip={onSkip}
+        />
+      );
+    case 'segment-spot':
+      return (
+        <SegmentSpot
+          activity={activity}
+          onComplete={(s, d) => onComplete(s, { kind: 'segment-spot', ...d })}
           onSkip={onSkip}
         />
       );
@@ -265,6 +274,30 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
         )}
         {/* Explanation is shown after answering regardless of correct/incorrect */}
         <p className={styles.reviewExplanation}>{activity.explanation}</p>
+      </>
+    );
+  }
+
+  if (activity.kind === 'segment-spot') {
+    const segText = (id: string) =>
+      activity.segments.find((s) => s.id === id)?.text ?? id;
+    const answer = detail && detail.kind === 'segment-spot' ? detail : null;
+    return (
+      <>
+        {showCorrect && (
+          <div className={styles.reviewBlock}>
+            {answer && (
+              <p className={styles.reviewLine}>
+                <span className={styles.reviewLineKey}>Você tocou:</span>{' '}
+                {segText(answer.selectedSegmentId)}
+              </p>
+            )}
+            <p className={styles.reviewLine}>
+              <span className={styles.reviewLineKey}>Parte correta:</span>{' '}
+              <span className={styles.reviewCorrect}>{segText(activity.targetSegmentId)}</span>
+            </p>
+          </div>
+        )}
       </>
     );
   }

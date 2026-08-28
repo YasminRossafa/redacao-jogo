@@ -4,6 +4,7 @@ import { fase1Activities } from './fase1-introducao';
 import { faseRepertorioActivities } from './fase-repertorio';
 import { faseTemaBrasilActivities } from './fase-tema-brasil';
 import { faseProblematicasActivities } from './fase-problematicas';
+import { faseD1FormulaActivities } from './fase-d1-formula';
 
 export interface PhaseInfo {
   id: string;
@@ -17,6 +18,7 @@ export const PHASES: PhaseInfo[] = [
   { id: 'fase-tema-brasil',         label: 'Tema + Brasil',      subtitle: 'Contextualização do tema na sociedade' },
   { id: 'fase-problematicas',       label: 'Problemáticas',      subtitle: 'Problematização do tema' },
   { id: 'fase-introducao-completa', label: 'Introdução',         subtitle: 'Monte a introdução inteira' },
+  { id: 'fase-d1-formula',          label: 'Fórmula D1',         subtitle: 'Como funciona o desenvolvimento 1' },
   { id: 'fase2',                    label: 'Desenvolvimento 1',  subtitle: 'Primeiro argumento' },
   { id: 'fase3',                    label: 'Desenvolvimento 2',  subtitle: 'Segundo argumento' },
   { id: 'fase4',                    label: 'Conclusão',          subtitle: 'Proposta de intervenção' },
@@ -31,6 +33,7 @@ export const CONTENT: Record<string, ActivityData[]> = {
   'fase-tema-brasil': faseTemaBrasilActivities,
   'fase-problematicas': faseProblematicasActivities,
   'fase-introducao-completa': fase1Activities,
+  'fase-d1-formula': faseD1FormulaActivities,
 };
 
 export function getNextPhaseId(currentId: string): string | null {
@@ -55,6 +58,7 @@ export const PHASE_CONFIG: Record<string, PhaseConfig> = {
   'fase-tema-brasil':         { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-problematicas':       { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-introducao-completa': { total: 18, unlockThreshold: 12, tiers: { expert: 15, good: 10, almostThere: 5 } },
+  'fase-d1-formula':          { total: 4,  unlockThreshold: 3,  tiers: { expert: 4,  good: 3,  almostThere: 2 } },
 };
 
 /** Question total for a phase, falling back to its actual activity count. */

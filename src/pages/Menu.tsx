@@ -74,6 +74,14 @@ const PHASE_ICON: Record<string, () => React.ReactElement> = {
   'fase-tema-brasil': PlanetIcon,
   'fase-problematicas': MoonStarsIcon,
   'fase-introducao-completa': PlanetIcon,
+  'fase-d1-formula': BookIcon,
+};
+
+// Formula/guide phases open their explanation page before the quiz; every other
+// phase links straight to the quiz.
+const EXPLAINER_ROUTE: Record<string, string> = {
+  'fase-formula': '/formula',
+  'fase-d1-formula': '/d1-formula',
 };
 
 /** Simple astronaut silhouette that rides on the current node. */
@@ -125,9 +133,8 @@ export function Menu() {
           const stars = score !== null ? getTierStars(score.correctCount, phase.id) : null;
           const isAstronaut = phase.id === frontierPhaseId;
 
-          // fase-formula navigates to the explanation page rather than the quiz.
-          const isFormulaStep = phase.id === 'fase-formula';
-          const nodeTarget = isFormulaStep ? '/formula' : `/fase/${phase.id}`;
+          // Guide phases navigate to their explanation page rather than the quiz.
+          const nodeTarget = EXPLAINER_ROUTE[phase.id] ?? `/fase/${phase.id}`;
           const PhaseNodeIcon = PHASE_ICON[phase.id] ?? MoonIcon;
 
           return (

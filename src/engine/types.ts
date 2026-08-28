@@ -50,12 +50,28 @@ export interface ChoiceActivity {
   explanation: string;
 }
 
+export interface SegmentSpotActivity {
+  id: string;
+  kind: 'segment-spot';
+  prompt: string;
+  /**
+   * The paragraph as an ordered list of segments. `selectable` segments are
+   * tappable clauses (each needs a stable id); non-selectable segments are the
+   * connective, punctuation, and spacing shown as plain, inert text.
+   * Concatenating every segment's `text` in order reproduces the paragraph.
+   */
+  segments: { id: string; text: string; selectable: boolean }[];
+  /** Id of the clause the student must tap. */
+  targetSegmentId: string;
+}
+
 export type ActivityData =
   | OrderActivity
   | TagMatchActivity
   | ErrorSpotActivity
   | BuildActivity
-  | ChoiceActivity;
+  | ChoiceActivity
+  | SegmentSpotActivity;
 
 // ─── Answer detail passed up through each engine's onComplete ─────────────────
 
@@ -84,10 +100,16 @@ export interface ChoiceAnswer {
   selectedOptionId: string;
 }
 
+/** The segment id the student tapped as the target clause. */
+export interface SegmentSpotAnswer {
+  selectedSegmentId: string;
+}
+
 /** Kind-tagged union assembled in Fase.tsx from each engine's answer. */
 export type AnswerDetail =
   | ({ kind: 'order' } & OrderAnswer)
   | ({ kind: 'tag-match' } & TagMatchAnswer)
   | ({ kind: 'error-spot' } & ErrorSpotAnswer)
   | ({ kind: 'build' } & BuildAnswer)
-  | ({ kind: 'choice' } & ChoiceAnswer);
+  | ({ kind: 'choice' } & ChoiceAnswer)
+  | ({ kind: 'segment-spot' } & SegmentSpotAnswer);
