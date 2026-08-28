@@ -13,19 +13,85 @@ export interface PhaseInfo {
 }
 
 export const PHASES: PhaseInfo[] = [
+  // ── Introdução ───────────────────────────────────────────────────────────────
   { id: 'fase-formula',             label: 'Fórmula',            subtitle: 'Como funciona a introdução' },
   { id: 'fase-repertorio',          label: 'Repertório',         subtitle: 'Construção do repertório sociocultural' },
   { id: 'fase-tema-brasil',         label: 'Tema + Brasil',      subtitle: 'Contextualização do tema na sociedade' },
   { id: 'fase-problematicas',       label: 'Problemáticas',      subtitle: 'Problematização do tema' },
   { id: 'fase-introducao-completa', label: 'Introdução',         subtitle: 'Monte a introdução inteira' },
+  // ── Desenvolvimento 1 ────────────────────────────────────────────────────────
   { id: 'fase-d1-formula',          label: 'Fórmula D1',         subtitle: 'Como funciona o desenvolvimento 1' },
-  { id: 'fase2',                    label: 'Desenvolvimento 1',  subtitle: 'Primeiro argumento' },
-  { id: 'fase3',                    label: 'Desenvolvimento 2',  subtitle: 'Segundo argumento' },
-  { id: 'fase4',                    label: 'Conclusão',          subtitle: 'Proposta de intervenção' },
-  { id: 'fase5',                    label: 'Redação Completa',   subtitle: 'Monte a redação inteira' },
+  { id: 'fase-d1-problema',         label: 'Problemática D1',    subtitle: 'A problemática do argumento 1' },
+  { id: 'fase-d1-citacao',          label: 'Citação D1',         subtitle: 'A citação do argumento 1' },
+  { id: 'fase-d1-argumento',        label: 'Argumento D1',       subtitle: 'O argumento aprofundado' },
+  { id: 'fase-d1-completo',         label: 'D1 Completo',        subtitle: 'Monte o desenvolvimento 1 inteiro' },
+  // ── Desenvolvimento 2 ────────────────────────────────────────────────────────
+  { id: 'fase-d2-formula',          label: 'Fórmula D2',         subtitle: 'Como funciona o desenvolvimento 2' },
+  { id: 'fase-d2-problema',         label: 'Problemática D2',    subtitle: 'A problemática do argumento 2' },
+  { id: 'fase-d2-citacao',          label: 'Citação D2',         subtitle: 'A citação do argumento 2' },
+  { id: 'fase-d2-argumento',        label: 'Argumento D2',       subtitle: 'O argumento aprofundado' },
+  { id: 'fase-d2-completo',         label: 'D2 Completo',        subtitle: 'Monte o desenvolvimento 2 inteiro' },
+  // ── Conclusão ────────────────────────────────────────────────────────────────
+  { id: 'fase-conclusao-1',         label: 'Conclusão',          subtitle: 'A proposta de intervenção' },
+  // ── Redação Completa ─────────────────────────────────────────────────────────
+  { id: 'fase-redacao-completa',    label: 'Redação Completa',   subtitle: 'Monte a redação inteira' },
 ];
 
 export const PHASE_SEQUENCE: string[] = PHASES.map((p) => p.id);
+
+// ─── Section grouping (visual only — progression still follows PHASE_SEQUENCE) ─
+
+export interface SectionInfo {
+  id: string;
+  label: string;
+  phaseIds: string[];
+}
+
+export const SECTIONS: SectionInfo[] = [
+  {
+    id: 'introducao',
+    label: 'Introdução',
+    phaseIds: [
+      'fase-formula',
+      'fase-repertorio',
+      'fase-tema-brasil',
+      'fase-problematicas',
+      'fase-introducao-completa',
+    ],
+  },
+  {
+    id: 'dev1',
+    label: 'Desenvolvimento 1',
+    phaseIds: [
+      'fase-d1-formula',
+      'fase-d1-problema',
+      'fase-d1-citacao',
+      'fase-d1-argumento',
+      'fase-d1-completo',
+    ],
+  },
+  {
+    id: 'dev2',
+    label: 'Desenvolvimento 2',
+    phaseIds: [
+      'fase-d2-formula',
+      'fase-d2-problema',
+      'fase-d2-citacao',
+      'fase-d2-argumento',
+      'fase-d2-completo',
+    ],
+  },
+  {
+    id: 'conclusao',
+    label: 'Conclusão',
+    phaseIds: ['fase-conclusao-1'],
+  },
+  {
+    id: 'redacao-completa',
+    label: 'Redação Completa',
+    phaseIds: ['fase-redacao-completa'],
+  },
+];
 
 export const CONTENT: Record<string, ActivityData[]> = {
   'fase-formula': faseFormulaActivities,

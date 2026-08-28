@@ -44,6 +44,91 @@
   padding: 0.5rem 0.5rem 4rem;
 }
 
+/* ── Section portal (divider between sections) ── */
+
+.portal {
+  position: relative;
+  z-index: 2;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 1.75rem 1rem 0.75rem;
+}
+
+.portalLine {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.portalNode {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  padding: 0.25rem 0.875rem;
+  flex-shrink: 0;
+}
+
+.portalLabel {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
+/* ── Section group (wraps a section's phase nodes, carries nebula tint) ── */
+
+.sectionGroup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Subtle inset glow — the pseudo-element keeps it behind everything */
+}
+
+.sectionGroup::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Nebula tints — one radial gradient per section, very subtle */
+
+.sectionIntroducao::before {
+  background: radial-gradient(ellipse 90% 60% at 50% 40%,
+    rgba(79, 70, 229, 0.08) 0%, transparent 70%);
+}
+
+.sectionDev1::before {
+  background: radial-gradient(ellipse 90% 60% at 50% 40%,
+    rgba(15, 158, 134, 0.08) 0%, transparent 70%);
+}
+
+.sectionDev2::before {
+  background: radial-gradient(ellipse 90% 60% at 50% 40%,
+    rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+}
+
+.sectionConclusao::before {
+  background: radial-gradient(ellipse 90% 60% at 50% 40%,
+    rgba(236, 72, 153, 0.08) 0%, transparent 70%);
+}
+
+.sectionRedacaoCompleta::before {
+  background: radial-gradient(ellipse 90% 60% at 50% 40%,
+    rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No animations are used on nebula tints, but gate the rule explicitly. */
+  .sectionGroup::before { animation: none; }
+}
+
 /* Dashed center line — spans full trail height; nodes (z-index:1) sit on top */
 .trail::before {
   content: '';
@@ -268,4 +353,19 @@
 .nodeBadge {
   font-size: 0.875rem;
   line-height: 1;
+}
+
+/* ── "Em breve" badge for locked placeholder phases ── */
+
+.comingSoonBadge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.15rem 0.5rem;
+  margin-top: -0.125rem;
 }
