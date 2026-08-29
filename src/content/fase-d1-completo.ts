@@ -17,7 +17,7 @@ const QUEHORASELA = {
   tema: 'Assim como no longa-metragem, no Brasil, ainda existem desafios para enfrentar a invisibilidade do trabalho de cuidado exercido pela mulher.',
   prob: 'Dois problemas desse tema são que as mulheres são responsáveis por grande parte do serviço, além daquele que não é remunerado.',
   d1p:  'Primeiramente, destaca-se que as mulheres são responsáveis por grande parte dos serviços de cuidado, e isso é um problema pois tais trabalhos são invisibilizados diante da sociedade.',
-  d1c:  'Segundo dados do IBGE, as mulheres trabalham o dobro dos homens em serviços domésticos.',
+  d1c:  'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
   d1a:  'Isto se deve ao fato de elas não terem seu esforço reconhecido devido ao seu círculo social.',
 };
 
