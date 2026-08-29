@@ -42,7 +42,7 @@ export const faseD1CitacaoActivities: ActivityData[] = [
       { id: 'q2-s2', text: 'Estudos afirmam que grande parte das escolas não têm acessibilidade.' },
       { id: 'q2-s3', text: 'De acordo com o IBGE, 1% das escolas brasileiras têm estrutura completa de acessibilidade.' },
     ],
-    errorSentenceId: 'q2-s2',
+    errorSentenceIds: ['q2-s2'],
     explanation:
       'Uma citação precisa nomear a fonte — instituição, pesquisa ou censo específico. "Estudos afirmam" não diz de onde vem o dado: qualquer pessoa poderia escrever isso sem embasamento real.',
   },
@@ -57,7 +57,7 @@ export const faseD1CitacaoActivities: ActivityData[] = [
       { id: 'q3-s2', text: 'As escolas brasileiras têm baixa estrutura de acessibilidade, apenas 1%.' },
       { id: 'q3-s3', text: 'Segundo o Censo Escolar do MEC, 25% das escolas públicas possuem intérprete de Libras.' },
     ],
-    errorSentenceId: 'q3-s2',
+    errorSentenceIds: ['q3-s2'],
     explanation:
       'Sem um "Segundo dados de..." ou "De acordo com...", a frase deixa de ser uma citação e vira uma afirmação não sustentada — como se o dado viesse da cabeça do próprio autor.',
   },
@@ -197,7 +197,7 @@ export const faseD1CitacaoActivities: ActivityData[] = [
         text: 'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
       },
     ],
-    errorSentenceId: 'q10-s2',
+    errorSentenceIds: ['q10-s2'],
     explanation:
       'A citação precisa sustentar especificamente a problemática do próprio parágrafo. Este parágrafo é sobre trabalho de cuidado — a citação do MEC sobre intérpretes de Libras em escolas não tem relação com o tema e não apoia o argumento.',
   },

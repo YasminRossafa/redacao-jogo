@@ -93,7 +93,7 @@ export const faseD1ProblemaActivities: ActivityData[] = [
       { id: 'q5-s2', text: 'destaca-se a invisibilidade do trabalho de cuidado exercido pela mulher,' },
       { id: 'q5-s3', text: 'pois o trabalho de cuidado exercido pela mulher é invisibilizado.' },
     ],
-    errorSentenceId: 'q5-s3',
+    errorSentenceIds: ['q5-s3'],
     explanation:
       'O motivo precisa explicar POR QUE o problema acontece, não repetir o problema com outras palavras. "Pois o trabalho de cuidado exercido pela mulher é invisibilizado" apenas reafirma a problemática — isso é raciocínio circular.',
   },
@@ -187,7 +187,7 @@ export const faseD1ProblemaActivities: ActivityData[] = [
       { id: 'q10-s2', text: 'destaca-se que a maior parte do trabalho de cuidado não é remunerada,' },
       { id: 'q10-s3', text: 'pois esse serviço não é reconhecido financeiramente pela sociedade.' },
     ],
-    errorSentenceId: 'q10-s2',
+    errorSentenceIds: ['q10-s2'],
     explanation:
       'A problemática do D1 é sempre a primeira citada na introdução. Aqui, a primeira problemática é "o pensamento estrutural de que esse tipo de serviço deve ser realizado pela mulher". A não-remuneração é a segunda problemática e pertence ao D2.',
   },

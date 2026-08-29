@@ -88,7 +88,7 @@ export const faseD1CompletoActivities: ActivityData[] = [
         text: 'A falta de educação midiática e a ausência de regulamentação eficaz contra a desinformação são problemas decorrentes desse tema.',
       },
     ],
-    errorSentenceId: 'q3-s2',
+    errorSentenceIds: ['q3-s2'],
     explanation:
       "A introdução deve ser sempre objetiva e impessoal. O uso de 'Na minha opinião' é primeira pessoa — proibido na redação ENEM. Basta remover a expressão e a frase fica correta.",
   },
@@ -159,7 +159,7 @@ export const faseD1CompletoActivities: ActivityData[] = [
         text: QUEHORASELA.d1p,
       },
     ],
-    errorSentenceId: 'q6-s2',
+    errorSentenceIds: ['q6-s2'],
     explanation:
       '"Ademais" sinaliza adição/segunda ideia — não pode abrir o D1. O conectivo do D1 deve indicar que este é o primeiro argumento: "Em primeiro lugar", "Primeiramente", "Em primeira análise" ou "Antes de mais nada".',
   },
@@ -234,7 +234,7 @@ export const faseD1CompletoActivities: ActivityData[] = [
       { id: 'q10-s2', text: 'Desse modo, poucas escolas têm estrutura de acessibilidade.' },
       { id: 'q10-s3', text: ANNE_SULLIVAN.d1a },
     ],
-    errorSentenceId: 'q10-s2',
+    errorSentenceIds: ['q10-s2'],
     explanation:
       'O argumento apenas reafirma o dado da citação com outras palavras. O argumento precisa ir além — mostrar uma consequência ou explicar uma causa mais profunda que o dado não explicita.',
   },
@@ -262,7 +262,7 @@ export const faseD1CompletoActivities: ActivityData[] = [
         text: ANNE_SULLIVAN.d1p,
       },
     ],
-    errorSentenceId: 'q11-s2',
+    errorSentenceIds: ['q11-s2'],
     explanation:
       'A problemática do D1 foi copiada palavra por palavra da introdução em vez de ser reescrita nas próprias palavras. O D1 deve retomar a ideia com uma formulação diferente (paráfrase), não repetir a mesma frase.',
   },
@@ -402,7 +402,7 @@ export const faseD1CompletoActivities: ActivityData[] = [
       },
       { id: 'q18-s6', text: ANNE_SULLIVAN.d1a  },
     ],
-    errorSentenceId: 'q18-s5',
+    errorSentenceIds: ['q18-s5'],
     explanation:
       'A citação é do tema trabalho de cuidado (PNAD / afazeres domésticos) — não tem nenhuma relação com a problemática deste parágrafo, que discute acessibilidade e inclusão de surdos. Tipo de erro: citação irrelevante — sustenta outro tema, não a problemática do próprio parágrafo.',
   },

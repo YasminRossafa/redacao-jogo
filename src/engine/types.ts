@@ -20,8 +20,12 @@ export interface ErrorSpotActivity {
   kind: 'error-spot';
   prompt: string;
   sentences: { id: string; text: string }[];
-  /** Id of the sentence that contains the error */
-  errorSentenceId: string;
+  /**
+   * Ids of the sentences that count as the error. A tap is correct when it
+   * matches ANY id here. Usually a single-element array; more than one entry
+   * exists when several sentences are each independently a valid "error".
+   */
+  errorSentenceIds: string[];
   explanation: string;
 }
 

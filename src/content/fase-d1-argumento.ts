@@ -51,7 +51,7 @@ export const faseD1ArgumentoActivities: ActivityData[] = [
         text: 'Desse modo, a ausência de recursos inclusivos contribui para o sentimento de exclusão, levando ao abandono escolar e à limitação de oportunidades no futuro.',
       },
     ],
-    errorSentenceId: 'q2-s2',
+    errorSentenceIds: ['q2-s2'],
     explanation:
       'O argumento precisa aprofundar especificamente o impacto do dado citado — acessibilidade e inclusão de surdos. "Desafios de evasão em todas as disciplinas" migra para um problema diferente, sem relação com o que a citação mostrou.',
   },
@@ -75,7 +75,7 @@ export const faseD1ArgumentoActivities: ActivityData[] = [
         text: 'Desse modo, a ausência de recursos inclusivos contribui para o sentimento de exclusão, levando ao abandono escolar e à limitação de oportunidades no futuro.',
       },
     ],
-    errorSentenceId: 'q3-s2',
+    errorSentenceIds: ['q3-s2'],
     explanation:
       'O argumento precisa ir além do dado — mostrar uma consequência ou explicar uma causa mais profunda. "Poucas escolas têm estrutura de acessibilidade" apenas reafirma o que a citação já diz, sem acrescentar nada novo.',
   },
@@ -284,7 +284,7 @@ export const faseD1ArgumentoActivities: ActivityData[] = [
         text: 'Desse modo, as mulheres dedicam menos tempo ao lazer do que os homens.',
       },
     ],
-    errorSentenceId: 'q10-s3',
+    errorSentenceIds: ['q10-s3'],
     explanation:
       'O argumento reafirma o dado da citação com outras palavras — inferir que as mulheres têm menos tempo para o lazer é consequência óbvia de trabalhar mais horas, mas não aprofunda o impacto nem explica uma causa mais profunda. O argumento precisa ir além do que a citação já disse.',
   },

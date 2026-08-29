@@ -200,8 +200,12 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
               </p>
             )}
             <p className={styles.reviewLine}>
-              <span className={styles.reviewLineKey}>Frase com erro:</span>{' '}
-              <span className={styles.reviewCorrect}>{text(activity.errorSentenceId)}</span>
+              <span className={styles.reviewLineKey}>
+                {activity.errorSentenceIds.length > 1 ? 'Frases com erro:' : 'Frase com erro:'}
+              </span>{' '}
+              <span className={styles.reviewCorrect}>
+                {activity.errorSentenceIds.map((id) => text(id)).join(' / ')}
+              </span>
             </p>
           </div>
         )}
