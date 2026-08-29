@@ -20,7 +20,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function ErrorSpot({ activity, onComplete, onSkip }: Props) {
-  const { prompt, sentences, errorSentenceIds, explanation } = activity;
+  const { prompt, sentences, errorSentenceIds, explanation, contextText } = activity;
 
   // Shuffle display order on mount; errorSentenceIds is id-based so validation is unaffected
   const [displaySentences] = useState(() => shuffle([...sentences]));
@@ -63,6 +63,12 @@ export function ErrorSpot({ activity, onComplete, onSkip }: Props) {
   return (
     <div className={styles.root}>
       <p className={styles.prompt}>{prompt}</p>
+
+      {contextText && (
+        <p className={styles.context} aria-label="Contexto">
+          {contextText}
+        </p>
+      )}
 
       <ul className={styles.list} aria-label="Frases">
         {displaySentences.map((sentence) => {

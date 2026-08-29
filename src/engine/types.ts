@@ -33,6 +33,12 @@ export interface ErrorSpotActivity {
    * exists when several sentences are each independently a valid "error".
    */
   errorSentenceIds: string[];
+  /**
+   * Optional static, non-tappable context shown above the tappable sentences —
+   * e.g. the introdução an opening D1 must be judged against. It is reference
+   * text only and is never one of the answer options.
+   */
+  contextText?: string;
   explanation: string;
 }
 

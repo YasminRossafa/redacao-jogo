@@ -70,6 +70,9 @@ export const faseD1CompletoActivities: ActivityData[] = [
   },
 
   // ── Q3 — ErrorSpot: uso de primeira pessoa na introdução (1984) ──────────────
+  // Real 3-part introdução (repertório, tema+Brasil, problemática). Only ONE
+  // version of the problemática sentence appears — the flawed one — so this is
+  // spot-the-error, not spot-the-difference against a clean twin.
   {
     id: 'fase-d1-completo-3',
     kind: 'error-spot',
@@ -77,18 +80,18 @@ export const faseD1CompletoActivities: ActivityData[] = [
     sentences: [
       {
         id: 'q3-s1',
-        text: "Em '1984', de George Orwell, o governo controla informações e limita a liberdade da população por meio da manipulação da verdade.",
+        text: "Na obra '1984', de George Orwell, o governo controla informações e limita a liberdade da população por meio da manipulação da verdade.",
       },
       {
         id: 'q3-s2',
-        text: 'Na minha opinião, a falta de educação midiática e a ausência de regulamentação eficaz contra a desinformação são problemas decorrentes desse tema.',
+        text: 'Embora seja uma obra fictícia, a manipulação do usuário pela informação na internet é uma realidade na sociedade brasileira.',
       },
       {
         id: 'q3-s3',
-        text: 'A falta de educação midiática e a ausência de regulamentação eficaz contra a desinformação são problemas decorrentes desse tema.',
+        text: 'Na minha opinião, a falta de educação midiática, que dificulta a análise das informações recebidas, e a ausência de regulamentação eficaz contra a desinformação, são problemas decorrentes desse tema.',
       },
     ],
-    errorSentenceIds: ['q3-s2'],
+    errorSentenceIds: ['q3-s3'],
     explanation:
       "A introdução deve ser sempre objetiva e impessoal. O uso de 'Na minha opinião' é primeira pessoa — proibido na redação ENEM. Basta remover a expressão e a frase fica correta.",
   },
@@ -244,27 +247,28 @@ export const faseD1CompletoActivities: ActivityData[] = [
   // ════════════════════════════════════════════════════════════════════════════
 
   // ── Q11 — ErrorSpot: problemática copiada literalmente da introdução ─────────
+  // The introdução's problemática is fixed context (non-tappable); the student
+  // judges only the two candidate D1 openings against it, tapping the one that
+  // just copies the introdução verbatim instead of reescrevendo (paráfrase).
   {
     id: 'fase-d1-completo-11',
     kind: 'error-spot',
-    prompt: 'Um estudante escreveu as frases abaixo para ligar a introdução ao D1. Uma delas tem um problema. Toque na que está errada.',
+    prompt: 'As duas frases abaixo são aberturas possíveis para o D1, que deve retomar a problemática da introdução. Uma delas tem um problema. Toque na que está errada.',
+    contextText:
+      `Problemática da introdução: "${ANNE_SULLIVAN.prob}"`,
     sentences: [
       {
         id: 'q11-s1',
-        text: ANNE_SULLIVAN.prob,
-      },
-      {
-        id: 'q11-s2',
         text: 'Em primeiro lugar, a falta de acessibilidade nas escolas e a exclusão de pessoas surdas no mercado de trabalho são problemas desse tema, uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral.',
       },
       {
-        id: 'q11-s3',
+        id: 'q11-s2',
         text: ANNE_SULLIVAN.d1p,
       },
     ],
-    errorSentenceIds: ['q11-s2'],
+    errorSentenceIds: ['q11-s1'],
     explanation:
-      'A problemática do D1 foi copiada palavra por palavra da introdução em vez de ser reescrita nas próprias palavras. O D1 deve retomar a ideia com uma formulação diferente (paráfrase), não repetir a mesma frase.',
+      'A problemática do D1 foi copiada palavra por palavra da introdução em vez de ser reescrita nas próprias palavras. O D1 deve retomar a ideia com uma formulação diferente (paráfrase), como faz a outra abertura.',
   },
 
   // ── Q12 — ChoiceSelect: identificar o erro de escolha de problemática ─────────

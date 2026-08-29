@@ -31,17 +31,18 @@ const paragraphA = [
   },
 ];
 
-// ── Paragraph B — trabalho de cuidado / desvalorização da mulher (questions 3 & 4) ──
+// ── Paragraph B — trabalho de cuidado / "Quarto de Despejo" (questions 3 & 4) ──
+// Canonical "Quarto de Despejo" D1, matching the wording used in fase-d1-completo.
 const paragraphB = [
   { id: 'b-con', text: 'Em primeiro lugar, ', selectable: false },
   {
     id: 'b-prob',
-    text: 'a normalização do trabalho de cuidado com responsabilidade exclusiva da mulher é um problema, ',
+    text: 'destaca-se que o trabalho de cuidado é normalizado como responsabilidade exclusiva da mulher,',
     selectable: true,
   },
   {
     id: 'b-mot',
-    text: 'pois contribui para sua desvalorização social econômica.',
+    text: 'pois isso reforça uma construção social enraizada.',
     selectable: true,
   },
   {
@@ -52,7 +53,7 @@ const paragraphB = [
   { id: 'b-sep3', text: ' ', selectable: false },
   {
     id: 'b-arg',
-    text: 'Apesar desses serviços serem fundamentais para o funcionamento da sociedade, em sua maioria, não são reconhecidos ou remunerados.',
+    text: 'Desse modo, essa naturalização contribui para a manutenção da desigualdade de oportunidades entre homens e mulheres no mercado de trabalho.',
     selectable: true,
   },
 ];
