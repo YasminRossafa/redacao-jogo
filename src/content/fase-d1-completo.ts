@@ -1,4 +1,8 @@
 import type { ActivityData } from '../engine/types';
+import { TEMA_BANK } from './shared-bank';
+
+// D1 content for the shared intro-bank themes (saude, meioambiente, …).
+const d1 = (id: string) => TEMA_BANK.find((e) => e.id === id)!.d1;
 
 // ─── Reference paragraphs ────────────────────────────────────────────────────
 // Exact wording used across all activities in this phase.
@@ -167,25 +171,25 @@ export const faseD1CompletoActivities: ActivityData[] = [
       '"Ademais" sinaliza adição/segunda ideia — não pode abrir o D1. O conectivo do D1 deve indicar que este é o primeiro argumento: "Em primeiro lugar", "Primeiramente", "Em primeira análise" ou "Antes de mais nada".',
   },
 
-  // ── Q7 — ChoiceSelect: completar o motivo corretamente ──────────────────────
+  // ── Q7 — ChoiceSelect: completar o motivo corretamente (violência urbana) ───
   {
     id: 'fase-d1-completo-7',
     kind: 'choice',
     prompt:
-      'O D1 começa assim: "Em primeiro lugar, destaca-se a falta de acessibilidade nas instituições de ensino como um dos principais entraves à inclusão educacional de surdos," — Qual opção completa o motivo corretamente?',
+      'O D1 começa assim: "Em primeiro lugar, destaca-se a ausência de policiamento em áreas periféricas como um dos principais fatores que agravam a violência urbana," Qual opção completa o motivo corretamente?',
     options: [
       {
         id: 'q7-a',
-        text: 'uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral',
+        text: 'uma vez que essas regiões recebem menos investimento em segurança pública',
       },
       {
         id: 'q7-b',
-        text: 'pois há falta de acessibilidade nas instituições de ensino',
+        text: 'pois há ausência de policiamento em áreas periféricas',
       },
     ],
     correctOptionId: 'q7-a',
     explanation:
-      'A opção correta apresenta uma causa real (ausência de intérpretes de Libras). A outra repete a própria problemática com outras palavras — isso é raciocínio circular e não explica por que o problema é um problema.',
+      'A opção correta apresenta uma causa real (menos investimento em segurança pública). A outra repete a própria problemática com outras palavras — isso é raciocínio circular e não explica por que o problema é um problema.',
   },
 
   // ── Q8 — BuildFromScratch: 1ª frase do D1 (Quarto de Despejo) ───────────────
@@ -227,15 +231,15 @@ export const faseD1CompletoActivities: ActivityData[] = [
       'A citação da PNAD mostra a disparidade real na divisão do trabalho doméstico entre homens e mulheres — sustentando diretamente a problemática. As demais são irrelevantes: população total e acessibilidade em escolas não têm relação com o argumento.',
   },
 
-  // ── Q10 — ErrorSpot: argumento repete a citação (surdos) ────────────────────
+  // ── Q10 — ErrorSpot: argumento repete a citação (meio ambiente) ─────────────
   {
     id: 'fase-d1-completo-10',
     kind: 'error-spot',
     prompt: 'Uma das frases abaixo tem um problema. Toque na que está errada.',
     sentences: [
-      { id: 'q10-s1', text: ANNE_SULLIVAN.d1c },
-      { id: 'q10-s2', text: 'Desse modo, poucas escolas têm estrutura de acessibilidade.' },
-      { id: 'q10-s3', text: ANNE_SULLIVAN.d1a },
+      { id: 'q10-s1', text: d1('meioambiente').citacao },
+      { id: 'q10-s2', text: 'Desse modo, poucos municípios oferecem coleta seletiva de lixo.' },
+      { id: 'q10-s3', text: d1('meioambiente').argumento },
     ],
     errorSentenceIds: ['q10-s2'],
     explanation:

@@ -16,6 +16,13 @@ export interface TemaBankEntry {
   problematica1: string;
   /** Second problem clause WITH its leading connective ("e"/"além de") attached. */
   problematica2: string;
+  /**
+   * Full D1 paragraph for this tema, split into its three sentences:
+   * problema+motivo, citação, and argumento. Reusable across the D1 phases.
+   * Statistics are illustrative/plausible (matching the game's existing style),
+   * not verified figures.
+   */
+  d1: { problema: string; citacao: string; argumento: string };
 }
 
 export const TEMA_BANK: TemaBankEntry[] = [
@@ -30,6 +37,14 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'A escassez de profissionais em regiões afastadas e a superlotação das unidades de saúde são problemas decorrentes desse tema.',
     problematica1: 'A escassez de profissionais em regiões afastadas',
     problematica2: 'e a superlotação das unidades de saúde',
+    d1: {
+      problema:
+        'Em primeiro lugar, destaca-se a escassez de profissionais de saúde em regiões afastadas do país, uma vez que grande parte dos médicos concentra-se nos grandes centros urbanos.',
+      citacao:
+        'Segundo dados do Conselho Federal de Medicina, municípios do interior contam com menos de um médico para cada mil habitantes.',
+      argumento:
+        'Desse modo, a ausência de atendimento próximo obriga a população a percorrer longas distâncias em busca de cuidados básicos, agravando quadros que poderiam ser tratados precocemente.',
+    },
   },
   {
     id: 'preconceito',
@@ -42,6 +57,14 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'A naturalização de discursos discriminatórios e a ausência de punição a atos de exclusão são problemas decorrentes desse tema.',
     problematica1: 'A naturalização de discursos discriminatórios',
     problematica2: 'e a ausência de punição a atos de exclusão',
+    d1: {
+      problema:
+        'Em primeira análise, destaca-se a naturalização de discursos discriminatórios no cotidiano da sociedade brasileira, pois esses discursos são frequentemente tratados como brincadeira ou opinião pessoal.',
+      citacao:
+        'Segundo pesquisa do Instituto Locomotiva, mais de 70% dos brasileiros já presenciaram algum tipo de discriminação em ambientes públicos.',
+      argumento:
+        'Desse modo, a banalização desses discursos contribui para a manutenção de estigmas sociais, dificultando a construção de uma convivência verdadeiramente inclusiva.',
+    },
   },
   {
     id: 'meioambiente',
@@ -54,6 +77,14 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'O descarte inadequado de resíduos e a fiscalização insuficiente contra o desmatamento são problemas decorrentes desse tema.',
     problematica1: 'O descarte inadequado de resíduos',
     problematica2: 'e a fiscalização insuficiente contra o desmatamento',
+    d1: {
+      problema:
+        'Primeiramente, destaca-se o descarte inadequado de resíduos como um dos principais entraves à preservação ambiental no Brasil, uma vez que grande parte dos municípios ainda não conta com coleta seletiva eficiente.',
+      citacao:
+        'Segundo dados do IBGE, menos de 40% dos municípios brasileiros oferecem coleta seletiva de lixo à população.',
+      argumento:
+        'Desse modo, a ausência de uma destinação correta dos resíduos contribui para a poluição de rios e solos, comprometendo ecossistemas inteiros.',
+    },
   },
   {
     id: 'violenciaurbana',
@@ -66,6 +97,14 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'A ausência de policiamento em áreas periféricas e a impunidade de crimes violentos são problemas decorrentes desse tema.',
     problematica1: 'A ausência de policiamento em áreas periféricas',
     problematica2: 'e a impunidade de crimes violentos',
+    d1: {
+      problema:
+        'Em primeiro lugar, destaca-se a ausência de policiamento em áreas periféricas como um dos principais fatores que agravam a violência urbana, uma vez que essas regiões recebem menos investimento em segurança pública.',
+      citacao:
+        'Segundo dados do Fórum Brasileiro de Segurança Pública, a maior parte dos homicídios no país ocorre em bairros com baixa presença policial.',
+      argumento:
+        'Desse modo, a desigualdade na distribuição da segurança pública aprofunda a sensação de abandono nessas comunidades, perpetuando o ciclo de violência.',
+    },
   },
   {
     id: 'solidao',
@@ -78,6 +117,14 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'A falta de espaços de convívio comunitário e o abandono familiar de idosos são problemas decorrentes desse tema.',
     problematica1: 'A falta de espaços de convívio comunitário',
     problematica2: 'e o abandono familiar de idosos',
+    d1: {
+      problema:
+        'Em primeira análise, destaca-se a falta de espaços de convívio comunitário como um entrave ao bem-estar da população idosa, pois muitos bairros não oferecem locais adequados para a socialização dessa faixa etária.',
+      citacao:
+        'Segundo dados do IBGE, mais de 30% dos idosos brasileiros vivem sozinhos, sem contato regular com familiares ou vizinhos.',
+      argumento:
+        'Desse modo, a ausência de convívio social contribui para o agravamento de quadros de solidão, afetando diretamente a saúde emocional dessa população.',
+    },
   },
   {
     id: 'luto',
@@ -90,6 +137,14 @@ export const TEMA_BANK: TemaBankEntry[] = [
       'A escassez de suporte psicológico gratuito e o silenciamento do luto no ambiente de trabalho são problemas decorrentes desse tema.',
     problematica1: 'A escassez de suporte psicológico gratuito',
     problematica2: 'e o silenciamento do luto no ambiente de trabalho',
+    d1: {
+      problema:
+        'Primeiramente, destaca-se a escassez de suporte psicológico gratuito para pessoas enlutadas, uma vez que o sistema público de saúde ainda não prioriza esse tipo de atendimento.',
+      citacao:
+        'Segundo dados do Conselho Federal de Psicologia, a maior parte dos municípios brasileiros não conta com atendimento psicológico gratuito voltado ao luto.',
+      argumento:
+        'Desse modo, a falta de acompanhamento adequado prolonga o sofrimento das famílias enlutadas, dificultando a retomada da rotina após a perda.',
+    },
   },
 ];
 

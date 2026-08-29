@@ -1,4 +1,8 @@
 import type { ActivityData } from '../engine/types';
+import { TEMA_BANK } from './shared-bank';
+
+// D1 content for the shared intro-bank themes (solidao, luto, …).
+const d1 = (id: string) => TEMA_BANK.find((e) => e.id === id)!.d1;
 
 export const faseD1CitacaoActivities: ActivityData[] = [
   // ── Q1 — TagMatch: fontes confiáveis vs. não confiáveis (many-to-few) ────────
@@ -47,15 +51,15 @@ export const faseD1CitacaoActivities: ActivityData[] = [
       'Uma citação precisa nomear a fonte — instituição, pesquisa ou censo específico. "Estudos afirmam" não diz de onde vem o dado: qualquer pessoa poderia escrever isso sem embasamento real.',
   },
 
-  // ── Q3 — ErrorSpot: ausência de atribuição ───────────────────────────────────
+  // ── Q3 — ErrorSpot: ausência de atribuição (solidão + decoy de luto) ─────────
   {
     id: 'fase-d1-citacao-3',
     kind: 'error-spot',
     prompt: 'Uma das citações abaixo tem um problema. Toque na que está errada.',
     sentences: [
-      { id: 'q3-s1', text: 'Segundo dados do IBGE, apenas 1% das escolas brasileiras têm estrutura completa de acessibilidade.' },
-      { id: 'q3-s2', text: 'As escolas brasileiras têm baixa estrutura de acessibilidade, apenas 1%.' },
-      { id: 'q3-s3', text: 'Segundo o Censo Escolar do MEC, 25% das escolas públicas possuem intérprete de Libras.' },
+      { id: 'q3-s1', text: d1('solidao').citacao },
+      { id: 'q3-s2', text: 'Os idosos brasileiros vivem sozinhos e sem contato familiar, cerca de 30% deles.' },
+      { id: 'q3-s3', text: d1('luto').citacao },
     ],
     errorSentenceIds: ['q3-s2'],
     explanation:

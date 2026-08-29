@@ -1,4 +1,8 @@
 import type { ActivityData } from '../engine/types';
+import { TEMA_BANK } from './shared-bank';
+
+// D1 content for the shared intro-bank themes (preconceito, …).
+const d1 = (id: string) => TEMA_BANK.find((e) => e.id === id)!.d1;
 
 export const faseD1ArgumentoActivities: ActivityData[] = [
   // ── Q1 — TagMatch: conectivos de argumento vs. outros (many-to-few, 8×2) ─────
@@ -56,7 +60,7 @@ export const faseD1ArgumentoActivities: ActivityData[] = [
       'O argumento precisa aprofundar especificamente o impacto do dado citado — acessibilidade e inclusão de surdos. "Desafios de evasão em todas as disciplinas" migra para um problema diferente, sem relação com o que a citação mostrou.',
   },
 
-  // ── Q3 — ErrorSpot: argumento repete a citação ───────────────────────────────
+  // ── Q3 — ErrorSpot: argumento repete a citação (preconceito) ─────────────────
   {
     id: 'fase-d1-argumento-3',
     kind: 'error-spot',
@@ -64,20 +68,20 @@ export const faseD1ArgumentoActivities: ActivityData[] = [
     sentences: [
       {
         id: 'q3-s1',
-        text: 'Segundo dados do IBGE, apenas 1% das escolas brasileiras têm estrutura completa de acessibilidade.',
+        text: d1('preconceito').citacao,
       },
       {
         id: 'q3-s2',
-        text: 'Desse modo, poucas escolas têm estrutura de acessibilidade.',
+        text: 'Desse modo, muitos brasileiros já presenciaram discriminação em público.',
       },
       {
         id: 'q3-s3',
-        text: 'Desse modo, a ausência de recursos inclusivos contribui para o sentimento de exclusão, levando ao abandono escolar e à limitação de oportunidades no futuro.',
+        text: d1('preconceito').argumento,
       },
     ],
     errorSentenceIds: ['q3-s2'],
     explanation:
-      'O argumento precisa ir além do dado — mostrar uma consequência ou explicar uma causa mais profunda. "Poucas escolas têm estrutura de acessibilidade" apenas reafirma o que a citação já diz, sem acrescentar nada novo.',
+      'O argumento precisa ir além do dado — mostrar uma consequência ou explicar uma causa mais profunda. "Muitos brasileiros já presenciaram discriminação" apenas reafirma o que a citação já diz, sem acrescentar nada novo.',
   },
 
   // ── Q4 — ChoiceSelect: qual argumento realmente aprofunda o dado? ─────────────
