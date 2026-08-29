@@ -108,6 +108,7 @@ export function BuildFromScratch({ activity, onComplete, onSkip }: Props) {
             >
               <span className={styles.slotNumber}>{i + 1}</span>
               <button
+                type="button"
                 className={styles.placedBlock}
                 onClick={() => removeFromSlot(i)}
                 disabled={isSuccess}
@@ -132,6 +133,7 @@ export function BuildFromScratch({ activity, onComplete, onSkip }: Props) {
           {pool.map((fragment) => (
             <li key={fragment.id}>
               <button
+                type="button"
                 className={styles.poolBlock}
                 onClick={() => placeFragment(fragment)}
               >
@@ -145,6 +147,7 @@ export function BuildFromScratch({ activity, onComplete, onSkip }: Props) {
       {/* Check — disabled with zero placed */}
       {!isSuccess && (
         <button
+          type="button"
           className={styles.checkBtn}
           onClick={check}
           disabled={placed.length === 0}
@@ -159,7 +162,7 @@ export function BuildFromScratch({ activity, onComplete, onSkip }: Props) {
             Há fragmentos incorretos na sequência, ou faltam fragmentos que deveriam
             estar aqui.
           </p>
-          <button className={styles.retryBtn} onClick={retry}>
+          <button type="button" className={styles.retryBtn} onClick={retry}>
             Tentar novamente
           </button>
         </div>
@@ -168,7 +171,7 @@ export function BuildFromScratch({ activity, onComplete, onSkip }: Props) {
       {checkState === 'wrong-order' && (
         <div className={styles.msgWarning} role="alert">
           <p>Você escolheu os fragmentos certos, mas a ordem está incorreta.</p>
-          <button className={styles.retryBtn} onClick={retry}>
+          <button type="button" className={styles.retryBtn} onClick={retry}>
             Tentar novamente
           </button>
         </div>
