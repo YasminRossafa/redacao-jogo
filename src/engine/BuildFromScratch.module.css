@@ -85,6 +85,12 @@
   color: var(--color-text);
   cursor: pointer;
   padding: 0.375rem 0;
+  -webkit-appearance: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  overflow-wrap: break-word;
 }
 
 .placedBlock:disabled {
@@ -123,6 +129,15 @@
   cursor: pointer;
   color: var(--color-text);
   transition: background 0.12s, border-color 0.12s;
+  /* Prevent iOS/Android OS text-assistance (autocorrect, Text Replacement,
+     QuickType) from targeting button text content. Without these, the OS can
+     silently overwrite the displayed value after a tap gesture. */
+  -webkit-appearance: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  overflow-wrap: break-word;
 }
 
 .poolBlock:active {
