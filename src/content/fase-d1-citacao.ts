@@ -1,4 +1,8 @@
 import type { ActivityData } from '../engine/types';
+import { TEMA_BANK } from './shared-bank';
+
+// D1 content for the shared intro-bank themes (solidao, luto, …).
+const d1 = (id: string) => TEMA_BANK.find((e) => e.id === id)!.d1;
 
 export const faseD1CitacaoActivities: ActivityData[] = [
   // ── Q1 — TagMatch: fontes confiáveis vs. não confiáveis (many-to-few) ────────
@@ -42,22 +46,22 @@ export const faseD1CitacaoActivities: ActivityData[] = [
       { id: 'q2-s2', text: 'Estudos afirmam que grande parte das escolas não têm acessibilidade.' },
       { id: 'q2-s3', text: 'De acordo com o IBGE, 1% das escolas brasileiras têm estrutura completa de acessibilidade.' },
     ],
-    errorSentenceId: 'q2-s2',
+    errorSentenceIds: ['q2-s2'],
     explanation:
       'Uma citação precisa nomear a fonte — instituição, pesquisa ou censo específico. "Estudos afirmam" não diz de onde vem o dado: qualquer pessoa poderia escrever isso sem embasamento real.',
   },
 
-  // ── Q3 — ErrorSpot: ausência de atribuição ───────────────────────────────────
+  // ── Q3 — ErrorSpot: ausência de atribuição (solidão + decoy de luto) ─────────
   {
     id: 'fase-d1-citacao-3',
     kind: 'error-spot',
     prompt: 'Uma das citações abaixo tem um problema. Toque na que está errada.',
     sentences: [
-      { id: 'q3-s1', text: 'Segundo dados do IBGE, apenas 1% das escolas brasileiras têm estrutura completa de acessibilidade.' },
-      { id: 'q3-s2', text: 'As escolas brasileiras têm baixa estrutura de acessibilidade, apenas 1%.' },
-      { id: 'q3-s3', text: 'Segundo o Censo Escolar do MEC, 25% das escolas públicas possuem intérprete de Libras.' },
+      { id: 'q3-s1', text: d1('solidao').citacao },
+      { id: 'q3-s2', text: 'Os idosos brasileiros vivem sozinhos e sem contato familiar, cerca de 30% deles.' },
+      { id: 'q3-s3', text: d1('luto').citacao },
     ],
-    errorSentenceId: 'q3-s2',
+    errorSentenceIds: ['q3-s2'],
     explanation:
       'Sem um "Segundo dados de..." ou "De acordo com...", a frase deixa de ser uma citação e vira uma afirmação não sustentada — como se o dado viesse da cabeça do próprio autor.',
   },
@@ -134,32 +138,32 @@ export const faseD1CitacaoActivities: ActivityData[] = [
       'A citação do IBGE reforça diretamente a falta de acessibilidade nas escolas. A opção da PNAD é sobre trabalho de cuidado (outro tema); a do Ministério do Trabalho aborda mercado de trabalho, não acessibilidade escolar.',
   },
 
-  // ── Q8 — BuildFromScratch: ordenar frases do D1, excluindo distrator ─────────
-  // Note: specified as OrderPuzzle, but OrderPuzzle requires ALL items to be
-  // placed — it has no mechanism for a distractor that must stay in the pool.
-  // BuildFromScratch is the correct existing engine for this learning goal.
+  // ── Q8 — ErrorSpot: qual citação não pertence ao parágrafo ───────────────────
+  // Was a 3-block BuildFromScratch (2 correct + 1 distractor), which is
+  // functionally just spot-the-intruder — so it is now an honest ErrorSpot,
+  // matching Q10's style.
   {
     id: 'fase-d1-citacao-8',
-    kind: 'build',
-    prompt: 'Monte as duas primeiras frases do D1 na ordem certa. Atenção: uma das opções não pertence a este parágrafo.',
-    fragments: [
+    kind: 'error-spot',
+    prompt:
+      'As frases abaixo deveriam formar a sequência do D1 sobre acessibilidade e inclusão de surdos. Uma delas não pertence a este parágrafo. Encontre qual é.',
+    sentences: [
       {
-        id: 'q8-f1',
+        id: 'q8-s1',
         text: 'Em primeiro lugar, destaca-se a falta de acessibilidade nas instituições de ensino como um dos principais entraves à inclusão educacional de surdos, uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral.',
-        correct: true,
       },
       {
-        id: 'q8-f2',
+        id: 'q8-s2',
         text: 'Segundo dados do IBGE, apenas 1% das escolas brasileiras têm estrutura completa de acessibilidade.',
-        correct: true,
       },
       {
-        id: 'q8-d1',
+        id: 'q8-s3',
         text: 'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
-        correct: false,
       },
     ],
-    acceptedOrders: [['q8-f1', 'q8-f2']],
+    errorSentenceIds: ['q8-s3'],
+    explanation:
+      'Essa citação pertence ao tema de trabalho de cuidado — não tem relação com acessibilidade ou inclusão de surdos.',
   },
 
   // ── Q9 — BuildFromScratch: citação para o tema trabalho de cuidado ───────────
@@ -197,7 +201,7 @@ export const faseD1CitacaoActivities: ActivityData[] = [
         text: 'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
       },
     ],
-    errorSentenceId: 'q10-s2',
+    errorSentenceIds: ['q10-s2'],
     explanation:
       'A citação precisa sustentar especificamente a problemática do próprio parágrafo. Este parágrafo é sobre trabalho de cuidado — a citação do MEC sobre intérpretes de Libras em escolas não tem relação com o tema e não apoia o argumento.',
   },

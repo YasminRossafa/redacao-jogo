@@ -20,9 +20,9 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function ErrorSpot({ activity, onComplete, onSkip }: Props) {
-  const { prompt, sentences, errorSentenceId, explanation } = activity;
+  const { prompt, sentences, errorSentenceIds, explanation, contextText } = activity;
 
-  // Shuffle display order on mount; errorSentenceId is id-based so validation is unaffected
+  // Shuffle display order on mount; errorSentenceIds is id-based so validation is unaffected
   const [displaySentences] = useState(() => shuffle([...sentences]));
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -46,14 +46,14 @@ export function ErrorSpot({ activity, onComplete, onSkip }: Props) {
       return;
     }
     const detail: ErrorSpotAnswer = { selectedSentenceId: selectedId };
-    if (selectedId === errorSentenceId) {
+    if (errorSentenceIds.includes(selectedId)) {
       setCheckState('correct');
       onComplete(true, detail);
     } else {
       setCheckState('incorrect');
       onComplete(false, detail);
     }
-  }, [selectedId, errorSentenceId, onComplete]);
+  }, [selectedId, errorSentenceIds, onComplete]);
 
   const retry = useCallback(() => {
     setSelectedId(null);
@@ -64,10 +64,16 @@ export function ErrorSpot({ activity, onComplete, onSkip }: Props) {
     <div className={styles.root}>
       <p className={styles.prompt}>{prompt}</p>
 
+      {contextText && (
+        <p className={styles.context} aria-label="Contexto">
+          {contextText}
+        </p>
+      )}
+
       <ul className={styles.list} aria-label="Frases">
         {displaySentences.map((sentence) => {
           const isSelected = selectedId === sentence.id;
-          const isCorrectSentence = sentence.id === errorSentenceId;
+          const isCorrectSentence = errorSentenceIds.includes(sentence.id);
 
           let stateClass = '';
           if (checkState === 'correct' && isSelected) stateClass = styles.correct;

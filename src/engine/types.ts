@@ -3,6 +3,13 @@ export interface OrderActivity {
   kind: 'order';
   prompt: string;
   items: { id: string; label: string }[];
+  /**
+   * Optional pool-only distractors: shown shuffled among the items but given no
+   * slot of their own (the sequence still has exactly items.length slots). To be
+   * correct the student must place every real item in order AND leave each
+   * distractor in the pool — placing one displaces a required item and fails.
+   */
+  distractors?: { id: string; label: string }[];
 }
 
 export interface TagMatchActivity {
@@ -20,8 +27,18 @@ export interface ErrorSpotActivity {
   kind: 'error-spot';
   prompt: string;
   sentences: { id: string; text: string }[];
-  /** Id of the sentence that contains the error */
-  errorSentenceId: string;
+  /**
+   * Ids of the sentences that count as the error. A tap is correct when it
+   * matches ANY id here. Usually a single-element array; more than one entry
+   * exists when several sentences are each independently a valid "error".
+   */
+  errorSentenceIds: string[];
+  /**
+   * Optional static, non-tappable context shown above the tappable sentences —
+   * e.g. the introdução an opening D1 must be judged against. It is reference
+   * text only and is never one of the answer options.
+   */
+  contextText?: string;
   explanation: string;
 }
 

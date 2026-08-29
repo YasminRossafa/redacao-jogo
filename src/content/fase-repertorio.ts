@@ -115,7 +115,7 @@ export const faseRepertorioActivities: ActivityData[] = [
       { id: 'wrong', text: rep('meioambiente') },
       { id: 'extra', text: extra('oextraordinario') },
     ],
-    errorSentenceId: 'wrong',
+    errorSentenceIds: ['wrong'],
     explanation:
       'WALL-E trata de consumo e meio ambiente, sem relação com preconceito ou exclusão social.',
   },
@@ -129,7 +129,7 @@ export const faseRepertorioActivities: ActivityData[] = [
       { id: 'wrong', text: rep('violenciaurbana') },
       { id: 'extra', text: rep('solidao') },
     ],
-    errorSentenceId: 'wrong',
+    errorSentenceIds: ['wrong'],
     explanation:
       'The Walking Dead trata da desintegração social após um apocalipse zumbi, sem relação direta com acesso à saúde.',
   },
@@ -138,14 +138,16 @@ export const faseRepertorioActivities: ActivityData[] = [
     id: 'fase-repertorio-error-3',
     kind: 'error-spot',
     prompt: `Para o tema "${tema('meioambiente')}", qual desses repertórios NÃO se encaixa?`,
+    // Two independently valid answers: both fail to fit the meio ambiente theme,
+    // for different reasons — hence two entries in errorSentenceIds.
     sentences: [
-      { id: 'fits',  text: rep('meioambiente') },
-      { id: 'wrong', text: extra('zootopia') },
-      { id: 'wrong', text: rep('saude') },
+      { id: 'fits',             text: rep('meioambiente') },
+      { id: 'wrong-zootopia',   text: extra('zootopia') },
+      { id: 'wrong-greysanatomy', text: rep('saude') },
     ],
-    errorSentenceId: 'wrong',
+    errorSentenceIds: ['wrong-zootopia', 'wrong-greysanatomy'],
     explanation:
-      "Zootopia trata de preconceito e discriminação, sem relação com questões ambientais. Grey's Anatomy trata da escassez e é possível conectar, mas não está conectado nesse caso.",
+      "Nenhum dos dois se encaixa no tema de meio ambiente. Zootopia trata de preconceito e discriminação — é tema errado. Grey's Anatomy trata da escassez de recursos na saúde: conecta-se a outro tema válido, mas não ao meio ambiente.",
   },
 
   {
@@ -157,7 +159,7 @@ export const faseRepertorioActivities: ActivityData[] = [
       { id: 'wrong', text: rep('solidao') },
       { id: 'extra', text: extra('zootopia') },
     ],
-    errorSentenceId: 'wrong',
+    errorSentenceIds: ['wrong'],
     explanation:
       'Up trata de luto e solidão na velhice, sem relação direta com violência urbana.',
   },

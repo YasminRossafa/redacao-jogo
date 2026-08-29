@@ -1,4 +1,8 @@
 import type { ActivityData } from '../engine/types';
+import { TEMA_BANK } from './shared-bank';
+
+// D1 content for the shared intro-bank themes (saude, meioambiente, …).
+const d1 = (id: string) => TEMA_BANK.find((e) => e.id === id)!.d1;
 
 // ─── Reference paragraphs ────────────────────────────────────────────────────
 // Exact wording used across all activities in this phase.
@@ -17,7 +21,7 @@ const QUEHORASELA = {
   tema: 'Assim como no longa-metragem, no Brasil, ainda existem desafios para enfrentar a invisibilidade do trabalho de cuidado exercido pela mulher.',
   prob: 'Dois problemas desse tema são que as mulheres são responsáveis por grande parte do serviço, além daquele que não é remunerado.',
   d1p:  'Primeiramente, destaca-se que as mulheres são responsáveis por grande parte dos serviços de cuidado, e isso é um problema pois tais trabalhos são invisibilizados diante da sociedade.',
-  d1c:  'Segundo dados do IBGE, as mulheres trabalham o dobro dos homens em serviços domésticos.',
+  d1c:  'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
   d1a:  'Isto se deve ao fato de elas não terem seu esforço reconhecido devido ao seu círculo social.',
 };
 
@@ -70,6 +74,9 @@ export const faseD1CompletoActivities: ActivityData[] = [
   },
 
   // ── Q3 — ErrorSpot: uso de primeira pessoa na introdução (1984) ──────────────
+  // Real 3-part introdução (repertório, tema+Brasil, problemática). Only ONE
+  // version of the problemática sentence appears — the flawed one — so this is
+  // spot-the-error, not spot-the-difference against a clean twin.
   {
     id: 'fase-d1-completo-3',
     kind: 'error-spot',
@@ -77,18 +84,18 @@ export const faseD1CompletoActivities: ActivityData[] = [
     sentences: [
       {
         id: 'q3-s1',
-        text: "Em '1984', de George Orwell, o governo controla informações e limita a liberdade da população por meio da manipulação da verdade.",
+        text: "Na obra '1984', de George Orwell, o governo controla informações e limita a liberdade da população por meio da manipulação da verdade.",
       },
       {
         id: 'q3-s2',
-        text: 'Na minha opinião, a falta de educação midiática e a ausência de regulamentação eficaz contra a desinformação são problemas decorrentes desse tema.',
+        text: 'Embora seja uma obra fictícia, a manipulação do usuário pela informação na internet é uma realidade na sociedade brasileira.',
       },
       {
         id: 'q3-s3',
-        text: 'A falta de educação midiática e a ausência de regulamentação eficaz contra a desinformação são problemas decorrentes desse tema.',
+        text: 'Na minha opinião, a falta de educação midiática, que dificulta a análise das informações recebidas, e a ausência de regulamentação eficaz contra a desinformação, são problemas decorrentes desse tema.',
       },
     ],
-    errorSentenceId: 'q3-s2',
+    errorSentenceIds: ['q3-s3'],
     explanation:
       "A introdução deve ser sempre objetiva e impessoal. O uso de 'Na minha opinião' é primeira pessoa — proibido na redação ENEM. Basta remover a expressão e a frase fica correta.",
   },
@@ -159,30 +166,30 @@ export const faseD1CompletoActivities: ActivityData[] = [
         text: QUEHORASELA.d1p,
       },
     ],
-    errorSentenceId: 'q6-s2',
+    errorSentenceIds: ['q6-s2'],
     explanation:
       '"Ademais" sinaliza adição/segunda ideia — não pode abrir o D1. O conectivo do D1 deve indicar que este é o primeiro argumento: "Em primeiro lugar", "Primeiramente", "Em primeira análise" ou "Antes de mais nada".',
   },
 
-  // ── Q7 — ChoiceSelect: completar o motivo corretamente ──────────────────────
+  // ── Q7 — ChoiceSelect: completar o motivo corretamente (violência urbana) ───
   {
     id: 'fase-d1-completo-7',
     kind: 'choice',
     prompt:
-      'O D1 começa assim: "Em primeiro lugar, destaca-se a falta de acessibilidade nas instituições de ensino como um dos principais entraves à inclusão educacional de surdos," — Qual opção completa o motivo corretamente?',
+      'O D1 começa assim: "Em primeiro lugar, destaca-se a ausência de policiamento em áreas periféricas como um dos principais fatores que agravam a violência urbana," Qual opção completa o motivo corretamente?',
     options: [
       {
         id: 'q7-a',
-        text: 'uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral',
+        text: 'uma vez que essas regiões recebem menos investimento em segurança pública',
       },
       {
         id: 'q7-b',
-        text: 'pois há falta de acessibilidade nas instituições de ensino',
+        text: 'pois há ausência de policiamento em áreas periféricas',
       },
     ],
     correctOptionId: 'q7-a',
     explanation:
-      'A opção correta apresenta uma causa real (ausência de intérpretes de Libras). A outra repete a própria problemática com outras palavras — isso é raciocínio circular e não explica por que o problema é um problema.',
+      'A opção correta apresenta uma causa real (menos investimento em segurança pública). A outra repete a própria problemática com outras palavras — isso é raciocínio circular e não explica por que o problema é um problema.',
   },
 
   // ── Q8 — BuildFromScratch: 1ª frase do D1 (Quarto de Despejo) ───────────────
@@ -224,17 +231,17 @@ export const faseD1CompletoActivities: ActivityData[] = [
       'A citação da PNAD mostra a disparidade real na divisão do trabalho doméstico entre homens e mulheres — sustentando diretamente a problemática. As demais são irrelevantes: população total e acessibilidade em escolas não têm relação com o argumento.',
   },
 
-  // ── Q10 — ErrorSpot: argumento repete a citação (surdos) ────────────────────
+  // ── Q10 — ErrorSpot: argumento repete a citação (meio ambiente) ─────────────
   {
     id: 'fase-d1-completo-10',
     kind: 'error-spot',
     prompt: 'Uma das frases abaixo tem um problema. Toque na que está errada.',
     sentences: [
-      { id: 'q10-s1', text: ANNE_SULLIVAN.d1c },
-      { id: 'q10-s2', text: 'Desse modo, poucas escolas têm estrutura de acessibilidade.' },
-      { id: 'q10-s3', text: ANNE_SULLIVAN.d1a },
+      { id: 'q10-s1', text: d1('meioambiente').citacao },
+      { id: 'q10-s2', text: 'Desse modo, poucos municípios oferecem coleta seletiva de lixo.' },
+      { id: 'q10-s3', text: d1('meioambiente').argumento },
     ],
-    errorSentenceId: 'q10-s2',
+    errorSentenceIds: ['q10-s2'],
     explanation:
       'O argumento apenas reafirma o dado da citação com outras palavras. O argumento precisa ir além — mostrar uma consequência ou explicar uma causa mais profunda que o dado não explicita.',
   },
@@ -244,27 +251,28 @@ export const faseD1CompletoActivities: ActivityData[] = [
   // ════════════════════════════════════════════════════════════════════════════
 
   // ── Q11 — ErrorSpot: problemática copiada literalmente da introdução ─────────
+  // The introdução's problemática is fixed context (non-tappable); the student
+  // judges only the two candidate D1 openings against it, tapping the one that
+  // just copies the introdução verbatim instead of reescrevendo (paráfrase).
   {
     id: 'fase-d1-completo-11',
     kind: 'error-spot',
-    prompt: 'Um estudante escreveu as frases abaixo para ligar a introdução ao D1. Uma delas tem um problema. Toque na que está errada.',
+    prompt: 'As duas frases abaixo são aberturas possíveis para o D1, que deve retomar a problemática da introdução. Uma delas tem um problema. Toque na que está errada.',
+    contextText:
+      `Problemática da introdução: "${ANNE_SULLIVAN.prob}"`,
     sentences: [
       {
         id: 'q11-s1',
-        text: ANNE_SULLIVAN.prob,
-      },
-      {
-        id: 'q11-s2',
         text: 'Em primeiro lugar, a falta de acessibilidade nas escolas e a exclusão de pessoas surdas no mercado de trabalho são problemas desse tema, uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral.',
       },
       {
-        id: 'q11-s3',
+        id: 'q11-s2',
         text: ANNE_SULLIVAN.d1p,
       },
     ],
-    errorSentenceId: 'q11-s2',
+    errorSentenceIds: ['q11-s1'],
     explanation:
-      'A problemática do D1 foi copiada palavra por palavra da introdução em vez de ser reescrita nas próprias palavras. O D1 deve retomar a ideia com uma formulação diferente (paráfrase), não repetir a mesma frase.',
+      'A problemática do D1 foi copiada palavra por palavra da introdução em vez de ser reescrita nas próprias palavras. O D1 deve retomar a ideia com uma formulação diferente (paráfrase), como faz a outra abertura.',
   },
 
   // ── Q12 — ChoiceSelect: identificar o erro de escolha de problemática ─────────
@@ -402,7 +410,7 @@ export const faseD1CompletoActivities: ActivityData[] = [
       },
       { id: 'q18-s6', text: ANNE_SULLIVAN.d1a  },
     ],
-    errorSentenceId: 'q18-s5',
+    errorSentenceIds: ['q18-s5'],
     explanation:
       'A citação é do tema trabalho de cuidado (PNAD / afazeres domésticos) — não tem nenhuma relação com a problemática deste parágrafo, que discute acessibilidade e inclusão de surdos. Tipo de erro: citação irrelevante — sustenta outro tema, não a problemática do próprio parágrafo.',
   },

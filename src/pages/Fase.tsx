@@ -120,7 +120,10 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
 
   // Branch on activity.kind (always present); use detail only when it exists.
   if (activity.kind === 'order') {
-    const label = (id: string) => activity.items.find((it) => it.id === id)?.label ?? id;
+    const label = (id: string) =>
+      activity.items.find((it) => it.id === id)?.label ??
+      activity.distractors?.find((it) => it.id === id)?.label ??
+      id;
     const answer = detail && detail.kind === 'order' ? detail : null;
     return (
       <>
@@ -200,8 +203,12 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
               </p>
             )}
             <p className={styles.reviewLine}>
-              <span className={styles.reviewLineKey}>Frase com erro:</span>{' '}
-              <span className={styles.reviewCorrect}>{text(activity.errorSentenceId)}</span>
+              <span className={styles.reviewLineKey}>
+                {activity.errorSentenceIds.length > 1 ? 'Frases com erro:' : 'Frase com erro:'}
+              </span>{' '}
+              <span className={styles.reviewCorrect}>
+                {activity.errorSentenceIds.map((id) => text(id)).join(' / ')}
+              </span>
             </p>
           </div>
         )}

@@ -201,7 +201,7 @@ const error1: ActivityData = {
     { id: 's-tema',      text: PANNESULLIVAN.tema },
     { id: 's-prob-falha', text: 'Primeiramente, a falta de acessibilidade nas escolas e a exclusão de pessoas surdas no mercado de trabalho são problemas desse tema.' },
   ],
-  errorSentenceId: 's-prob-falha',
+  errorSentenceIds: ['s-prob-falha'],
   explanation: "Essa frase usa 'Primeiramente', um conectivo de desenvolvimento (D1). A introdução não usa esse tipo de conectivo — ele é exclusivo dos parágrafos de desenvolvimento.",
 };
 
@@ -215,7 +215,7 @@ const error2: ActivityData = {
     { id: 's-tema',      text: PVOZSILENCIO.tema },
     { id: 's-prob',      text: PVOZSILENCIO.prob },
   ],
-  errorSentenceId: 's-rep-wrong',
+  errorSentenceIds: ['s-rep-wrong'],
   explanation: "O repertório fala sobre manipulação de informação, mas o resto do parágrafo é sobre educação de surdos. O repertório precisa se relacionar com o tema do parágrafo.",
 };
 
@@ -229,7 +229,7 @@ const error3: ActivityData = {
     { id: 's-tema',       text: PCORTICO.tema },
     { id: 's-prob-falha', text: 'A falta de oportunidades e a desigualdade social são problemas desse tema.' },
   ],
-  errorSentenceId: 's-prob-falha',
+  errorSentenceIds: ['s-prob-falha'],
   explanation: "Essa problemática é genérica demais — não menciona nada específico sobre trabalho de cuidado ou remuneração. Toda problemática precisa ser específica e ligada ao tema.",
 };
 
@@ -243,7 +243,7 @@ const error4: ActivityData = {
     { id: 's-tema-falha', text: 'Eu acredito que, no Brasil, ainda existem desafios para enfrentar a invisibilidade do trabalho de cuidado exercido pela mulher.' },
     { id: 's-prob',       text: PQUEHORASELA.prob },
   ],
-  errorSentenceId: 's-tema-falha',
+  errorSentenceIds: ['s-tema-falha'],
   explanation: "A redação não pode usar primeira pessoa ('eu acredito'). O texto precisa ser objetivo e impessoal.",
 };
 
@@ -257,7 +257,7 @@ const error5: ActivityData = {
     { id: 's-tema',       text: PPATINHOFEIO.tema },
     { id: 's-prob-falha', text: 'A tese deste texto é que a falta de acessibilidade e a inclusão tardia do sistema de Libras são problemas desse tema.' },
   ],
-  errorSentenceId: 's-prob-falha',
+  errorSentenceIds: ['s-prob-falha'],
   explanation: "Essa redação não usa a palavra 'tese'. Vá direto aos problemas, sem nomear o que a frase está fazendo.",
 };
 

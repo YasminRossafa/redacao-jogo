@@ -30,6 +30,19 @@
   margin: 0;
 }
 
+/* ── Static context (non-tappable reference text above the options) ── */
+
+.context {
+  margin: 0;
+  background: #f1f5f9;
+  border-left: 4px solid var(--color-border-strong);
+  border-radius: 0 6px 6px 0;
+  padding: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
 /* ── Sentence list ──────────────────────── */
 
 .list {
