@@ -198,29 +198,29 @@ export const faseD1ArgumentoActivities: ActivityData[] = [
     acceptedOrders: [['q7-f1', 'q7-f2', 'q7-f3']],
   },
 
-  // ── Q8 — OrderPuzzle: sequenciar as 3 frases do D1, tema surdos ──────────────
-  // Spec requested OrderPuzzle with a distractor to exclude. OrderPuzzle requires
-  // all items to be placed — no pool-distractor mechanism exists. Distractor dropped;
-  // Q7 (BuildFromScratch) already trains discrimination; Q8 trains pure sequencing.
+  // ── Q8 — OrderPuzzle: sequenciar as 3 frases do D1, tema "Quarto de Despejo" ──
+  // Rethemed away from the surdos paragraph (which Q7 already uses) to the
+  // "Quarto de Despejo" trabalho-de-cuidado D1, so back-to-back questions no
+  // longer test the same paragraph twice. Trains pure sequencing.
   {
     id: 'fase-d1-argumento-8',
     kind: 'order',
-    prompt: 'Organize as três frases do D1 (tema: inclusão de surdos) na sequência correta.',
+    prompt: 'Organize as três frases do D1 (tema: trabalho de cuidado — "Quarto de Despejo") na sequência correta.',
     items: [
       {
         id: 'q8-s1',
         label:
-          'Em primeiro lugar, destaca-se a falta de acessibilidade nas instituições de ensino como um dos principais entraves à inclusão educacional de surdos, uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral.',
+          'Em primeiro lugar, destaca-se que o trabalho de cuidado é normalizado como responsabilidade exclusiva da mulher, pois isso reforça uma construção social enraizada.',
       },
       {
         id: 'q8-s2',
         label:
-          'Segundo dados do IBGE, apenas 1% das escolas brasileiras têm estrutura completa de acessibilidade.',
+          'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
       },
       {
         id: 'q8-s3',
         label:
-          'Desse modo, a ausência de recursos inclusivos contribui para o sentimento de exclusão, levando ao abandono escolar e à limitação de oportunidades no futuro.',
+          'Desse modo, essa naturalização contribui para a manutenção da desigualdade de oportunidades entre homens e mulheres no mercado de trabalho.',
       },
     ],
   },

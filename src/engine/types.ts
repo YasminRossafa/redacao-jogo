@@ -3,6 +3,13 @@ export interface OrderActivity {
   kind: 'order';
   prompt: string;
   items: { id: string; label: string }[];
+  /**
+   * Optional pool-only distractors: shown shuffled among the items but given no
+   * slot of their own (the sequence still has exactly items.length slots). To be
+   * correct the student must place every real item in order AND leave each
+   * distractor in the pool — placing one displaces a required item and fails.
+   */
+  distractors?: { id: string; label: string }[];
 }
 
 export interface TagMatchActivity {

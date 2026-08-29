@@ -134,32 +134,32 @@ export const faseD1CitacaoActivities: ActivityData[] = [
       'A citação do IBGE reforça diretamente a falta de acessibilidade nas escolas. A opção da PNAD é sobre trabalho de cuidado (outro tema); a do Ministério do Trabalho aborda mercado de trabalho, não acessibilidade escolar.',
   },
 
-  // ── Q8 — BuildFromScratch: ordenar frases do D1, excluindo distrator ─────────
-  // Note: specified as OrderPuzzle, but OrderPuzzle requires ALL items to be
-  // placed — it has no mechanism for a distractor that must stay in the pool.
-  // BuildFromScratch is the correct existing engine for this learning goal.
+  // ── Q8 — ErrorSpot: qual citação não pertence ao parágrafo ───────────────────
+  // Was a 3-block BuildFromScratch (2 correct + 1 distractor), which is
+  // functionally just spot-the-intruder — so it is now an honest ErrorSpot,
+  // matching Q10's style.
   {
     id: 'fase-d1-citacao-8',
-    kind: 'build',
-    prompt: 'Monte as duas primeiras frases do D1 na ordem certa. Atenção: uma das opções não pertence a este parágrafo.',
-    fragments: [
+    kind: 'error-spot',
+    prompt:
+      'As frases abaixo deveriam formar a sequência do D1 sobre acessibilidade e inclusão de surdos. Uma delas não pertence a este parágrafo. Encontre qual é.',
+    sentences: [
       {
-        id: 'q8-f1',
+        id: 'q8-s1',
         text: 'Em primeiro lugar, destaca-se a falta de acessibilidade nas instituições de ensino como um dos principais entraves à inclusão educacional de surdos, uma vez que muitas escolas públicas não possuem intérpretes de Libras disponíveis em tempo integral.',
-        correct: true,
       },
       {
-        id: 'q8-f2',
+        id: 'q8-s2',
         text: 'Segundo dados do IBGE, apenas 1% das escolas brasileiras têm estrutura completa de acessibilidade.',
-        correct: true,
       },
       {
-        id: 'q8-d1',
+        id: 'q8-s3',
         text: 'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
-        correct: false,
       },
     ],
-    acceptedOrders: [['q8-f1', 'q8-f2']],
+    errorSentenceIds: ['q8-s3'],
+    explanation:
+      'Essa citação pertence ao tema de trabalho de cuidado — não tem relação com acessibilidade ou inclusão de surdos.',
   },
 
   // ── Q9 — BuildFromScratch: citação para o tema trabalho de cuidado ───────────

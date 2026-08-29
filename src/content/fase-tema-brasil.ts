@@ -1,8 +1,9 @@
 import type { ActivityData } from '../engine/types';
 import { TEMA_BANK } from './shared-bank';
 
-const rep   = (id: string) => TEMA_BANK.find((e) => e.id === id)!.repertorio;
-const tema  = (id: string) => TEMA_BANK.find((e) => e.id === id)!.tema;
+const rep        = (id: string) => TEMA_BANK.find((e) => e.id === id)!.repertorio;
+const tema       = (id: string) => TEMA_BANK.find((e) => e.id === id)!.tema;
+const temaBrasil = (id: string) => TEMA_BANK.find((e) => e.id === id)!.temaBrasil;
 
 const promptBuild = (id: string) =>
   `Monte a frase que liga o repertório ao tema, no Brasil, para o tema "${tema(id)}".`;
@@ -149,48 +150,55 @@ export const faseTemaBrasilActivities: ActivityData[] = [
   // ── 4 × OrderActivity ────────────────────────────────────────────────────
   // 2-item sequence: repertório → temaBrasil.
   // The items array order IS the correct order (validated by index in OrderPuzzle).
+  // Each also carries one pool-only distractor — a temaBrasil sentence from a
+  // different theme — that must be recognized as foreign and left unplaced, so
+  // the task is discrimination + ordering rather than a 50/50 guess.
 
-  // order-1: meioambiente
+  // order-1: meioambiente (distractor: saude)
   {
     id: 'fase-tema-brasil-order-1',
     kind: 'order',
     prompt: promptOrder('meioambiente'),
     items: [
-      { id: 'rep',       label: rep('meioambiente') },
-      { id: 'temabrasil', label: TEMA_BANK.find((e) => e.id === 'meioambiente')!.temaBrasil },
+      { id: 'rep',        label: rep('meioambiente') },
+      { id: 'temabrasil', label: temaBrasil('meioambiente') },
     ],
+    distractors: [{ id: 'distractor', label: temaBrasil('saude') }],
   },
 
-  // order-2: violenciaurbana
+  // order-2: violenciaurbana (distractor: preconceito)
   {
     id: 'fase-tema-brasil-order-2',
     kind: 'order',
     prompt: promptOrder('violenciaurbana'),
     items: [
-      { id: 'rep',       label: rep('violenciaurbana') },
-      { id: 'temabrasil', label: TEMA_BANK.find((e) => e.id === 'violenciaurbana')!.temaBrasil },
+      { id: 'rep',        label: rep('violenciaurbana') },
+      { id: 'temabrasil', label: temaBrasil('violenciaurbana') },
     ],
+    distractors: [{ id: 'distractor', label: temaBrasil('preconceito') }],
   },
 
-  // order-3: solidao
+  // order-3: solidao (distractor: meioambiente)
   {
     id: 'fase-tema-brasil-order-3',
     kind: 'order',
     prompt: promptOrder('solidao'),
     items: [
-      { id: 'rep',       label: rep('solidao') },
-      { id: 'temabrasil', label: TEMA_BANK.find((e) => e.id === 'solidao')!.temaBrasil },
+      { id: 'rep',        label: rep('solidao') },
+      { id: 'temabrasil', label: temaBrasil('solidao') },
     ],
+    distractors: [{ id: 'distractor', label: temaBrasil('meioambiente') }],
   },
 
-  // order-4: luto
+  // order-4: luto (distractor: violenciaurbana)
   {
     id: 'fase-tema-brasil-order-4',
     kind: 'order',
     prompt: promptOrder('luto'),
     items: [
-      { id: 'rep',       label: rep('luto') },
-      { id: 'temabrasil', label: TEMA_BANK.find((e) => e.id === 'luto')!.temaBrasil },
+      { id: 'rep',        label: rep('luto') },
+      { id: 'temabrasil', label: temaBrasil('luto') },
     ],
+    distractors: [{ id: 'distractor', label: temaBrasil('violenciaurbana') }],
   },
 ];

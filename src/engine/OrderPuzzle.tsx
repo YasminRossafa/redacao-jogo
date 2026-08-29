@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { OrderActivity, OrderAnswer } from './types';
 import styles from './OrderPuzzle.module.css';
 
@@ -24,10 +24,14 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function OrderPuzzle({ activity, onComplete, onSkip }: Props) {
-  const { prompt, items } = activity;
+  const { prompt, items, distractors } = activity;
+
+  // Real items plus any pool-only distractors. Slots still number items.length,
+  // so a placed distractor always displaces a required item and fails the check.
+  const blocks = useMemo(() => [...items, ...(distractors ?? [])], [items, distractors]);
 
   // Stable shuffled order used to render the unplaced pool.
-  const [displayOrder] = useState(() => shuffle(items));
+  const [displayOrder] = useState(() => shuffle(blocks));
   // Single source of truth: a compact, ordered list of placed item ids.
   // The pool is DERIVED from this — an unplaced item can never be duplicated.
   const [placed, setPlaced] = useState<string[]>([]);
@@ -37,8 +41,8 @@ export function OrderPuzzle({ activity, onComplete, onSkip }: Props) {
   const isSuccess = checkState === 'correct';
 
   const itemById = useCallback(
-    (id: string) => items.find((it) => it.id === id)!,
-    [items]
+    (id: string) => blocks.find((it) => it.id === id)!,
+    [blocks]
   );
 
   const placedSet = new Set(placed);

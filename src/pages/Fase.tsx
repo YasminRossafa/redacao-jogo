@@ -120,7 +120,10 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
 
   // Branch on activity.kind (always present); use detail only when it exists.
   if (activity.kind === 'order') {
-    const label = (id: string) => activity.items.find((it) => it.id === id)?.label ?? id;
+    const label = (id: string) =>
+      activity.items.find((it) => it.id === id)?.label ??
+      activity.distractors?.find((it) => it.id === id)?.label ??
+      id;
     const answer = detail && detail.kind === 'order' ? detail : null;
     return (
       <>
