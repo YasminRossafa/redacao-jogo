@@ -208,7 +208,7 @@ export const faseD1CompletoActivities: ActivityData[] = [
     options: [
       {
         id: 'q9-a',
-        text: 'Segundo dados da PNAD, as mulheres dedicam aproximadamente o dobro de horas semanais aos afazeres domésticos em relação aos homens.',
+        text: QUARTODESPEJO.d1c,
       },
       {
         id: 'q9-b',
@@ -353,28 +353,19 @@ export const faseD1CompletoActivities: ActivityData[] = [
   // BLOCO D — Desafio final
   // ════════════════════════════════════════════════════════════════════════════
 
-  // ── Q16 — BuildFromScratch: D1 completo de "Quarto de Despejo" (fragmentos) ──
+  // ── Q16 — BuildFromScratch: D1 completo de "Quarto de Despejo" (frases completas) ──
   {
     id: 'fase-d1-completo-16',
     kind: 'build',
-    prompt: 'Monte o parágrafo D1 completo de "Quarto de Despejo" (todas as 3 frases). Atenção: há fragmentos de outro tema no pool.',
+    prompt: 'Monte o parágrafo D1 completo de "Quarto de Despejo". Atenção: há frases de outro tema no pool.',
     fragments: [
-      // 1ª frase: problem+motivo
-      { id: 'q16-f1', text: 'Em primeiro lugar,',                                                                                         correct: true  },
-      { id: 'q16-f2', text: 'destaca-se que o trabalho de cuidado é normalizado como responsabilidade exclusiva da mulher,',               correct: true  },
-      { id: 'q16-f3', text: 'pois isso reforça uma construção social enraizada.',                                                          correct: true  },
-      // 2ª frase: citação
-      { id: 'q16-f4', text: 'Segundo dados da PNAD,',                                                                                     correct: true  },
-      { id: 'q16-f5', text: 'as mulheres dedicam aproximadamente o dobro de horas semanais',                                              correct: true  },
-      { id: 'q16-f6', text: 'aos afazeres domésticos em relação aos homens.',                                                             correct: true  },
-      // 3ª frase: argumento
-      { id: 'q16-f7', text: 'Desse modo, essa naturalização contribui para a manutenção da desigualdade de oportunidades',                correct: true  },
-      { id: 'q16-f8', text: 'entre homens e mulheres no mercado de trabalho.',                                                            correct: true  },
-      // Distractors from surdos theme
-      { id: 'q16-d1', text: 'como um dos principais entraves à inclusão educacional de surdos,',                                          correct: false },
-      { id: 'q16-d2', text: 'levando ao abandono escolar e à limitação de oportunidades no futuro.',                                      correct: false },
+      { id: 'q16-f1', text: QUARTODESPEJO.d1p, correct: true  },
+      { id: 'q16-f2', text: QUARTODESPEJO.d1c, correct: true  },
+      { id: 'q16-f3', text: QUARTODESPEJO.d1a, correct: true  },
+      { id: 'q16-d1', text: ANNE_SULLIVAN.d1p,  correct: false },
+      { id: 'q16-d2', text: ANNE_SULLIVAN.d1a,  correct: false },
     ],
-    acceptedOrders: [['q16-f1', 'q16-f2', 'q16-f3', 'q16-f4', 'q16-f5', 'q16-f6', 'q16-f7', 'q16-f8']],
+    acceptedOrders: [['q16-f1', 'q16-f2', 'q16-f3']],
   },
 
   // ── Q17 — OrderPuzzle: sequenciar as 6 frases da intro+D1 "Que Horas Ela Volta?" ─
