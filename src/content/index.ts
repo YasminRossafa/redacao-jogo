@@ -20,6 +20,7 @@ import { faseConclusaoAcaoActivities } from './fase-conclusao-acao';
 import { faseConclusaoModoActivities } from './fase-conclusao-modo';
 import { faseConclusaoFinalidadeActivities } from './fase-conclusao-finalidade';
 import { faseConclusaoDetalhamentoActivities } from './fase-conclusao-detalhamento';
+import { faseConclusaoRetomadaActivities } from './fase-conclusao-retomada';
 
 export interface PhaseInfo {
   id: string;
@@ -53,6 +54,7 @@ export const PHASES: PhaseInfo[] = [
   { id: 'fase-conclusao-modo',      label: 'Modo / Meio',        subtitle: 'Como a ação será realizada' },
   { id: 'fase-conclusao-finalidade', label: 'Finalidade',        subtitle: 'Para que a ação serve' },
   { id: 'fase-conclusao-detalhamento', label: 'Detalhamento',    subtitle: 'Um exemplo concreto da proposta' },
+  { id: 'fase-conclusao-retomada',  label: 'Retomada',           subtitle: 'O fechamento que retoma o repertório' },
   { id: 'fase-conclusao-1',         label: 'Conclusão',          subtitle: 'A proposta de intervenção' },
   // ── Redação Completa ─────────────────────────────────────────────────────────
   { id: 'fase-redacao-completa',    label: 'Redação Completa',   subtitle: 'Monte a redação inteira' },
@@ -105,7 +107,7 @@ export const SECTIONS: SectionInfo[] = [
   {
     id: 'conclusao',
     label: 'Conclusão',
-    phaseIds: ['fase-conclusao-formula', 'fase-conclusao-agente', 'fase-conclusao-acao', 'fase-conclusao-modo', 'fase-conclusao-finalidade', 'fase-conclusao-detalhamento', 'fase-conclusao-1'],
+    phaseIds: ['fase-conclusao-formula', 'fase-conclusao-agente', 'fase-conclusao-acao', 'fase-conclusao-modo', 'fase-conclusao-finalidade', 'fase-conclusao-detalhamento', 'fase-conclusao-retomada', 'fase-conclusao-1'],
   },
   {
     id: 'redacao-completa',
@@ -136,6 +138,7 @@ export const CONTENT: Record<string, ActivityData[]> = {
   'fase-conclusao-modo':    faseConclusaoModoActivities,
   'fase-conclusao-finalidade': faseConclusaoFinalidadeActivities,
   'fase-conclusao-detalhamento': faseConclusaoDetalhamentoActivities,
+  'fase-conclusao-retomada': faseConclusaoRetomadaActivities,
 };
 
 export function getNextPhaseId(currentId: string): string | null {
@@ -176,6 +179,7 @@ export const PHASE_CONFIG: Record<string, PhaseConfig> = {
   'fase-conclusao-modo':      { total: 8,  unlockThreshold: 6,  tiers: { expert: 7,  good: 6,  almostThere: 3 } },
   'fase-conclusao-finalidade': { total: 8, unlockThreshold: 6,  tiers: { expert: 7,  good: 6,  almostThere: 3 } },
   'fase-conclusao-detalhamento': { total: 8, unlockThreshold: 6, tiers: { expert: 7, good: 6, almostThere: 3 } },
+  'fase-conclusao-retomada':  { total: 8,  unlockThreshold: 6,  tiers: { expert: 7,  good: 6,  almostThere: 3 } },
 };
 
 /** Question total for a phase, falling back to its actual activity count. */
