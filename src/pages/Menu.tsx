@@ -248,6 +248,7 @@ const PHASE_ICON: Record<string, () => React.ReactElement> = {
 const EXPLAINER_ROUTE: Record<string, string> = {
   'fase-formula':    '/formula',
   'fase-d1-formula': '/d1-formula',
+  'fase-d2-formula': '/d2-formula',
 };
 
 // CSS class for each section's nebula tint (applied to sectionGroup wrapper).
