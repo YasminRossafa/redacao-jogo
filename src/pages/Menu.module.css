@@ -500,12 +500,12 @@
 
 .bonusBranch {
   position: absolute;
-  /* Hangs below the anchor node's full content area (node circle + gap + label +
-     gap + stars row). The anchor node circle is 72px and starts at the step's
-     1.25rem top-pad; label + gap + stars consume roughly another 53px, giving a
-     total of ~125px before the bonus should start. Using 155px adds ~30px of
-     breathing space above the bonus circle regardless of node state. */
-  top: calc(1.25rem + 155px);
+  /* Hangs below the anchor node's full content area: 72px circle + 8px gap +
+     ~17px label + 8px gap + ~20px star row = ~125px. Using 185px keeps the
+     bonus circle ~60px below the star row, and the connector's upper end stays
+     ~14px below the star row's bottom edge (connector origin at 185+2=187px in
+     step coords; top end at 207−50×sin72°≈159px; star row bottom at ~145px). */
+  top: calc(1.25rem + 185px);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -525,18 +525,17 @@
   opacity: 0.9;
 }
 
-/* Diagonal dashed connector from the top of the bonus circle up to the anchor
-   node's circle. Geometry at the new top offset (Δy≈123px, Δx≈39px):
-   hypotenuse≈129px, angle≈72° from horizontal. Width 105px stops inside the
-   anchor node's disc so the circle masks the line's tip. This geometry is
-   state-independent: locked/current/completed only change color and glow —
-   not node size or step-layout position. (nodeBig adds 6px to the node center,
-   negligible at this scale.) */
+/* Diagonal dashed connector spanning the clear gap between the star row and
+   the Repertórios circle. Shortened to 50px so the connector's upper end sits
+   ~14px below the anchor node's star row (step y≈159) and the lower end tucks
+   2px inside the Repertórios circle top (masked by bonusNode's z-index:1).
+   Angle unchanged at ±72° from horizontal; state-independent for the same
+   reason as before. */
 .bonusBranch::before {
   content: '';
   position: absolute;
-  top: 4px;
-  width: 105px;
+  top: 2px;
+  width: 50px;
   height: 2px;
   transform-origin: left center;
   background: repeating-linear-gradient(
