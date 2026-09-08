@@ -2,10 +2,11 @@ import type { ActivityData } from '../engine/types';
 
 // Conclusão — capstone. Mirrors the "recap pieces → join progressively → final
 // challenge" block structure of fase-d1-completo/fase-d2-completo, but scoped to
-// ONE paragraph (a Conclusão), so it is intentionally shorter: 12 questions.
+// ONE paragraph (a Conclusão): 15 questions.
 //   A (Q1-2)   recap misto dos elementos  — TagMatch many-to-few (6 categorias)
 //   B (Q3-7)   reconstrução progressiva   — Build/OrderPuzzle até detalhamento
 //   C (Q8-12)  desafio final              — OrderPuzzle do parágrafo inteiro + TagMatch
+//   D (Q13-15) conexão com a redação      — a Conclusão ligada à Intro/D1/D2
 // Themes: saúde, violência urbana, solidão, trabalho de cuidado (textos canônicos
 // construídos nas seis fases anteriores da Conclusão).
 
@@ -294,6 +295,76 @@ export const faseConclusaoCompletoActivities: ActivityData[] = [
       'q12-s2': 'violencia',
       'q12-s3': 'solidao',
       'q12-s4': 'cuidado',
+    },
+  },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // BLOCO D — conexão com a redação inteira (Conclusão ligada a Intro / D1 / D2)
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // ── Q13 — ChoiceSelect: a retomada fecha o circuito do repertório da Introdução ─
+  // Tema: violência urbana. Liga a Conclusão ao repertório da Introdução ('The
+  // Walking Dead'); a tarefa continua escopada à Conclusão, mas o contexto puxa
+  // a redação inteira.
+  {
+    id: 'fase-conclusao-completo-13',
+    kind: 'choice',
+    prompt:
+      "A introdução deste tema usa o repertório da série 'The Walking Dead'. Qual trecho da Conclusão fecha corretamente esse circuito?",
+    options: [
+      { id: 'q13-a', text: "Dessa maneira, o cenário de caos retratado em 'The Walking Dead' permanecerá restrito à ficção, distante da realidade das comunidades brasileiras." },
+      { id: 'q13-b', text: "Dessa forma, cenários como os retratados em 'Grey's Anatomy'... deixarão de refletir a realidade brasileira." },
+      { id: 'q13-c', text: "Assim, a sociedade deixa de reproduzir a realidade de exclusão retratada em 'Que Horas Ela Volta?'." },
+      { id: 'q13-d', text: 'Assim, a violência urbana é um problema grave no Brasil.' },
+    ],
+    correctOptionId: 'q13-a',
+    explanation:
+      "A retomada precisa reconectar com o MESMO repertório da introdução — aqui, 'The Walking Dead'. As opções com 'Grey's Anatomy' e 'Que Horas Ela Volta?' retomam repertórios de outros temas, e a última não retoma repertório nenhum.",
+  },
+
+  // ── Q14 — ChoiceSelect: a proposta responde à problemática do D1 do mesmo tema ─
+  // Tema: solidão. Liga a Conclusão à problemática levantada no D1.
+  {
+    id: 'fase-conclusao-completo-14',
+    kind: 'choice',
+    prompt:
+      "O D1 deste tema apresenta a problemática 'falta de espaços de convívio comunitário'. Qual agente e ação da Conclusão respondem diretamente a esse problema específico?",
+    options: [
+      { id: 'q14-a', text: 'Logo, as secretarias municipais de assistência social devem criar centros de convivência para idosos' },
+      { id: 'q14-b', text: 'Portanto, o Ministério da Saúde deve investir em infraestrutura hospitalar' },
+      { id: 'q14-c', text: 'Assim, as secretarias estaduais de segurança pública devem ampliar o policiamento comunitário' },
+      { id: 'q14-d', text: 'Sendo assim, o Ministério da Mulher, da Família e dos Direitos Humanos deve criar campanhas nacionais de conscientização' },
+    ],
+    correctOptionId: 'q14-a',
+    explanation:
+      "A proposta de intervenção precisa responder à problemática do próprio tema. 'Criar centros de convivência para idosos' ataca diretamente a 'falta de espaços de convívio comunitário' do D1 sobre solidão. As demais são propostas de outros temas (saúde, violência urbana e trabalho de cuidado).",
+  },
+
+  // ── Q15 — TagMatch bijetivo (fechamento da fase): citação do D2 → abertura da Conclusão ─
+  // Liga cada D2 (repertório do pensador) à abertura da proposta de intervenção
+  // do MESMO tema, amarrando os parágrafos finais da redação.
+  {
+    id: 'fase-conclusao-completo-15',
+    kind: 'tag-match',
+    prompt:
+      'Cada frase abaixo é a citação do D2 de um tema. Associe-a à abertura da Conclusão (conectivo + agente + ação) do mesmo tema.',
+    sentences: [
+      { id: 'q15-s1', text: 'Segundo o filósofo Michel Foucault, as instituições modernas frequentemente priorizam o controle e a gestão em detrimento do cuidado individualizado com os indivíduos.' },
+      { id: 'q15-s2', text: "Conforme o filósofo Thomas Hobbes, em sua obra 'Leviatã', a ausência de uma autoridade que garanta a ordem leva à instauração do caos social." },
+      { id: 'q15-s3', text: "Segundo o sociólogo Norbert Elias, em sua obra 'A Solidão dos Moribundos', o distanciamento social contemporâneo tende a isolar os indivíduos justamente nos momentos de maior fragilidade." },
+      { id: 'q15-s4', text: 'Segundo os conceitos de Émile Durkheim, essas funções seriam desenvolvidas pelas instituições socializadoras, e não de forma natural.' },
+    ],
+    tags: [
+      { id: 'saude',     label: 'Portanto, o Ministério da Saúde deve investir em infraestrutura hospitalar' },
+      { id: 'violencia', label: 'Assim, as secretarias estaduais de segurança pública devem ampliar o policiamento comunitário' },
+      { id: 'solidao',   label: 'Logo, as secretarias municipais de assistência social devem criar centros de convivência para idosos' },
+      { id: 'cuidado',   label: 'Sendo assim, o Ministério da Mulher, da Família e dos Direitos Humanos deve criar campanhas nacionais de conscientização' },
+    ],
+    mapping: {
+      'q15-s1': 'saude',
+      'q15-s2': 'violencia',
+      'q15-s3': 'solidao',
+      'q15-s4': 'cuidado',
     },
   },
 ];

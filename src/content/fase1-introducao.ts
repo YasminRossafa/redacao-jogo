@@ -143,16 +143,7 @@ const tagsingle4: ActivityData = {
   mapping: { 's-tema': 'tag-tema' },
 };
 
-const tagsingle5: ActivityData = {
-  id: 'fase1-tagsingle-5',
-  kind: 'tag-match',
-  prompt: 'Toque no trecho que traz as duas problemáticas.',
-  sentences: sentences(PPATINHOFEIO),
-  tags: [TAG_PROB],
-  mapping: { 's-prob': 'tag-prob' },
-};
-
-// ─── GROUP 3: OrderActivity (5 activities) ───────────────────────────────────
+// ─── GROUP 3: OrderActivity (3 activities) ───────────────────────────────────
 
 const order1: ActivityData = {
   id: 'fase1-order-1',
@@ -166,20 +157,6 @@ const order2: ActivityData = {
   kind: 'order',
   prompt: 'Organize as 3 frases na ordem certa da introdução.',
   items: orderItems(PVOZSILENCIO),
-};
-
-const order3: ActivityData = {
-  id: 'fase1-order-3',
-  kind: 'order',
-  prompt: 'Organize as 3 frases na ordem certa da introdução.',
-  items: orderItems(PANNESULLIVAN),
-};
-
-const order4: ActivityData = {
-  id: 'fase1-order-4',
-  kind: 'order',
-  prompt: 'Organize as 3 frases na ordem certa da introdução.',
-  items: orderItems(PEXTRAORDINARIO),
 };
 
 const order5: ActivityData = {
@@ -263,13 +240,18 @@ const error5: ActivityData = {
 
 // ─── Export — Group 1, Group 2, Group 3, Group 4 (recognition → production → error analysis) ───
 
+// Trimmed to 15 questions (3 + 4 + 3 + 5) to match the standardized completo size:
+// - dropped one "problemáticas" single (PPATINHOFEIO already recapped in tagfull2);
+// - dropped two 3-sentence Orders (the most repetitive mechanic), keeping three
+//   Orders across distinct themes (desinformação, surdos, trabalho de cuidado);
+// - kept all five ErrorSpots — each targets a distinct error type (diagnostic block).
 export const fase1Activities: ActivityData[] = [
   // Group 1: TagMatch full match
   tagfull1, tagfull2, tagfull3,
   // Group 2: TagMatch single target
-  tagsingle1, tagsingle2, tagsingle3, tagsingle4, tagsingle5,
+  tagsingle1, tagsingle2, tagsingle3, tagsingle4,
   // Group 3: Order
-  order1, order2, order3, order4, order5,
+  order1, order2, order5,
   // Group 4: ErrorSpot
   error1, error2, error3, error4, error5,
 ];

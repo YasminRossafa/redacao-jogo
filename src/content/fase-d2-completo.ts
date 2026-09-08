@@ -2,12 +2,13 @@ import type { ActivityData } from '../engine/types';
 
 // Desenvolvimento 2 — capstone. Mirrors the block structure of fase-d1-completo,
 // but ties together all THREE paragraphs (Introdução + D1 + D2) across four
-// themes. 18 questions in 5 blocks:
-//   A (Q1-4)   recap Introdução sozinha  — TagMatch bijective (rep/ponte/prob)
-//   B (Q5-8)   recap D1 sozinho          — ChoiceSelect (qual citação do D1?)
-//   C (Q9-12)  recap D2 sozinho          — ChoiceSelect (qual citação do D2?)
-//   D (Q13-16) junção dos 3 parágrafos   — TagMatch many-to-few (Intro/D1/D2)
-//   E (Q17-18) desafio final             — OrderPuzzle das 9 frases + distratores
+// themes. 15 questions in 5 blocks (A/B/C trimmed to 3 themes each; D keeps all
+// 4 paragraphs' junção; E keeps the 2 full-order challenges):
+//   A (Q1-3)   recap Introdução sozinha  — TagMatch bijective (rep/ponte/prob)
+//   B (Q4-6)   recap D1 sozinho          — ChoiceSelect (qual citação do D1?)
+//   C (Q7-9)   recap D2 sozinho          — ChoiceSelect (qual citação do D2?)
+//   D (Q10-13) junção dos 3 parágrafos   — TagMatch many-to-few (Intro/D1/D2)
+//   E (Q14-15) desafio final             — OrderPuzzle das 9 frases + distratores
 
 // ─── Theme reference texts (established/validated content) ────────────────────
 // Each paragraph is split into its sentences. `d2pShort` is the D2 problemática
@@ -195,87 +196,72 @@ function fullOrder(
 // ─── Phase ────────────────────────────────────────────────────────────────────
 
 export const faseD2CompletoActivities: ActivityData[] = [
-  // ── BLOCO A — recap Introdução sozinha ──────────────────────────────────────
+  // ── BLOCO A — recap Introdução sozinha (3 de 4 temas; cuidado recapeado adiante) ─
   introTag(1, SAUDE),
   introTag(2, VIOLENCIA),
   introTag(3, SOLIDAO),
-  introTag(4, CUIDADO),
 
-  // ── BLOCO B — recap D1 sozinho (qual citação/dado do D1?) ───────────────────
+  // ── BLOCO B — recap D1 sozinho (qual citação/dado do D1?) — 3 temas ─────────
   citationChoice(
-    5,
+    4,
     "No D1 do tema 'saúde', qual é a citação (dado) utilizada?",
     SAUDE.d1c,
     [VIOLENCIA.d1c, SOLIDAO.d1c, CUIDADO.d1c],
     'No D1 de saúde, a citação é o dado do Conselho Federal de Medicina sobre a escassez de médicos no interior. As demais são citações do D1 de outros temas (segurança pública, idosos e trabalho de cuidado).'
   ),
   citationChoice(
-    6,
+    5,
     "No D1 do tema 'violência urbana', qual é a citação (dado) utilizada?",
     VIOLENCIA.d1c,
     [SAUDE.d1c, SOLIDAO.d1c, CUIDADO.d1c],
     'No D1 de violência urbana, a citação é o dado do Fórum Brasileiro de Segurança Pública sobre homicídios em bairros com baixa presença policial. As demais são citações do D1 de outros temas.'
   ),
   citationChoice(
-    7,
-    "No D1 do tema 'solidão', qual é a citação (dado) utilizada?",
-    SOLIDAO.d1c,
-    [SAUDE.d1c, VIOLENCIA.d1c, CUIDADO.d1c],
-    'No D1 de solidão, a citação é o dado do IBGE sobre idosos que vivem sozinhos. As demais são citações do D1 de outros temas.'
-  ),
-  citationChoice(
-    8,
+    6,
     "No D1 do tema 'trabalho de cuidado', qual é a citação (dado) utilizada?",
     CUIDADO.d1c,
     [SAUDE.d1c, VIOLENCIA.d1c, SOLIDAO.d1c],
     'No D1 de trabalho de cuidado, a citação é o dado da PNAD sobre horas semanais de afazeres domésticos. As demais são citações do D1 de outros temas.'
   ),
 
-  // ── BLOCO C — recap D2 sozinho (qual citação/pensador do D2?) ───────────────
+  // ── BLOCO C — recap D2 sozinho (qual citação/pensador do D2?) — 3 temas ─────
   citationChoice(
-    9,
-    "No D2 do tema 'saúde', qual é a citação (pensador) utilizada?",
-    SAUDE.d2c,
-    [VIOLENCIA.d2c, SOLIDAO.d2c, CUIDADO.d2c],
-    'No D2 de saúde, a citação é a do filósofo Michel Foucault, sobre as instituições modernas. As demais são citações do D2 de outros temas (Hobbes, Norbert Elias e Durkheim).'
-  ),
-  citationChoice(
-    10,
+    7,
     "No D2 do tema 'violência urbana', qual é a citação (pensador) utilizada?",
     VIOLENCIA.d2c,
     [SAUDE.d2c, SOLIDAO.d2c, CUIDADO.d2c],
     'No D2 de violência urbana, a citação é a do filósofo Thomas Hobbes ("Leviatã"), sobre a ausência de autoridade e o caos social. As demais são citações do D2 de outros temas.'
   ),
   citationChoice(
-    11,
+    8,
     "No D2 do tema 'solidão', qual é a citação (pensador) utilizada?",
     SOLIDAO.d2c,
     [SAUDE.d2c, VIOLENCIA.d2c, CUIDADO.d2c],
     'No D2 de solidão, a citação é a do sociólogo Norbert Elias ("A Solidão dos Moribundos"). As demais são citações do D2 de outros temas.'
   ),
   citationChoice(
-    12,
+    9,
     "No D2 do tema 'trabalho de cuidado', qual é a citação (pensador) utilizada?",
     CUIDADO.d2c,
     [SAUDE.d2c, VIOLENCIA.d2c, SOLIDAO.d2c],
     'No D2 de trabalho de cuidado, a citação é a de Émile Durkheim, sobre as instituições socializadoras. As demais são citações do D2 de outros temas.'
   ),
 
-  // ── BLOCO D — junção dos 3 parágrafos (Introdução / D1 / D2) ────────────────
-  junctionTag(13, SAUDE),
-  junctionTag(14, VIOLENCIA),
-  junctionTag(15, SOLIDAO),
-  junctionTag(16, CUIDADO),
+  // ── BLOCO D — junção dos 3 parágrafos (Introdução / D1 / D2) — 4 temas ──────
+  junctionTag(10, SAUDE),
+  junctionTag(11, VIOLENCIA),
+  junctionTag(12, SOLIDAO),
+  junctionTag(13, CUIDADO),
 
   // ── BLOCO E — desafio final (ordenar os 3 parágrafos completos) ─────────────
   fullOrder(
-    17,
+    14,
     SOLIDAO,
     'Organize todas as nove frases da introdução + D1 + D2 do tema "solidão" ("Up: Altas Aventuras") na sequência correta. Atenção: há frases de outro tema no pool.',
     [SAUDE.d1c, SAUDE.d2c]
   ),
   fullOrder(
-    18,
+    15,
     CUIDADO,
     'Organize todas as nove frases da introdução + D1 + D2 do tema "trabalho de cuidado" ("Que Horas Ela Volta?") na sequência correta. Atenção: há frases de outro tema no pool.',
     [VIOLENCIA.d1c, VIOLENCIA.d2c]

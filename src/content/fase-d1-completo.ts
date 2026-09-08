@@ -45,17 +45,7 @@ export const faseD1CompletoActivities: ActivityData[] = [
   // BLOCO A — Introdução sozinha
   // ════════════════════════════════════════════════════════════════════════════
 
-  // ── Q1 — OrderPuzzle: ordenar a introdução "Anne Sullivan" ──────────────────
-  {
-    id: 'fase-d1-completo-1',
-    kind: 'order',
-    prompt: 'Organize as três frases da introdução de "O Milagre de Anne Sullivan" na ordem correta.',
-    items: [
-      { id: 'q1-rep',  label: ANNE_SULLIVAN.rep  },
-      { id: 'q1-tema', label: ANNE_SULLIVAN.tema },
-      { id: 'q1-prob', label: ANNE_SULLIVAN.prob },
-    ],
-  },
+  // (A ordenação de uma introdução + D1 completa é cobrada no Q17, desafio final.)
 
   // ── Q2 — ChoiceSelect: qual problemática abre o D1? (A Voz do Silêncio) ─────
   {
@@ -192,19 +182,8 @@ export const faseD1CompletoActivities: ActivityData[] = [
       'A opção correta apresenta uma causa real (menos investimento em segurança pública). A outra repete a própria problemática com outras palavras — isso é raciocínio circular e não explica por que o problema é um problema.',
   },
 
-  // ── Q8 — BuildFromScratch: 1ª frase do D1 (Quarto de Despejo) ───────────────
-  {
-    id: 'fase-d1-completo-8',
-    kind: 'build',
-    prompt: 'Monte a primeira frase do D1 para o tema de "Quarto de Despejo".',
-    fragments: [
-      { id: 'q8-f1', text: 'Em primeiro lugar,',                                                                    correct: true  },
-      { id: 'q8-f2', text: 'destaca-se que o trabalho de cuidado é normalizado como responsabilidade exclusiva da mulher,', correct: true },
-      { id: 'q8-f3', text: 'pois isso reforça uma construção social enraizada.',                                    correct: true  },
-      { id: 'q8-d1', text: 'pois as mulheres preferem esse tipo de trabalho,',                                     correct: false },
-    ],
-    acceptedOrders: [['q8-f1', 'q8-f2', 'q8-f3']],
-  },
+  // (A montagem da 1ª frase do D1 de "Quarto de Despejo" — paráfrase, não cópia —
+  //  é cobrada no Q14, que é a versão mais diagnóstica dessa mesma construção.)
 
   // ── Q9 — ChoiceSelect: citação relevante para "Quarto de Despejo" D1 ─────────
   {
@@ -291,21 +270,8 @@ export const faseD1CompletoActivities: ActivityData[] = [
       'A introdução lista dois problemas: 1º "as mulheres são responsáveis por grande parte do serviço"; 2º "aquele que não é remunerado". O D1 deve retomar o primeiro. "A maior parte não é remunerada" é a segunda problemática — pertence ao D2. O motivo nessa frase até explica bem, e o conectivo está presente; o erro é qual problemática foi escolhida.',
   },
 
-  // ── Q13 — OrderPuzzle: sequenciar as 6 frases da intro+D1 "Anne Sullivan" ────
-  // OrderPuzzle renders items.length slots dynamically — 6 items is supported.
-  {
-    id: 'fase-d1-completo-13',
-    kind: 'order',
-    prompt: 'Organize as seis frases da introdução + D1 de "O Milagre de Anne Sullivan" na sequência correta.',
-    items: [
-      { id: 'q13-i1', label: ANNE_SULLIVAN.rep  },
-      { id: 'q13-i2', label: ANNE_SULLIVAN.tema },
-      { id: 'q13-i3', label: ANNE_SULLIVAN.prob },
-      { id: 'q13-i4', label: ANNE_SULLIVAN.d1p  },
-      { id: 'q13-i5', label: ANNE_SULLIVAN.d1c  },
-      { id: 'q13-i6', label: ANNE_SULLIVAN.d1a  },
-    ],
-  },
+  // (A ordenação das 6 frases de introdução + D1 é cobrada no Q17, desafio final,
+  //  com o tema "Que Horas Ela Volta?".)
 
   // ── Q14 — BuildFromScratch: paráfrase vs. cópia literal (Quarto de Despejo) ──
   {
