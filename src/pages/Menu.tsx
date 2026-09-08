@@ -171,22 +171,17 @@ function CometIcon() {
   );
 }
 
-// ─── Icons — Redação Completa: constelação ────────────────────────────────────
+// ─── Icon — Missão Final: nave de retorno ─────────────────────────────────────
 
-/** Five stars connected by constellation lines. */
-function ConstellationIcon() {
+/** Rocket/spaceship — the final objective. Distinct from every celestial family. */
+function MissionShipIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
-      <line x1="7" y1="18" x2="11" y2="11"  stroke="currentColor" strokeWidth="1" opacity="0.4" />
-      <line x1="11" y1="11" x2="17" y2="6"  stroke="currentColor" strokeWidth="1" opacity="0.4" />
-      <line x1="17" y1="6"  x2="21" y2="13" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-      <line x1="11" y1="11" x2="17" y2="18" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-      <line x1="17" y1="18" x2="21" y2="13" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-      <circle cx="7"  cy="18" r="1.8" />
-      <circle cx="11" cy="11" r="1.8" />
-      <circle cx="17" cy="6"  r="2.3" />
-      <circle cx="21" cy="13" r="1.6" />
-      <circle cx="17" cy="18" r="1.6" />
+      <path d="M12 2.4c2.5 2 3.9 4.9 3.9 8.2 0 1.2-.2 2.4-.6 3.6H8.7c-.4-1.2-.6-2.4-.6-3.6C8.1 7.3 9.5 4.4 12 2.4z" />
+      <circle cx="12" cy="9" r="1.6" fill="#0B1224" />
+      <path d="M8.1 12.2 5.2 14.1c-.3.2-.4.5-.3.9l.9 2.7 2.6-1.7z" />
+      <path d="M15.9 12.2 18.8 14.1c.3.2.4.5.3.9l-.9 2.7-2.6-1.7z" />
+      <path d="M10.5 16.6h3l-1.5 3.8z" opacity="0.85" />
     </svg>
   );
 }
@@ -248,9 +243,15 @@ const PHASE_ICON: Record<string, () => React.ReactElement> = {
   'fase-conclusao-retomada':  CometIcon,
   'fase-conclusao-completo':  CometIcon,
   'fase-conclusao-1':         CometIcon,
-  // Redação Completa — constelação
-  'fase-redacao-completa':    ConstellationIcon,
+  // Missão Final — nave
+  'fase-missao-final':        MissionShipIcon,
 };
+
+// The final objective and its exclusive completion badge.
+const MISSION_ID = 'fase-missao-final';
+const MISSION_BADGE = 'comandante-missao-final';
+// Sections that must all be completed before the Missão Final unlocks.
+const MISSION_PREREQ_SECTIONS = ['introducao', 'dev1', 'dev2', 'conclusao'];
 
 // Guide phases open their explainer page before the quiz.
 const EXPLAINER_ROUTE: Record<string, string> = {
@@ -258,6 +259,7 @@ const EXPLAINER_ROUTE: Record<string, string> = {
   'fase-d1-formula': '/d1-formula',
   'fase-d2-formula': '/d2-formula',
   'fase-conclusao-formula': '/conclusao-formula',
+  'fase-missao-final': '/missao-final',
 };
 
 // CSS class for each section's nebula tint (applied to sectionGroup wrapper).
@@ -294,7 +296,7 @@ function buildSectionPhaseItems(
       phase,
       isLeft: (startIdx + i) % 2 === 0,
       sectionId: section.id,
-      isFinal: phaseId === 'fase-redacao-completa',
+      isFinal: phaseId === MISSION_ID,
     });
     i++;
   }
@@ -330,6 +332,16 @@ export function Menu() {
     return lastUnlocked?.id ?? null;
   })();
 
+  // The Missão Final ignores the sequential unlock chain: it opens only once every
+  // content phase of all four prior sections has been played at least once.
+  const missionUnlocked = MISSION_PREREQ_SECTIONS.every((secId) => {
+    const section = SECTIONS.find((s) => s.id === secId);
+    if (!section) return false;
+    return section.phaseIds
+      .filter((id) => CONTENT[id])
+      .every((id) => getPhaseScore(id) !== null);
+  });
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -362,7 +374,9 @@ export function Menu() {
                 className={[styles.sectionGroup, nebClass].filter(Boolean).join(' ')}
               >
                 {phaseItems.map(({ phase, isLeft, isFinal }) => {
-                  const unlocked = isPhaseUnlocked(phase.id);
+                  const isMission = phase.id === MISSION_ID;
+                  // The Missão Final gates on section completion, not the chain.
+                  const unlocked = isMission ? missionUnlocked : isPhaseUnlocked(phase.id);
                   const score = getPhaseScore(phase.id);
                   const state: NodeState = !unlocked
                     ? 'locked'
@@ -376,6 +390,8 @@ export function Menu() {
                   const isComingSoon = !CONTENT[phase.id];
                   const nodeTarget = EXPLAINER_ROUTE[phase.id] ?? `/fase/${phase.id}`;
                   const PhaseNodeIcon = PHASE_ICON[phase.id] ?? MoonIcon;
+                  // The mission node glows gold when reachable (never while locked).
+                  const missionActive = isMission && state !== 'locked';
 
                   return (
                     <div
@@ -394,6 +410,7 @@ export function Menu() {
                             styles.node,
                             isFinal ? styles.nodeFinal : '',
                             isAstronaut ? styles.nodeBig : '',
+                            missionActive ? styles.nodeMission : '',
                             NODE_STATE_CLASS[state],
                           ]
                             .filter(Boolean)
@@ -429,6 +446,12 @@ export function Menu() {
                         <span className={styles.comingSoonBadge}>Em breve</span>
                       )}
 
+                      {isMission && state === 'locked' && (
+                        <span className={styles.missionLockLabel}>
+                          Complete todas as missões anteriores
+                        </span>
+                      )}
+
                       {stars !== null && (
                         <div className={styles.starRow}>
                           <div
@@ -445,15 +468,25 @@ export function Menu() {
                               </span>
                             ))}
                           </div>
-                          {hasBadge(`sabichao-${phase.id}`) && (
-                            <span
-                              className={styles.nodeBadge}
-                              aria-label="Sabichão"
-                              title="Sabichão"
-                            >
-                              🏆
-                            </span>
-                          )}
+                          {isMission
+                            ? hasBadge(MISSION_BADGE) && (
+                                <span
+                                  className={styles.nodeBadge}
+                                  aria-label="Comandante da Missão Final"
+                                  title="Comandante da Missão Final"
+                                >
+                                  🚀
+                                </span>
+                              )
+                            : hasBadge(`sabichao-${phase.id}`) && (
+                                <span
+                                  className={styles.nodeBadge}
+                                  aria-label="Sabichão"
+                                  title="Sabichão"
+                                >
+                                  🏆
+                                </span>
+                              )}
                         </div>
                       )}
                     </div>

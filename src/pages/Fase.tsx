@@ -39,6 +39,12 @@ interface BurstState {
   combo: number;
 }
 
+// The Missão Final is the game's finale: its 30 questions run in a fixed order
+// (no shuffle), it grants an exclusive badge, and it has its own results screen.
+const MISSION_PHASE_ID = 'fase-missao-final';
+const MISSION_BADGE = 'comandante-missao-final';
+const MISSION_FINAL_CHALLENGE_ID = 'fase-missao-final-30';
+
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
@@ -326,9 +332,11 @@ export function Fase() {
 
   const baseActivities = phaseId ? (CONTENT[phaseId] ?? []) : [];
   const phase = PHASES.find((p) => p.id === phaseId);
+  const isMission = phaseId === MISSION_PHASE_ID;
 
+  // The Missão Final keeps its fixed block order; every other phase shuffles.
   const [shuffledActivities, setShuffledActivities] = useState<ActivityData[]>(
-    () => shuffle([...baseActivities])
+    () => (isMission ? [...baseActivities] : shuffle([...baseActivities]))
   );
   const [activityIndex, setActivityIndex] = useState(0);
   const [succeeded, setSucceeded] = useState(false);
@@ -389,10 +397,13 @@ export function Fase() {
     const correctCount = results.filter((r) => r.success).length;
     const total = getPhaseTotal(phaseId);
     recordPhaseScore(phaseId, correctCount, total, bestCombo);
-    if (total > 0 && correctCount === total) {
+    const threshold = getUnlockThreshold(phaseId);
+    if (phaseId === MISSION_PHASE_ID) {
+      // The finale grants its own exclusive badge — never the generic Sabichão.
+      if (correctCount >= threshold) awardBadge(MISSION_BADGE);
+    } else if (total > 0 && correctCount === total) {
       awardBadge(`sabichao-${phaseId}`);
     }
-    const threshold = getUnlockThreshold(phaseId);
     if (correctCount >= threshold) {
       const nextId = getNextPhaseId(phaseId);
       if (nextId) unlockPhase(nextId);
@@ -414,7 +425,9 @@ export function Fase() {
     comboRef.current = 0;
     setBestCombo(0);
     setBurst(null);
-    setShuffledActivities(shuffle([...baseActivities]));
+    setShuffledActivities(
+      phaseId === MISSION_PHASE_ID ? [...baseActivities] : shuffle([...baseActivities])
+    );
     setActivityIndex(0);
     setSucceeded(false);
     setResults([]);
@@ -494,9 +507,10 @@ export function Fase() {
     const nextPhase = nextId ? PHASES.find((p) => p.id === nextId) : null;
     const threshold = getUnlockThreshold(phaseId);
     const meetsThreshold = correctCount >= threshold;
+    const missionPassed = isMission && meetsThreshold;
 
     return (
-      <div className={styles.root}>
+      <div className={[styles.root, isMission ? styles.missionRoot : ''].filter(Boolean).join(' ')}>
         <header className={styles.header}>
           <button className={styles.backBtn} onClick={() => navigate('/')}>
             ← Menu
@@ -505,17 +519,45 @@ export function Fase() {
         </header>
 
         <div className={styles.results}>
-          <div
-            className={styles.tierBadge}
-            style={{ color: tier.color, backgroundColor: tier.bg }}
-          >
-            {tier.label}
-          </div>
-
-          {correctCount === totalCount && (
-            <div className={styles.sabichaoBadge}>
-              <span aria-hidden>🏆</span> Sabichão
+          {isMission ? (
+            <div className={styles.missionComplete}>
+              {missionPassed ? (
+                <>
+                  <div className={styles.missionBadge}>
+                    <span aria-hidden>🚀</span> Comandante da Missão Final
+                  </div>
+                  <h2 className={styles.missionHeadline}>Missão cumprida — você retornou à Terra!</h2>
+                  <p className={styles.missionSub}>
+                    Você reconstruiu a redação inteira, do repertório à proposta de
+                    intervenção. Parabéns, Comandante.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className={styles.missionBadgeLocked}>Reentrada incompleta</div>
+                  <h2 className={styles.missionHeadline}>A missão ainda não terminou.</h2>
+                  <p className={styles.missionSub}>
+                    Você precisa de pelo menos <strong>{threshold}</strong> acertos para
+                    concluir a Missão Final. Recupere o fôlego e tente novamente.
+                  </p>
+                </>
+              )}
             </div>
+          ) : (
+            <>
+              <div
+                className={styles.tierBadge}
+                style={{ color: tier.color, backgroundColor: tier.bg }}
+              >
+                {tier.label}
+              </div>
+
+              {correctCount === totalCount && (
+                <div className={styles.sabichaoBadge}>
+                  <span aria-hidden>🏆</span> Sabichão
+                </div>
+              )}
+            </>
           )}
 
           <p className={styles.score}>
@@ -528,13 +570,15 @@ export function Fase() {
             acerto{bestCombo === 1 ? '' : 's'} seguido{bestCombo === 1 ? '' : 's'}
           </p>
 
-          <p className={styles.unlockNote}>
-            {nextPhase
-              ? meetsThreshold
-                ? `${nextPhase.label} liberada!`
-                : `Tente novamente para liberar ${nextPhase.label}`
-              : 'Você completou todas as fases!'}
-          </p>
+          {!isMission && (
+            <p className={styles.unlockNote}>
+              {nextPhase
+                ? meetsThreshold
+                  ? `${nextPhase.label} liberada!`
+                  : `Tente novamente para liberar ${nextPhase.label}`
+                : 'Você completou todas as fases!'}
+            </p>
+          )}
 
           <button
             className={styles.reviewToggleBtn}
@@ -578,9 +622,12 @@ export function Fase() {
 
   // Activity screen
   const isLast = activityIndex === shuffledActivities.length - 1;
+  const currentActivity = shuffledActivities[activityIndex];
+  // The very last mission question is the "final boss" — flag it visually.
+  const isFinalChallenge = isMission && currentActivity?.id === MISSION_FINAL_CHALLENGE_ID;
 
   return (
-    <div className={styles.root}>
+    <div className={[styles.root, isFinalChallenge ? styles.finalChallengeRoot : ''].filter(Boolean).join(' ')}>
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => navigate('/')}>
           ← Menu
@@ -591,10 +638,16 @@ export function Fase() {
         </span>
       </header>
 
+      {isFinalChallenge && (
+        <div className={styles.finalChallengeBanner} role="note">
+          <span aria-hidden>🏁</span> Desafio Final — a redação inteira
+        </div>
+      )}
+
       {/* key forces remount when activity changes, resetting internal component state */}
       <div key={activityIndex} className={styles.activityWrap}>
         <ActivityRenderer
-          activity={shuffledActivities[activityIndex]}
+          activity={currentActivity}
           onComplete={handleComplete}
           onSkip={handleSkip}
         />

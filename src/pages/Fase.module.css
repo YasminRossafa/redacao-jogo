@@ -411,6 +411,93 @@
   background: var(--color-primary-hover);
 }
 
+/* ── Missão Final — results backdrop tint ── */
+
+.missionRoot {
+  background-image:
+    radial-gradient(1.5px 1.5px at 40px 60px, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 130px 180px, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 90px 250px, rgba(251, 191, 36, 0.5), transparent);
+}
+
+/* ── Missão Final — desafio final banner ─── */
+
+.finalChallengeRoot {
+  box-shadow: inset 0 0 0 2px rgba(251, 191, 36, 0.55), inset 0 0 40px rgba(245, 158, 11, 0.18);
+}
+
+.finalChallengeBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.75rem auto 0;
+  max-width: 640px;
+  padding: 0.625rem 1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(251, 191, 36, 0.12));
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  color: #FDE68A;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* ── Missão Final — completion screen ─────── */
+
+.missionComplete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.875rem;
+  padding: 1.25rem 1rem 0.5rem;
+}
+
+.missionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #F59E0B, #FBBF24);
+  color: #1E1204;
+  font-size: clamp(1rem, 4.5vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.45);
+}
+
+.missionBadgeLocked {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-warning-border);
+  color: var(--color-warning);
+  font-size: 1.0625rem;
+  font-weight: 800;
+}
+
+.missionHeadline {
+  margin: 0;
+  font-size: clamp(1.25rem, 5vw, 1.625rem);
+  font-weight: 800;
+  color: #FDE68A;
+  line-height: 1.25;
+}
+
+.missionSub {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #CBD5E1;
+  max-width: 460px;
+}
+
 /* ── Shared utility screens ─────────────── */
 
 .menuBtn {

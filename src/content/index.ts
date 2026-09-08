@@ -22,6 +22,7 @@ import { faseConclusaoFinalidadeActivities } from './fase-conclusao-finalidade';
 import { faseConclusaoDetalhamentoActivities } from './fase-conclusao-detalhamento';
 import { faseConclusaoRetomadaActivities } from './fase-conclusao-retomada';
 import { faseConclusaoCompletoActivities } from './fase-conclusao-completo';
+import { faseMissaoFinalActivities } from './fase-missao-final';
 
 export interface PhaseInfo {
   id: string;
@@ -58,8 +59,8 @@ export const PHASES: PhaseInfo[] = [
   { id: 'fase-conclusao-retomada',  label: 'Retomada',           subtitle: 'O fechamento que retoma o repertório' },
   { id: 'fase-conclusao-completo',  label: 'Conclusão Completa', subtitle: 'Monte a conclusão inteira' },
   { id: 'fase-conclusao-1',         label: 'Conclusão',          subtitle: 'A proposta de intervenção' },
-  // ── Redação Completa ─────────────────────────────────────────────────────────
-  { id: 'fase-redacao-completa',    label: 'Redação Completa',   subtitle: 'Monte a redação inteira' },
+  // ── Missão Final ─────────────────────────────────────────────────────────────
+  { id: 'fase-missao-final',        label: 'Missão Final: Retorno à Terra', subtitle: 'A culminância de tudo o que você aprendeu' },
 ];
 
 export const PHASE_SEQUENCE: string[] = PHASES.map((p) => p.id);
@@ -113,8 +114,8 @@ export const SECTIONS: SectionInfo[] = [
   },
   {
     id: 'redacao-completa',
-    label: 'Redação Completa',
-    phaseIds: ['fase-redacao-completa'],
+    label: 'Missão Final',
+    phaseIds: ['fase-missao-final'],
   },
 ];
 
@@ -142,6 +143,7 @@ export const CONTENT: Record<string, ActivityData[]> = {
   'fase-conclusao-detalhamento': faseConclusaoDetalhamentoActivities,
   'fase-conclusao-retomada': faseConclusaoRetomadaActivities,
   'fase-conclusao-completo': faseConclusaoCompletoActivities,
+  'fase-missao-final': faseMissaoFinalActivities,
 };
 
 export function getNextPhaseId(currentId: string): string | null {
@@ -184,6 +186,7 @@ export const PHASE_CONFIG: Record<string, PhaseConfig> = {
   'fase-conclusao-detalhamento': { total: 8, unlockThreshold: 6, tiers: { expert: 7, good: 6, almostThere: 3 } },
   'fase-conclusao-retomada':  { total: 8,  unlockThreshold: 6,  tiers: { expert: 7,  good: 6,  almostThere: 3 } },
   'fase-conclusao-completo':  { total: 12, unlockThreshold: 8,  tiers: { expert: 10, good: 7,  almostThere: 3 } },
+  'fase-missao-final':        { total: 30, unlockThreshold: 20, tiers: { expert: 25, good: 17, almostThere: 8 } },
 };
 
 /** Question total for a phase, falling back to its actual activity count. */
