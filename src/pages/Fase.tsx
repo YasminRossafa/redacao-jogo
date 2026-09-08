@@ -424,15 +424,15 @@ export function Fase() {
       if (nextId) unlockPhase(nextId);
     }
 
-    // On a successful skip, bulk-unlock every other phase in this section so
-    // the section appears fully completed and Missão Final can unlock.
+    // On a successful skip, also unlock the completo itself (it was played from
+    // skip state so it was never in unlockedPhases), then bulk-unlock every
+    // other phase in the section so it appears fully completed.
     if (skipMode && passed) {
+      unlockPhase(phaseId);
       const sectionId = COMPLETO_SECTION[phaseId];
       const section = sectionId ? SECTIONS.find((s) => s.id === sectionId) : null;
       if (section) {
-        const others = section.phaseIds
-          .filter((id) => id !== phaseId)
-          .map((id) => ({ id, total: getPhaseTotal(id) }));
+        const others = section.phaseIds.filter((id) => id !== phaseId);
         markSectionCompleted(others);
       }
     }

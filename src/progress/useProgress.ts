@@ -14,6 +14,9 @@ interface ProgressState {
   phaseErrorCounts: Record<string, number>;
   phaseScores: Record<string, PhaseScore>;
   badges: string[];
+  /** Phase IDs auto-completed by a successful section skip (unlocked but never
+   *  actually played — no score should be shown for these). */
+  skippedPhaseIds: string[];
 }
 
 const INITIAL_STATE: ProgressState = {
@@ -22,6 +25,7 @@ const INITIAL_STATE: ProgressState = {
   phaseErrorCounts: {},
   phaseScores: {},
   badges: [],
+  skippedPhaseIds: [],
 };
 
 function readStorage(): ProgressState {
@@ -73,9 +77,12 @@ export interface ProgressHook {
   resetPhaseErrors: (phaseId: string) => void;
   getPhaseScore: (phaseId: string) => PhaseScore | null;
   recordPhaseScore: (phaseId: string, correctCount: number, total: number, bestCombo: number) => void;
-  /** Bulk-unlock every phase in `phases` and record a 0-score for any that have
-   *  no existing score. Used when a successful skip completes an entire section. */
-  markSectionCompleted: (phases: Array<{ id: string; total: number }>) => void;
+  /** Bulk-unlock phases from a successful section skip, marking unplayed ones as
+   *  skipped so they render as completed (green) without any star rating. Phases
+   *  the player has already played are unlocked but NOT overwritten with a skip flag. */
+  markSectionCompleted: (phaseIds: string[]) => void;
+  /** True for phases that were auto-completed by a section skip and never played. */
+  isPhaseSkipped: (phaseId: string) => boolean;
   hasBadge: (badgeId: string) => boolean;
   awardBadge: (badgeId: string) => void;
   resetAllProgress: () => void;
@@ -165,21 +172,28 @@ export function useProgress(): ProgressHook {
   );
 
   const markSectionCompleted = useCallback(
-    (phases: Array<{ id: string; total: number }>) => {
+    (phaseIds: string[]) => {
       update((prev) => {
-        let { unlockedPhases, phaseScores } = prev;
-        for (const { id, total } of phases) {
+        let { unlockedPhases, skippedPhaseIds } = prev;
+        for (const id of phaseIds) {
           if (!unlockedPhases.includes(id)) {
             unlockedPhases = [...unlockedPhases, id];
           }
-          if (!phaseScores[id]) {
-            phaseScores = { ...phaseScores, [id]: { correctCount: 0, total, bestCombo: 0 } };
+          // Only flag as skipped when the phase was never actually played.
+          // Phases with a real score keep their earned rating untouched.
+          if (!prev.phaseScores[id] && !skippedPhaseIds.includes(id)) {
+            skippedPhaseIds = [...skippedPhaseIds, id];
           }
         }
-        return { ...prev, unlockedPhases, phaseScores };
+        return { ...prev, unlockedPhases, skippedPhaseIds };
       });
     },
     [update]
+  );
+
+  const isPhaseSkipped = useCallback(
+    (phaseId: string) => state.skippedPhaseIds.includes(phaseId),
+    [state.skippedPhaseIds]
   );
 
   const hasBadge = useCallback(
@@ -210,6 +224,7 @@ export function useProgress(): ProgressHook {
     getPhaseScore,
     recordPhaseScore,
     markSectionCompleted,
+    isPhaseSkipped,
     hasBadge,
     awardBadge,
     resetAllProgress,

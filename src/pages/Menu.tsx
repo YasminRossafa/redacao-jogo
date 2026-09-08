@@ -434,7 +434,7 @@ const SECTION_PHASE_ITEMS: Record<string, PhaseTrailItem[]> = (() => {
 
 export function Menu() {
   const navigate = useNavigate();
-  const { isPhaseUnlocked, unlockPhase, getPhaseScore, hasBadge } = useProgress();
+  const { isPhaseUnlocked, unlockPhase, getPhaseScore, hasBadge, isPhaseSkipped } = useProgress();
 
   // Transient "Em Breve" toast shown when a placeholder bonus node is tapped.
   const [toast, setToast] = useState<string | null>(null);
@@ -449,23 +449,27 @@ export function Menu() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  // The astronaut sits on the first unlocked-but-unplayed phase.
+  // The astronaut sits on the first genuinely-unplayed frontier phase.
+  // Skipped phases (auto-completed by skip mechanic, never played) are excluded
+  // so the astronaut always marks the real next phase to play.
   // Falls back to the last unlocked phase so it never disappears.
   const frontierPhaseId = (() => {
-    const fresh = PHASES.find((p) => isPhaseUnlocked(p.id) && getPhaseScore(p.id) === null);
+    const fresh = PHASES.find(
+      (p) => isPhaseUnlocked(p.id) && getPhaseScore(p.id) === null && !isPhaseSkipped(p.id)
+    );
     if (fresh) return fresh.id;
     const lastUnlocked = [...PHASES].reverse().find((p) => isPhaseUnlocked(p.id));
     return lastUnlocked?.id ?? null;
   })();
 
   // The Missão Final ignores the sequential unlock chain: it opens only once every
-  // content phase of all four prior sections has been played at least once.
+  // content phase of all four prior sections has been played OR skipped.
   const missionUnlocked = MISSION_PREREQ_SECTIONS.every((secId) => {
     const section = SECTIONS.find((s) => s.id === secId);
     if (!section) return false;
     return section.phaseIds
       .filter((id) => CONTENT[id])
-      .every((id) => getPhaseScore(id) !== null);
+      .every((id) => getPhaseScore(id) !== null || isPhaseSkipped(id));
   });
 
   return (
@@ -521,6 +525,8 @@ export function Menu() {
                     ? 'locked'
                     : score !== null
                     ? 'completed'
+                    : isPhaseSkipped(phase.id)
+                    ? 'completed'  // auto-completed by skip — green node, no stars (score is null)
                     : 'current';
 
                   // Stars are suppressed for locked nodes so a failed-skip score
