@@ -500,9 +500,12 @@
 
 .bonusBranch {
   position: absolute;
-  /* Hangs below the 72px main node, clearing its label (node starts at the
-     step's 1.25rem pad; node + label occupy roughly the next ~98px). */
-  top: calc(1.25rem + 98px);
+  /* Hangs below the anchor node's full content area (node circle + gap + label +
+     gap + stars row). The anchor node circle is 72px and starts at the step's
+     1.25rem top-pad; label + gap + stars consume roughly another 53px, giving a
+     total of ~125px before the bonus should start. Using 155px adds ~30px of
+     breathing space above the bonus circle regardless of node state. */
+  top: calc(1.25rem + 155px);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -522,14 +525,18 @@
   opacity: 0.9;
 }
 
-/* Diagonal dashed connector: a thin dashed bar rotated to run from the bonus
-   node up toward the anchor node's edge. Each end tucks under an opaque node
-   circle, so only the mid-span between the two circles is visible. */
+/* Diagonal dashed connector from the top of the bonus circle up to the anchor
+   node's circle. Geometry at the new top offset (Δy≈123px, Δx≈39px):
+   hypotenuse≈129px, angle≈72° from horizontal. Width 105px stops inside the
+   anchor node's disc so the circle masks the line's tip. This geometry is
+   state-independent: locked/current/completed only change color and glow —
+   not node size or step-layout position. (nodeBig adds 6px to the node center,
+   negligible at this scale.) */
 .bonusBranch::before {
   content: '';
   position: absolute;
-  top: 6px;
-  width: 58px;
+  top: 4px;
+  width: 105px;
   height: 2px;
   transform-origin: left center;
   background: repeating-linear-gradient(
@@ -539,22 +546,22 @@
   );
 }
 
-/* Left-side step → branch hangs down-left, connector angles up-right to the node. */
+/* Left-side step → bonus hangs down-left; connector rotates up-right (~72°). */
 .bonusOutLeft {
   right: calc(50% + 6px);
 }
 .bonusOutLeft::before {
-  left: 28px;
-  transform: rotate(-62deg);
+  left: 24px;
+  transform: rotate(-72deg);
 }
 
-/* Right-side step → branch hangs down-right, connector angles up-left to the node. */
+/* Right-side step → bonus hangs down-right; connector rotates up-left (~108°). */
 .bonusOutRight {
   left: calc(50% + 6px);
 }
 .bonusOutRight::before {
-  left: 30px;
-  transform: rotate(-118deg);
+  left: 32px;
+  transform: rotate(-108deg);
 }
 
 .bonusNode {
