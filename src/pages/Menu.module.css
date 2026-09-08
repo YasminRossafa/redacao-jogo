@@ -492,14 +492,17 @@
 }
 
 /* ── "Repertórios" bonus side-branch (placeholder) ── */
-/* Absolutely positioned beside the anchor phase node. Dimmed to read as
-   "not yet available". The ::before pseudo-element draws the connector line. */
+/* Hangs BELOW the anchor phase node as a small extra branch (not part of the
+   track). A diagonal dashed connector (::before) runs from the anchor node's
+   edge down toward the nearest screen corner, so it reads as a branch off that
+   specific node rather than a second line beside the central track.
+   Dimmed to read as "not yet available". */
 
 .bonusBranch {
   position: absolute;
-  /* Vertically center the 44px bonus node on the 72px main node:
-     main node starts at 1.25rem padding, so top = 1.25rem + (72-44)/2 = 1.25rem+14px */
-  top: calc(1.25rem + 14px);
+  /* Hangs below the 72px main node, clearing its label (node starts at the
+     step's 1.25rem pad; node + label occupy roughly the next ~98px). */
+  top: calc(1.25rem + 98px);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -519,37 +522,44 @@
   opacity: 0.9;
 }
 
-/* Straight horizontal dashed connector to the anchor node */
+/* Diagonal dashed connector: a thin dashed bar rotated to run from the bonus
+   node up toward the anchor node's edge. Each end tucks under an opaque node
+   circle, so only the mid-span between the two circles is visible. */
 .bonusBranch::before {
   content: '';
   position: absolute;
-  top: 22px; /* centers on the 44px bonus node */
-  width: 14px;
+  top: 6px;
+  width: 58px;
   height: 2px;
+  transform-origin: left center;
   background: repeating-linear-gradient(
     to right,
-    rgba(255, 255, 255, 0.38) 0px, rgba(255, 255, 255, 0.38) 4px,
+    rgba(255, 255, 255, 0.4) 0px, rgba(255, 255, 255, 0.4) 4px,
     transparent 4px, transparent 7px
   );
 }
 
-/* Anchor is a left-side step → bonus extends rightward (toward center) */
-.bonusAnchorRight {
-  left: calc(100% + 2px);
+/* Left-side step → branch hangs down-left, connector angles up-right to the node. */
+.bonusOutLeft {
+  right: calc(50% + 6px);
 }
-.bonusAnchorRight::before {
-  right: 100%;
+.bonusOutLeft::before {
+  left: 28px;
+  transform: rotate(-62deg);
 }
 
-/* Anchor is a right-side step → bonus extends leftward (toward center) */
-.bonusAnchorLeft {
-  right: calc(100% + 2px);
+/* Right-side step → branch hangs down-right, connector angles up-left to the node. */
+.bonusOutRight {
+  left: calc(50% + 6px);
 }
-.bonusAnchorLeft::before {
-  left: 100%;
+.bonusOutRight::before {
+  left: 30px;
+  transform: rotate(-118deg);
 }
 
 .bonusNode {
+  position: relative;
+  z-index: 1; /* opaque circle covers the connector's lower end */
   display: flex;
   align-items: center;
   justify-content: center;
