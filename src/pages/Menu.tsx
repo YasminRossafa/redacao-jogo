@@ -246,6 +246,7 @@ const PHASE_ICON: Record<string, () => React.ReactElement> = {
   'fase-conclusao-finalidade': CometIcon,
   'fase-conclusao-detalhamento': CometIcon,
   'fase-conclusao-retomada':  CometIcon,
+  'fase-conclusao-completo':  CometIcon,
   'fase-conclusao-1':         CometIcon,
   // Redação Completa — constelação
   'fase-redacao-completa':    ConstellationIcon,
