@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
 import { PHASES, SECTIONS, CONTENT, getTierStars } from '../content/index';
@@ -186,9 +186,22 @@ function MissionShipIcon() {
   );
 }
 
+// ─── Icon — Repertórios bônus (ramo lateral) ──────────────────────────────────
+
+/** Bookmark/ribbon — the "Repertórios" bonus branch (collectible references). */
+function RepertoriosIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
+      <path d="M7 3h10a1 1 0 0 1 1 1v17l-6-3.6L6 21V4a1 1 0 0 1 1-1z" />
+      <path d="M9.3 8h5.4" stroke="#0B1224" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M9.3 11h3.2" stroke="#0B1224" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 // ─── Shared icons ─────────────────────────────────────────────────────────────
 
-/** Padlock — shown for locked phases. */
+/** Padlock — shown as a small corner badge on locked nodes. */
 function LockIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
@@ -245,6 +258,20 @@ const PHASE_ICON: Record<string, () => React.ReactElement> = {
   // Missão Final — nave
   'fase-missao-final':        MissionShipIcon,
 };
+
+// Family fallback icon per section, so every node in a section carries a
+// celestial silhouette matching its family (planeta / lua / estrela / cometa)
+// even if a specific phase has no explicit PHASE_ICON entry.
+const SECTION_FAMILY_ICON: Record<string, () => React.ReactElement> = {
+  'introducao':       PlanetIcon,
+  'dev1':             MoonIcon,
+  'dev2':             StarIcon,
+  'conclusao':        CometIcon,
+  'redacao-completa': MissionShipIcon,
+};
+
+// Sections that carry the "Repertórios" bonus side-branch (Conclusão excluded).
+const BONUS_SECTIONS = ['introducao', 'dev1', 'dev2'];
 
 // The final objective and its exclusive completion badge.
 const MISSION_ID = 'fase-missao-final';
@@ -318,9 +345,18 @@ export function Menu() {
   const navigate = useNavigate();
   const { isPhaseUnlocked, unlockPhase, getPhaseScore, hasBadge } = useProgress();
 
+  // Transient "Em Breve" toast shown when a placeholder bonus node is tapped.
+  const [toast, setToast] = useState<string | null>(null);
+
   useEffect(() => {
     unlockPhase('fase-formula');
   }, [unlockPhase]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 1900);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   // The astronaut sits on the first unlocked-but-unplayed phase.
   // Falls back to the last unlocked phase so it never disappears.
@@ -388,7 +424,11 @@ export function Menu() {
                   // Phases without content entries are "em breve" placeholders.
                   const isComingSoon = !CONTENT[phase.id];
                   const nodeTarget = EXPLAINER_ROUTE[phase.id] ?? `/fase/${phase.id}`;
-                  const PhaseNodeIcon = PHASE_ICON[phase.id] ?? MoonIcon;
+                  // Always show the family/celestial icon (dimmed when locked), so
+                  // each section's family reads at a glance; the lock state is shown
+                  // by a small corner badge instead of replacing the whole icon.
+                  const PhaseNodeIcon =
+                    PHASE_ICON[phase.id] ?? SECTION_FAMILY_ICON[section.id] ?? MoonIcon;
                   // The mission node glows gold when reachable (never while locked).
                   const missionActive = isMission && state !== 'locked';
 
@@ -419,9 +459,15 @@ export function Menu() {
                           aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : ''}`}
                         >
                           <span className={styles.nodeIcon}>
-                            {state === 'locked' ? <LockIcon /> : <PhaseNodeIcon />}
+                            <PhaseNodeIcon />
                           </span>
                         </button>
+
+                        {state === 'locked' && (
+                          <span className={styles.lockBadge} aria-hidden>
+                            <LockIcon />
+                          </span>
+                        )}
 
                         {isAstronaut && (
                           <span className={styles.astronaut} aria-hidden>
@@ -491,11 +537,41 @@ export function Menu() {
                     </div>
                   );
                 })}
+
+                {/* ── Repertórios bonus side-branch (placeholder / Em breve) ── */}
+                {BONUS_SECTIONS.includes(section.id) && (
+                  <button
+                    type="button"
+                    className={[
+                      styles.bonusBranch,
+                      phaseItems[0]?.isLeft ? styles.bonusRight : styles.bonusLeft,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => setToast('Em Breve')}
+                    aria-label="Repertórios — em breve"
+                  >
+                    <span className={styles.bonusConnector} aria-hidden />
+                    <span className={styles.bonusNode}>
+                      <span className={styles.bonusIcon} aria-hidden>
+                        <RepertoriosIcon />
+                      </span>
+                    </span>
+                    <span className={styles.bonusLabel}>Repertórios</span>
+                    <span className={styles.bonusTag}>Em breve</span>
+                  </button>
+                )}
               </div>
             </React.Fragment>
           );
         })}
       </div>
+
+      {toast && (
+        <div className={styles.toast} role="status" aria-live="polite">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

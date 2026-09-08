@@ -33,7 +33,7 @@ export interface PhaseInfo {
 export const PHASES: PhaseInfo[] = [
   // ── Introdução ───────────────────────────────────────────────────────────────
   { id: 'fase-formula',             label: 'Fórmula',            subtitle: 'Como funciona a introdução' },
-  { id: 'fase-repertorio',          label: 'Repertório',         subtitle: 'Construção do repertório sociocultural' },
+  { id: 'fase-repertorio',          label: 'Contextualização',   subtitle: 'Construção do repertório sociocultural' },
   { id: 'fase-tema-brasil',         label: 'Tema + Brasil',      subtitle: 'Contextualização do tema na sociedade' },
   { id: 'fase-problematicas',       label: 'Problemáticas',      subtitle: 'Problematização do tema' },
   { id: 'fase-introducao-completa', label: 'Introdução',         subtitle: 'Monte a introdução inteira' },

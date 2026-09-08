@@ -97,31 +97,24 @@
   z-index: 0;
 }
 
-/* Nebula tints — one radial gradient per section, very subtle */
+/* One color per section, exposed as an RGB triplet so the same hue drives both
+   the section nebula background and the per-node glow. */
+.sectionIntroducao       { --sec-rgb: 99, 102, 241; }   /* indigo — planetas */
+.sectionDev1             { --sec-rgb: 20, 184, 166; }   /* teal   — luas     */
+.sectionDev2             { --sec-rgb: 245, 158, 11; }   /* amber  — estrelas */
+.sectionConclusao        { --sec-rgb: 236, 72, 153; }   /* pink   — cometas  */
+.sectionRedacaoCompleta  { --sec-rgb: 139, 92, 246; }   /* purple — missão   */
 
-.sectionIntroducao::before {
-  background: radial-gradient(ellipse 90% 60% at 50% 40%,
-    rgba(79, 70, 229, 0.08) 0%, transparent 70%);
-}
-
-.sectionDev1::before {
-  background: radial-gradient(ellipse 90% 60% at 50% 40%,
-    rgba(15, 158, 134, 0.08) 0%, transparent 70%);
-}
-
-.sectionDev2::before {
-  background: radial-gradient(ellipse 90% 60% at 50% 40%,
-    rgba(245, 158, 11, 0.08) 0%, transparent 70%);
-}
-
-.sectionConclusao::before {
-  background: radial-gradient(ellipse 90% 60% at 50% 40%,
-    rgba(236, 72, 153, 0.08) 0%, transparent 70%);
-}
-
+/* Nebula tints — one radial gradient per section, now clearly readable. */
+.sectionIntroducao::before,
+.sectionDev1::before,
+.sectionDev2::before,
+.sectionConclusao::before,
 .sectionRedacaoCompleta::before {
-  background: radial-gradient(ellipse 90% 60% at 50% 40%,
-    rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+  background: radial-gradient(ellipse 112% 74% at 50% 42%,
+    rgba(var(--sec-rgb), 0.24) 0%,
+    rgba(var(--sec-rgb), 0.07) 55%,
+    transparent 80%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -207,11 +200,17 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--sec-rgb, 255, 255, 255), 0.4);
   background: var(--color-backdrop-elev);
   flex-shrink: 0;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.12s;
+  /* Every node carries its section-color glow; the state ring layers on top. */
+  --state-ring: 0 0 0 0 rgba(0, 0, 0, 0);
+  box-shadow:
+    0 0 22px 5px rgba(var(--sec-rgb, 148, 163, 184), 0.5),
+    0 0 7px 1px rgba(var(--sec-rgb, 148, 163, 184), 0.4),
+    var(--state-ring);
 }
 
 .node:not(:disabled):active {
@@ -225,21 +224,46 @@
   height: 84px;
 }
 
-/* Icon color is driven by state; SVGs use currentColor */
+/* Icon color is driven by state; SVGs use currentColor. The state ring composes
+   with the section-color glow via the --state-ring custom property. */
 .nodeCompleted {
   color: var(--color-success);
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.4), 0 2px 12px rgba(22, 163, 74, 0.25);
+  --state-ring: 0 0 0 2px rgba(22, 163, 74, 0.65), 0 2px 12px rgba(22, 163, 74, 0.35);
 }
 
 .nodeCurrent {
   color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.5), 0 0 22px rgba(79, 70, 229, 0.4);
+  --state-ring: 0 0 0 3px rgba(79, 70, 229, 0.6), 0 0 22px rgba(79, 70, 229, 0.45);
 }
 
+/* Locked: keep a dimmed section glow so the family color still reads. */
 .nodeLocked {
-  color: rgba(226, 232, 240, 0.4);
+  color: rgba(226, 232, 240, 0.45);
   cursor: not-allowed;
-  box-shadow: none;
+  box-shadow: 0 0 13px 2px rgba(var(--sec-rgb, 148, 163, 184), 0.3);
+}
+
+/* Small padlock badge in the node corner (replaces the full-disc lock icon). */
+.lockBadge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(11, 18, 36, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.lockBadge svg {
+  width: 13px;
+  height: 13px;
+  display: block;
 }
 
 .nodeIcon {
@@ -410,4 +434,129 @@
   border-radius: 10px;
   padding: 0.15rem 0.5rem;
   margin-top: -0.125rem;
+}
+
+/* ── "Repertórios" bonus side-branch (placeholder) ── */
+/* Absolutely positioned off the main track, on the side opposite the section's
+   first node so it never overlaps a step. Dimmed to read as "not yet available". */
+
+.bonusBranch {
+  position: absolute;
+  top: 8px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  width: 84px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.12s, transform 0.1s ease;
+}
+
+.bonusBranch:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.bonusRight {
+  right: 2px;
+}
+
+.bonusLeft {
+  left: 2px;
+}
+
+.bonusConnector {
+  width: 30px;
+  height: 0;
+  border-top: 2px dashed rgba(255, 255, 255, 0.24);
+  margin-bottom: 0.15rem;
+}
+
+.bonusRight .bonusConnector {
+  align-self: flex-start;
+  transform: rotate(20deg);
+}
+
+.bonusLeft .bonusConnector {
+  align-self: flex-end;
+  transform: rotate(-20deg);
+}
+
+.bonusNode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  background: var(--color-backdrop-elev);
+  color: rgba(203, 213, 225, 0.7);
+  box-shadow: 0 0 11px 1px rgba(148, 163, 184, 0.22);
+}
+
+.bonusIcon {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.bonusIcon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.bonusLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #CBD5E1;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.bonusTag {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.1rem 0.4rem;
+}
+
+/* ── Transient "Em Breve" toast ── */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  z-index: 50;
+  padding: 0.625rem 1.25rem;
+  border-radius: 999px;
+  background: rgba(17, 24, 44, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #F1F5F9;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  animation: toastIn 0.18s ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
 }
