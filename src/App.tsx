@@ -4,6 +4,7 @@ import { Fase } from './pages/Fase';
 import { FormulaExplicacao } from './pages/FormulaExplicacao';
 import { D1FormulaExplicacao } from './pages/D1FormulaExplicacao';
 import { D2FormulaExplicacao } from './pages/D2FormulaExplicacao';
+import { ConclusaoFormulaExplicacao } from './pages/ConclusaoFormulaExplicacao';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/formula" element={<FormulaExplicacao />} />
         <Route path="/d1-formula" element={<D1FormulaExplicacao />} />
         <Route path="/d2-formula" element={<D2FormulaExplicacao />} />
+        <Route path="/conclusao-formula" element={<ConclusaoFormulaExplicacao />} />
         <Route path="/fase/:phaseId" element={<Fase />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

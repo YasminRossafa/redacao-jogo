@@ -14,6 +14,7 @@ import { faseD2ProblemaActivities } from './fase-d2-problema';
 import { faseD2CitacaoActivities } from './fase-d2-citacao';
 import { faseD2ArgumentoActivities } from './fase-d2-argumento';
 import { faseD2CompletoActivities } from './fase-d2-completo';
+import { faseConclusaoFormulaActivities } from './fase-conclusao-formula';
 
 export interface PhaseInfo {
   id: string;
@@ -41,6 +42,7 @@ export const PHASES: PhaseInfo[] = [
   { id: 'fase-d2-argumento',        label: 'Argumento D2',       subtitle: 'O argumento aprofundado' },
   { id: 'fase-d2-completo',         label: 'D2 Completo',        subtitle: 'Monte o desenvolvimento 2 inteiro' },
   // ── Conclusão ────────────────────────────────────────────────────────────────
+  { id: 'fase-conclusao-formula',   label: 'Fórmula Conclusão',  subtitle: 'Como funciona a conclusão' },
   { id: 'fase-conclusao-1',         label: 'Conclusão',          subtitle: 'A proposta de intervenção' },
   // ── Redação Completa ─────────────────────────────────────────────────────────
   { id: 'fase-redacao-completa',    label: 'Redação Completa',   subtitle: 'Monte a redação inteira' },
@@ -93,7 +95,7 @@ export const SECTIONS: SectionInfo[] = [
   {
     id: 'conclusao',
     label: 'Conclusão',
-    phaseIds: ['fase-conclusao-1'],
+    phaseIds: ['fase-conclusao-formula', 'fase-conclusao-1'],
   },
   {
     id: 'redacao-completa',
@@ -118,6 +120,7 @@ export const CONTENT: Record<string, ActivityData[]> = {
   'fase-d2-citacao':   faseD2CitacaoActivities,
   'fase-d2-argumento': faseD2ArgumentoActivities,
   'fase-d2-completo':  faseD2CompletoActivities,
+  'fase-conclusao-formula': faseConclusaoFormulaActivities,
 };
 
 export function getNextPhaseId(currentId: string): string | null {
@@ -152,6 +155,7 @@ export const PHASE_CONFIG: Record<string, PhaseConfig> = {
   'fase-d2-citacao':          { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-d2-argumento':        { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-d2-completo':         { total: 18, unlockThreshold: 12, tiers: { expert: 15, good: 10, almostThere: 5 } },
+  'fase-conclusao-formula':   { total: 4,  unlockThreshold: 3,  tiers: { expert: 4,  good: 3,  almostThere: 2 } },
 };
 
 /** Question total for a phase, falling back to its actual activity count. */

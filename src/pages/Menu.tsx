@@ -239,6 +239,7 @@ const PHASE_ICON: Record<string, () => React.ReactElement> = {
   'fase-d2-argumento':        ShootingStarIcon,
   'fase-d2-completo':         StarClusterIcon,
   // Conclusão — cometas
+  'fase-conclusao-formula':   BookIcon,
   'fase-conclusao-1':         CometIcon,
   // Redação Completa — constelação
   'fase-redacao-completa':    ConstellationIcon,
@@ -249,6 +250,7 @@ const EXPLAINER_ROUTE: Record<string, string> = {
   'fase-formula':    '/formula',
   'fase-d1-formula': '/d1-formula',
   'fase-d2-formula': '/d2-formula',
+  'fase-conclusao-formula': '/conclusao-formula',
 };
 
 // CSS class for each section's nebula tint (applied to sectionGroup wrapper).
