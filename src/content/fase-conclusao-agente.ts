@@ -82,10 +82,10 @@ export const faseConclusaoAgenteActivities: ActivityData[] = [
     kind: 'tag-match',
     prompt: 'Associe cada agente ao tema para o qual ele é o órgão mais adequado.',
     sentences: [
-      { id: 'q5-s1', text: 'Ministério da Saúde' },
-      { id: 'q5-s2', text: 'secretarias estaduais de segurança pública' },
-      { id: 'q5-s3', text: 'secretarias municipais de assistência social' },
-      { id: 'q5-s4', text: 'Ministério da Mulher, da Família e dos Direitos Humanos' },
+      { id: 'q5-s1', text: 'Portanto, o Ministério da Saúde' },
+      { id: 'q5-s2', text: 'Assim, as secretarias estaduais de segurança pública' },
+      { id: 'q5-s3', text: 'Logo, as secretarias municipais de assistência social' },
+      { id: 'q5-s4', text: 'Sendo assim, o Ministério da Mulher, da Família e dos Direitos Humanos' },
     ],
     tags: [
       { id: 'saude',     label: 'Saúde' },

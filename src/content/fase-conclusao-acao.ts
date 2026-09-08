@@ -87,10 +87,10 @@ export const faseConclusaoAcaoActivities: ActivityData[] = [
       { id: 'q5-s4', text: 'criar campanhas nacionais de conscientização' },
     ],
     tags: [
-      { id: 'saude',     label: 'Ministério da Saúde' },
-      { id: 'violencia', label: 'Secretarias estaduais de segurança pública' },
-      { id: 'solidao',   label: 'Secretarias municipais de assistência social' },
-      { id: 'cuidado',   label: 'Ministério da Mulher, da Família e dos Direitos Humanos' },
+      { id: 'saude',     label: 'Portanto, o Ministério da Saúde' },
+      { id: 'violencia', label: 'Assim, as secretarias estaduais de segurança pública' },
+      { id: 'solidao',   label: 'Logo, as secretarias municipais de assistência social' },
+      { id: 'cuidado',   label: 'Sendo assim, o Ministério da Mulher, da Família e dos Direitos Humanos' },
     ],
     mapping: {
       'q5-s1': 'saude',

@@ -142,7 +142,7 @@ export const faseConclusaoFinalidadeActivities: ActivityData[] = [
     kind: 'build',
     prompt: 'Tema "saúde": monte a proposta até a finalidade (ação + modo/meio + finalidade) na ordem correta.',
     fragments: [
-      { id: 'q7-f1', text: 'o Ministério da Saúde deve investir em infraestrutura hospitalar',        correct: true  },
+      { id: 'q7-f1', text: 'Portanto, o Ministério da Saúde deve investir em infraestrutura hospitalar', correct: true  },
       { id: 'q7-f2', text: 'por meio da destinação de verba específica para a contratação de novos profissionais', correct: true },
       { id: 'q7-f3', text: 'com a finalidade de reduzir a sobrecarga das unidades de saúde',          correct: true  },
       { id: 'q7-d1', text: 'em detalhe, contratar mais enfermeiros',                                  correct: false },
@@ -157,7 +157,7 @@ export const faseConclusaoFinalidadeActivities: ActivityData[] = [
     kind: 'build',
     prompt: 'Tema "violência urbana": monte a proposta até a finalidade (ação + modo/meio + finalidade) na ordem correta.',
     fragments: [
-      { id: 'q8-f1', text: 'as secretarias estaduais de segurança pública devem ampliar o policiamento comunitário', correct: true },
+      { id: 'q8-f1', text: 'Assim, as secretarias estaduais de segurança pública devem ampliar o policiamento comunitário', correct: true },
       { id: 'q8-f2', text: 'por meio da criação de bases fixas em bairros periféricos',                              correct: true },
       { id: 'q8-f3', text: 'com o objetivo de reduzir os índices de criminalidade nessas regiões',                  correct: true },
       { id: 'q8-d1', text: 'como, por exemplo, mais iluminação pública',                                            correct: false },
