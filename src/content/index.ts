@@ -13,6 +13,7 @@ import { faseD2FormulaActivities } from './fase-d2-formula';
 import { faseD2ProblemaActivities } from './fase-d2-problema';
 import { faseD2CitacaoActivities } from './fase-d2-citacao';
 import { faseD2ArgumentoActivities } from './fase-d2-argumento';
+import { faseD2CompletoActivities } from './fase-d2-completo';
 
 export interface PhaseInfo {
   id: string;
@@ -116,6 +117,7 @@ export const CONTENT: Record<string, ActivityData[]> = {
   'fase-d2-problema': faseD2ProblemaActivities,
   'fase-d2-citacao':   faseD2CitacaoActivities,
   'fase-d2-argumento': faseD2ArgumentoActivities,
+  'fase-d2-completo':  faseD2CompletoActivities,
 };
 
 export function getNextPhaseId(currentId: string): string | null {
@@ -149,6 +151,7 @@ export const PHASE_CONFIG: Record<string, PhaseConfig> = {
   'fase-d2-problema':         { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-d2-citacao':          { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-d2-argumento':        { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
+  'fase-d2-completo':         { total: 18, unlockThreshold: 12, tiers: { expert: 15, good: 10, almostThere: 5 } },
 };
 
 /** Question total for a phase, falling back to its actual activity count. */
