@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
-import { PHASES, SECTIONS, CONTENT, getTierStars } from '../content/index';
+import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, getTierStars } from '../content/index';
 import type { PhaseInfo, SectionInfo } from '../content/index';
 import styles from './Menu.module.css';
 
 // ─── Node states ──────────────────────────────────────────────────────────────
 
-type NodeState = 'locked' | 'current' | 'completed';
+type NodeState = 'locked' | 'current' | 'completed' | 'skip';
 
 const NODE_STATE_CLASS: Record<NodeState, string> = {
   locked:    styles.nodeLocked,
   current:   styles.nodeCurrent,
   completed: styles.nodeCompleted,
+  skip:      styles.nodeSkip,
 };
 
 // ─── Icons — Introdução: planetas ─────────────────────────────────────────────
@@ -415,20 +416,40 @@ export function Menu() {
               >
                 {phaseItems.map(({ phase, isLeft, isFinal }) => {
                   const isMission = phase.id === MISSION_ID;
-                  // The Missão Final gates on section completion, not the chain.
                   const unlocked = isMission ? missionUnlocked : isPhaseUnlocked(phase.id);
                   const score = getPhaseScore(phase.id);
-                  const state: NodeState = !unlocked
+
+                  // A completo phase is in 'skip' state when its section has started
+                  // (first phase unlocked) but the completo itself is not yet normally
+                  // unlocked and has never been attempted (no score recorded).
+                  const completoSectionId = COMPLETO_SECTION[phase.id];
+                  const inSkipState =
+                    !isMission &&
+                    !!completoSectionId &&
+                    isPhaseUnlocked(section.phaseIds[0]) &&
+                    !unlocked &&
+                    score === null;
+
+                  const state: NodeState = inSkipState
+                    ? 'skip'
+                    : !unlocked
                     ? 'locked'
                     : score !== null
                     ? 'completed'
                     : 'current';
+
+                  // Stars are suppressed for locked nodes so a failed-skip score
+                  // (recorded on the completo but still gated) doesn't show stars
+                  // on a locked disc.
                   const stars =
-                    score !== null ? getTierStars(score.correctCount, phase.id) : null;
+                    score !== null && state !== 'locked'
+                      ? getTierStars(score.correctCount, phase.id)
+                      : null;
                   const isAstronaut = phase.id === frontierPhaseId;
                   // Phases without content entries are "em breve" placeholders.
                   const isComingSoon = !CONTENT[phase.id];
-                  const nodeTarget = EXPLAINER_ROUTE[phase.id] ?? `/fase/${phase.id}`;
+                  const baseTarget = EXPLAINER_ROUTE[phase.id] ?? `/fase/${phase.id}`;
+                  const nodeTarget = inSkipState ? `${baseTarget}?skip=1` : baseTarget;
                   // Always show the family/celestial icon (dimmed when locked), so
                   // each section's family reads at a glance; the lock state is shown
                   // by a small corner badge instead of replacing the whole icon.
@@ -461,9 +482,9 @@ export function Menu() {
                           ]
                             .filter(Boolean)
                             .join(' ')}
-                          onClick={() => state !== 'locked' && navigate(nodeTarget)}
+                          onClick={() => (state !== 'locked') && navigate(nodeTarget)}
                           disabled={state === 'locked'}
-                          aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : ''}`}
+                          aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : state === 'skip' ? ' — pular esta etapa' : ''}`}
                         >
                           <span className={styles.nodeIcon}>
                             <PhaseNodeIcon />
@@ -502,6 +523,10 @@ export function Menu() {
                         <span className={styles.missionLockLabel}>
                           Complete todas as missões anteriores
                         </span>
+                      )}
+
+                      {state === 'skip' && (
+                        <span className={styles.skipBadge}>Pular esta etapa</span>
                       )}
 
                       {stars !== null && (

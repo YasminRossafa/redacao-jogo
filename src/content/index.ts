@@ -64,6 +64,22 @@ export const PHASES: PhaseInfo[] = [
 
 export const PHASE_SEQUENCE: string[] = PHASES.map((p) => p.id);
 
+// ─── Skip-mechanic section maps ───────────────────────────────────────────────
+// Maps each skip-eligible section to its capstone (completo) phase.
+// Missão Final is intentionally excluded — it has its own unlock gate.
+
+export const SECTION_COMPLETO: Readonly<Record<string, string>> = {
+  'introducao': 'fase-introducao-completa',
+  'dev1':       'fase-d1-completo',
+  'dev2':       'fase-d2-completo',
+  'conclusao':  'fase-conclusao-completo',
+};
+
+/** Reverse of SECTION_COMPLETO: completo phase id → its section id. */
+export const COMPLETO_SECTION: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(SECTION_COMPLETO).map(([sId, pId]) => [pId, sId])
+);
+
 // ─── Section grouping (visual only — progression still follows PHASE_SEQUENCE) ─
 
 export interface SectionInfo {

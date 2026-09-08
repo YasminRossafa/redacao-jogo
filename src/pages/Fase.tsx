@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useParams, useNavigate, Navigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
 import {
   CONTENT,
   PHASES,
+  SECTIONS,
+  COMPLETO_SECTION,
   getNextPhaseId,
   getTier,
   getPhaseTotal,
@@ -321,12 +323,16 @@ function ReviewDetail({ result }: { result: ActivityResult }) {
 export function Fase() {
   const { phaseId } = useParams<{ phaseId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const skipMode = searchParams.get('skip') === '1';
+
   const {
     recordActivityResult,
     unlockPhase,
     incrementPhaseErrors,
     resetPhaseErrors,
     recordPhaseScore,
+    markSectionCompleted,
     awardBadge,
   } = useProgress();
 
@@ -396,19 +402,41 @@ export function Fase() {
     if (!showResults || !phaseId) return;
     const correctCount = results.filter((r) => r.success).length;
     const total = getPhaseTotal(phaseId);
-    recordPhaseScore(phaseId, correctCount, total, bestCombo);
     const threshold = getUnlockThreshold(phaseId);
+    const passed = correctCount >= threshold;
+
+    // Skip-mode: a failed attempt records only the score (so the skip badge
+    // disappears on the menu); it does NOT unlock anything. A passed attempt
+    // runs the full normal unlock path AND bulk-completes the rest of the section.
+    if (skipMode && !passed) {
+      recordPhaseScore(phaseId, correctCount, total, bestCombo);
+      return;
+    }
+
+    recordPhaseScore(phaseId, correctCount, total, bestCombo);
     if (phaseId === MISSION_PHASE_ID) {
-      // The finale grants its own exclusive badge — never the generic Sabichão.
-      if (correctCount >= threshold) awardBadge(MISSION_BADGE);
+      if (passed) awardBadge(MISSION_BADGE);
     } else if (total > 0 && correctCount === total) {
       awardBadge(`sabichao-${phaseId}`);
     }
-    if (correctCount >= threshold) {
+    if (passed) {
       const nextId = getNextPhaseId(phaseId);
       if (nextId) unlockPhase(nextId);
     }
-  }, [showResults, phaseId, results, bestCombo, recordPhaseScore, awardBadge, unlockPhase]);
+
+    // On a successful skip, bulk-unlock every other phase in this section so
+    // the section appears fully completed and Missão Final can unlock.
+    if (skipMode && passed) {
+      const sectionId = COMPLETO_SECTION[phaseId];
+      const section = sectionId ? SECTIONS.find((s) => s.id === sectionId) : null;
+      if (section) {
+        const others = section.phaseIds
+          .filter((id) => id !== phaseId)
+          .map((id) => ({ id, total: getPhaseTotal(id) }));
+        markSectionCompleted(others);
+      }
+    }
+  }, [showResults, phaseId, results, bestCombo, skipMode, recordPhaseScore, awardBadge, unlockPhase, markSectionCompleted]);
 
   const advance = useCallback(() => {
     if (activityIndex < shuffledActivities.length - 1) {
@@ -572,7 +600,11 @@ export function Fase() {
 
           {!isMission && (
             <p className={styles.unlockNote}>
-              {nextPhase
+              {skipMode
+                ? meetsThreshold
+                  ? 'Seção pulada! As demais fases foram marcadas como concluídas.'
+                  : `Pontuação insuficiente para pular (mín. ${threshold}). Continue praticando as fases anteriores.`
+                : nextPhase
                 ? meetsThreshold
                   ? `${nextPhase.label} liberada!`
                   : `Tente novamente para liberar ${nextPhase.label}`

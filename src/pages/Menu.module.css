@@ -421,6 +421,61 @@
   margin-top: -0.125rem;
 }
 
+/* ── Skip state: completo phase available as a shortcut before normal unlock ── */
+/* Cyan / dashed ring — distinct from all section colors and from the mission gold. */
+
+.nodeSkip {
+  color: #67E8F9; /* cyan-300 */
+  border-style: dashed;
+  border-color: rgba(6, 182, 212, 0.65);
+  cursor: pointer;
+  animation: skipPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes skipPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 22px 5px rgba(var(--sec-rgb, 148, 163, 184), 0.5),
+      0 0 7px 1px rgba(var(--sec-rgb, 148, 163, 184), 0.4),
+      0 0 0 2px rgba(6, 182, 212, 0.38),
+      0 0 14px rgba(6, 182, 212, 0.28);
+  }
+  50% {
+    box-shadow:
+      0 0 22px 5px rgba(var(--sec-rgb, 148, 163, 184), 0.5),
+      0 0 7px 1px rgba(var(--sec-rgb, 148, 163, 184), 0.4),
+      0 0 0 3px rgba(6, 182, 212, 0.7),
+      0 0 26px rgba(6, 182, 212, 0.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nodeSkip {
+    animation: none;
+    box-shadow:
+      0 0 22px 5px rgba(var(--sec-rgb, 148, 163, 184), 0.5),
+      0 0 0 2px rgba(6, 182, 212, 0.6),
+      0 0 16px rgba(6, 182, 212, 0.4);
+  }
+}
+
+/* "Pular esta etapa" ribbon below the skip node */
+.skipBadge {
+  max-width: 130px;
+  text-align: center;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(103, 232, 249, 0.95);
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.38);
+  border-radius: 10px;
+  padding: 0.2rem 0.5rem;
+  line-height: 1.3;
+  margin-top: -0.125rem;
+}
+
 /* ── "Em breve" badge for locked placeholder phases ── */
 
 .comingSoonBadge {

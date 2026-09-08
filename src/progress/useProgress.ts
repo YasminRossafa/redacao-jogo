@@ -73,6 +73,9 @@ export interface ProgressHook {
   resetPhaseErrors: (phaseId: string) => void;
   getPhaseScore: (phaseId: string) => PhaseScore | null;
   recordPhaseScore: (phaseId: string, correctCount: number, total: number, bestCombo: number) => void;
+  /** Bulk-unlock every phase in `phases` and record a 0-score for any that have
+   *  no existing score. Used when a successful skip completes an entire section. */
+  markSectionCompleted: (phases: Array<{ id: string; total: number }>) => void;
   hasBadge: (badgeId: string) => boolean;
   awardBadge: (badgeId: string) => void;
   resetAllProgress: () => void;
@@ -161,6 +164,24 @@ export function useProgress(): ProgressHook {
     [update]
   );
 
+  const markSectionCompleted = useCallback(
+    (phases: Array<{ id: string; total: number }>) => {
+      update((prev) => {
+        let { unlockedPhases, phaseScores } = prev;
+        for (const { id, total } of phases) {
+          if (!unlockedPhases.includes(id)) {
+            unlockedPhases = [...unlockedPhases, id];
+          }
+          if (!phaseScores[id]) {
+            phaseScores = { ...phaseScores, [id]: { correctCount: 0, total, bestCombo: 0 } };
+          }
+        }
+        return { ...prev, unlockedPhases, phaseScores };
+      });
+    },
+    [update]
+  );
+
   const hasBadge = useCallback(
     (badgeId: string) => state.badges.includes(badgeId),
     [state.badges]
@@ -188,6 +209,7 @@ export function useProgress(): ProgressHook {
     resetPhaseErrors,
     getPhaseScore,
     recordPhaseScore,
+    markSectionCompleted,
     hasBadge,
     awardBadge,
     resetAllProgress,
