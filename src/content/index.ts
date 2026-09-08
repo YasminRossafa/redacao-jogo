@@ -58,7 +58,6 @@ export const PHASES: PhaseInfo[] = [
   { id: 'fase-conclusao-detalhamento', label: 'Detalhamento',    subtitle: 'Um exemplo concreto da proposta' },
   { id: 'fase-conclusao-retomada',  label: 'Retomada',           subtitle: 'O fechamento que retoma o repertório' },
   { id: 'fase-conclusao-completo',  label: 'Conclusão Completa', subtitle: 'Monte a conclusão inteira' },
-  { id: 'fase-conclusao-1',         label: 'Conclusão',          subtitle: 'A proposta de intervenção' },
   // ── Missão Final ─────────────────────────────────────────────────────────────
   { id: 'fase-missao-final',        label: 'Missão Final: Retorno à Terra', subtitle: 'A culminância de tudo o que você aprendeu' },
 ];
@@ -110,7 +109,7 @@ export const SECTIONS: SectionInfo[] = [
   {
     id: 'conclusao',
     label: 'Conclusão',
-    phaseIds: ['fase-conclusao-formula', 'fase-conclusao-agente', 'fase-conclusao-acao', 'fase-conclusao-modo', 'fase-conclusao-finalidade', 'fase-conclusao-detalhamento', 'fase-conclusao-retomada', 'fase-conclusao-completo', 'fase-conclusao-1'],
+    phaseIds: ['fase-conclusao-formula', 'fase-conclusao-agente', 'fase-conclusao-acao', 'fase-conclusao-modo', 'fase-conclusao-finalidade', 'fase-conclusao-detalhamento', 'fase-conclusao-retomada', 'fase-conclusao-completo'],
   },
   {
     id: 'redacao-completa',
