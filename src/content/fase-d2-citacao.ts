@@ -45,7 +45,7 @@ export const faseD2CitacaoActivities: ActivityData[] = [
   {
     id: 'fase-d2-citacao-3',
     kind: 'error-spot',
-    prompt: 'As frases abaixo formam um D2 sobre violência urbana. Uma citação está no estilo errado. Toque na frase com erro.',
+    prompt: 'As frases abaixo formam um D2 sobre violência urbana. Uma delas está no estilo errado. Toque na frase com erro.',
     sentences: [
       { id: 'q3-s1', text: 'Ademais, destaca-se a impunidade de crimes violentos como um fator que perpetua a insegurança na sociedade brasileira, uma vez que a ausência de punição efetiva reforça a sensação de que a violência não terá consequências.' },
       { id: 'q3-s2', text: 'Segundo dados do Fórum Brasileiro de Segurança Pública, o Brasil registrou mais de 47 mil homicídios em um único ano.' },
