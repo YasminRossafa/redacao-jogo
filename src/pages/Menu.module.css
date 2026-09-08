@@ -144,7 +144,7 @@
 /* ── Trail step ─────────────────────────── */
 
 .step {
-  position: relative;
+  position: relative; /* anchors the absolutely-positioned bonus branch */
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -437,18 +437,20 @@
 }
 
 /* ── "Repertórios" bonus side-branch (placeholder) ── */
-/* Absolutely positioned off the main track, on the side opposite the section's
-   first node so it never overlaps a step. Dimmed to read as "not yet available". */
+/* Absolutely positioned beside the anchor phase node. Dimmed to read as
+   "not yet available". The ::before pseudo-element draws the connector line. */
 
 .bonusBranch {
   position: absolute;
-  top: 8px;
+  /* Vertically center the 44px bonus node on the 72px main node:
+     main node starts at 1.25rem padding, so top = 1.25rem + (72-44)/2 = 1.25rem+14px */
+  top: calc(1.25rem + 14px);
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.2rem;
-  width: 84px;
+  width: 58px;
   padding: 0;
   background: none;
   border: none;
@@ -462,29 +464,34 @@
   opacity: 0.9;
 }
 
-.bonusRight {
-  right: 2px;
+/* Straight horizontal dashed connector to the anchor node */
+.bonusBranch::before {
+  content: '';
+  position: absolute;
+  top: 22px; /* centers on the 44px bonus node */
+  width: 14px;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.38) 0px, rgba(255, 255, 255, 0.38) 4px,
+    transparent 4px, transparent 7px
+  );
 }
 
-.bonusLeft {
-  left: 2px;
+/* Anchor is a left-side step → bonus extends rightward (toward center) */
+.bonusAnchorRight {
+  left: calc(100% + 2px);
+}
+.bonusAnchorRight::before {
+  right: 100%;
 }
 
-.bonusConnector {
-  width: 30px;
-  height: 0;
-  border-top: 2px dashed rgba(255, 255, 255, 0.24);
-  margin-bottom: 0.15rem;
+/* Anchor is a right-side step → bonus extends leftward (toward center) */
+.bonusAnchorLeft {
+  right: calc(100% + 2px);
 }
-
-.bonusRight .bonusConnector {
-  align-self: flex-start;
-  transform: rotate(20deg);
-}
-
-.bonusLeft .bonusConnector {
-  align-self: flex-end;
-  transform: rotate(-20deg);
+.bonusAnchorLeft::before {
+  left: 100%;
 }
 
 .bonusNode {

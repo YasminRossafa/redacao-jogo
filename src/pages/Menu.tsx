@@ -270,8 +270,13 @@ const SECTION_FAMILY_ICON: Record<string, () => React.ReactElement> = {
   'redacao-completa': MissionShipIcon,
 };
 
-// Sections that carry the "Repertórios" bonus side-branch (Conclusão excluded).
-const BONUS_SECTIONS = ['introducao', 'dev1', 'dev2'];
+// Which specific phase the bonus node anchors to, per section.
+// Introdução → "Contextualização" (fase-repertorio); D1/D2 → the Citação phase.
+const BONUS_ANCHOR: Record<string, string> = {
+  'introducao': 'fase-repertorio',
+  'dev1':       'fase-d1-citacao',
+  'dev2':       'fase-d2-citacao',
+};
 
 // The final objective and its exclusive completion badge.
 const MISSION_ID = 'fase-missao-final';
@@ -431,6 +436,8 @@ export function Menu() {
                     PHASE_ICON[phase.id] ?? SECTION_FAMILY_ICON[section.id] ?? MoonIcon;
                   // The mission node glows gold when reachable (never while locked).
                   const missionActive = isMission && state !== 'locked';
+                  // This phase is the anchor for the Repertórios bonus branch.
+                  const isAnchor = BONUS_ANCHOR[section.id] === phase.id;
 
                   return (
                     <div
@@ -534,33 +541,31 @@ export function Menu() {
                               )}
                         </div>
                       )}
+
+                      {/* ── Repertórios bonus side-branch: anchored to this node ── */}
+                      {isAnchor && (
+                        <button
+                          type="button"
+                          className={[
+                            styles.bonusBranch,
+                            isLeft ? styles.bonusAnchorRight : styles.bonusAnchorLeft,
+                          ].join(' ')}
+                          onClick={() => setToast('Em Breve')}
+                          aria-label="Repertórios — em breve"
+                        >
+                          <span className={styles.bonusNode}>
+                            <span className={styles.bonusIcon} aria-hidden>
+                              <RepertoriosIcon />
+                            </span>
+                          </span>
+                          <span className={styles.bonusLabel}>Repertórios</span>
+                          <span className={styles.bonusTag}>Em breve</span>
+                        </button>
+                      )}
                     </div>
                   );
                 })}
 
-                {/* ── Repertórios bonus side-branch (placeholder / Em breve) ── */}
-                {BONUS_SECTIONS.includes(section.id) && (
-                  <button
-                    type="button"
-                    className={[
-                      styles.bonusBranch,
-                      phaseItems[0]?.isLeft ? styles.bonusRight : styles.bonusLeft,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => setToast('Em Breve')}
-                    aria-label="Repertórios — em breve"
-                  >
-                    <span className={styles.bonusConnector} aria-hidden />
-                    <span className={styles.bonusNode}>
-                      <span className={styles.bonusIcon} aria-hidden>
-                        <RepertoriosIcon />
-                      </span>
-                    </span>
-                    <span className={styles.bonusLabel}>Repertórios</span>
-                    <span className={styles.bonusTag}>Em breve</span>
-                  </button>
-                )}
               </div>
             </React.Fragment>
           );
