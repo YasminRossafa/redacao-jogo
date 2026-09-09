@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
-import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, getTierStars } from '../content/index';
+import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, getTierStars } from '../content/index';
 import type { PhaseInfo, SectionInfo } from '../content/index';
 import styles from './Menu.module.css';
 
@@ -659,25 +659,84 @@ export function Menu() {
                       )}
 
                       {/* ── Repertórios bonus side-branch: hangs below this node ── */}
-                      {isAnchor && (
-                        <button
-                          type="button"
-                          className={[
-                            styles.bonusBranch,
-                            isLeft ? styles.bonusOutLeft : styles.bonusOutRight,
-                          ].join(' ')}
-                          onClick={() => setToast('Em Breve')}
-                          aria-label="Repertórios — em breve"
-                        >
-                          <span className={styles.bonusNode}>
-                            <span className={styles.bonusIcon} aria-hidden>
-                              <RepertoriosIcon />
+                      {isAnchor && (() => {
+                        const bonusId = BONUS_PHASE_BY_SECTION[section.id];
+                        // A playable bonus exists only where a bonus phase is
+                        // mapped AND its content is built. It unlocks with the
+                        // SECTION itself (its first stage becoming available) —
+                        // never gated behind completing any stage.
+                        const bonusReady =
+                          !!bonusId &&
+                          !!CONTENT[bonusId] &&
+                          isPhaseUnlocked(section.phaseIds[0]);
+
+                        if (!bonusReady) {
+                          // Placeholder branch — dimmed; taps show an "Em Breve" toast.
+                          return (
+                            <button
+                              type="button"
+                              className={[
+                                styles.bonusBranch,
+                                isLeft ? styles.bonusOutLeft : styles.bonusOutRight,
+                              ].join(' ')}
+                              onClick={() => setToast('Em Breve')}
+                              aria-label="Repertórios — em breve"
+                            >
+                              <span className={styles.bonusNode}>
+                                <span className={styles.bonusIcon} aria-hidden>
+                                  <RepertoriosIcon />
+                                </span>
+                              </span>
+                              <span className={styles.bonusLabel}>Repertórios</span>
+                              <span className={styles.bonusTag}>Em breve</span>
+                            </button>
+                          );
+                        }
+
+                        const bonusScore = getPhaseScore(bonusId);
+                        const bonusStars = bonusScore
+                          ? getTierStars(bonusScore.correctCount, bonusId)
+                          : null;
+
+                        return (
+                          <button
+                            type="button"
+                            className={[
+                              styles.bonusBranch,
+                              styles.bonusBranchActive,
+                              isLeft ? styles.bonusOutLeft : styles.bonusOutRight,
+                            ].join(' ')}
+                            onClick={() => navigate(`/fase/${bonusId}`)}
+                            aria-label="Repertórios — fase bônus"
+                          >
+                            <span className={[styles.bonusNode, styles.bonusNodeActive].join(' ')}>
+                              <span className={styles.bonusIcon} aria-hidden>
+                                <RepertoriosIcon />
+                              </span>
                             </span>
-                          </span>
-                          <span className={styles.bonusLabel}>Repertórios</span>
-                          <span className={styles.bonusTag}>Em breve</span>
-                        </button>
-                      )}
+                            <span className={styles.bonusLabel}>Repertórios</span>
+                            <span className={[styles.bonusTag, styles.bonusTagActive].join(' ')}>
+                              Bônus
+                            </span>
+                            {bonusStars !== null && (
+                              <div
+                                className={styles.stars}
+                                aria-label={`${bonusStars} de 3 estrelas`}
+                              >
+                                {[0, 1, 2].map((i) => (
+                                  <span
+                                    key={i}
+                                    className={i < bonusStars ? styles.starOn : styles.starOff}
+                                    aria-hidden
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })()}
                     </div>
                   );
                 })}

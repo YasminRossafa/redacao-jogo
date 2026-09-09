@@ -4,6 +4,8 @@ import { useProgress } from '../progress/useProgress';
 import {
   CONTENT,
   PHASES,
+  ALL_PHASES,
+  BONUS_PHASE_IDS,
   SECTIONS,
   COMPLETO_SECTION,
   getNextPhaseId,
@@ -337,8 +339,9 @@ export function Fase() {
   } = useProgress();
 
   const baseActivities = phaseId ? (CONTENT[phaseId] ?? []) : [];
-  const phase = PHASES.find((p) => p.id === phaseId);
+  const phase = ALL_PHASES.find((p) => p.id === phaseId);
   const isMission = phaseId === MISSION_PHASE_ID;
+  const isBonus = phaseId ? BONUS_PHASE_IDS.has(phaseId) : false;
 
   // The Missão Final keeps its fixed block order; every other phase shuffles.
   const [shuffledActivities, setShuffledActivities] = useState<ActivityData[]>(
@@ -598,7 +601,11 @@ export function Fase() {
             acerto{bestCombo === 1 ? '' : 's'} seguido{bestCombo === 1 ? '' : 's'}
           </p>
 
-          {!isMission && (
+          {isBonus ? (
+            <p className={styles.unlockNote}>
+              Fase bônus — pratique quantas vezes quiser para dominar os repertórios.
+            </p>
+          ) : !isMission && (
             <p className={styles.unlockNote}>
               {skipMode
                 ? meetsThreshold

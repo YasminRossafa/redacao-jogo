@@ -23,6 +23,7 @@ import { faseConclusaoDetalhamentoActivities } from './fase-conclusao-detalhamen
 import { faseConclusaoRetomadaActivities } from './fase-conclusao-retomada';
 import { faseConclusaoCompletoActivities } from './fase-conclusao-completo';
 import { faseMissaoFinalActivities } from './fase-missao-final';
+import { faseRepertoriosBonusActivities } from './fase-repertorios-bonus';
 
 export interface PhaseInfo {
   id: string;
@@ -63,6 +64,31 @@ export const PHASES: PhaseInfo[] = [
 ];
 
 export const PHASE_SEQUENCE: string[] = PHASES.map((p) => p.id);
+
+// ─── Bonus phases (off-track side branches) ───────────────────────────────────
+// Bonus phases hang off a section as collectible side-quests. They are NOT part
+// of PHASE_SEQUENCE, so they never affect getNextPhaseId / the sequential unlock
+// chain / the astronaut frontier. They carry their own PhaseInfo + CONTENT +
+// PHASE_CONFIG so Fase.tsx renders them exactly like any other phase.
+
+export const BONUS_PHASES: PhaseInfo[] = [
+  {
+    id: 'fase-repertorios-bonus',
+    label: 'Repertórios',
+    subtitle: 'Vários repertórios servem à mesma introdução',
+  },
+];
+
+/** Which bonus phase (if any) hangs off each section. A section absent here
+ *  keeps its placeholder ("Em breve") bonus branch. */
+export const BONUS_PHASE_BY_SECTION: Readonly<Record<string, string>> = {
+  'introducao': 'fase-repertorios-bonus',
+};
+
+export const BONUS_PHASE_IDS: ReadonlySet<string> = new Set(BONUS_PHASES.map((p) => p.id));
+
+/** Every phase Fase.tsx may render — the sequential track plus bonus branches. */
+export const ALL_PHASES: PhaseInfo[] = [...PHASES, ...BONUS_PHASES];
 
 // ─── Skip-mechanic section maps ───────────────────────────────────────────────
 // Maps each skip-eligible section to its capstone (completo) phase.
@@ -159,6 +185,7 @@ export const CONTENT: Record<string, ActivityData[]> = {
   'fase-conclusao-retomada': faseConclusaoRetomadaActivities,
   'fase-conclusao-completo': faseConclusaoCompletoActivities,
   'fase-missao-final': faseMissaoFinalActivities,
+  'fase-repertorios-bonus': faseRepertoriosBonusActivities,
 };
 
 export function getNextPhaseId(currentId: string): string | null {
@@ -202,6 +229,9 @@ export const PHASE_CONFIG: Record<string, PhaseConfig> = {
   'fase-conclusao-retomada':  { total: 8,  unlockThreshold: 6,  tiers: { expert: 7,  good: 6,  almostThere: 3 } },
   'fase-conclusao-completo':  { total: 15, unlockThreshold: 12, tiers: { expert: 13, good: 8,  almostThere: 4 } },
   'fase-missao-final':        { total: 30, unlockThreshold: 20, tiers: { expert: 25, good: 17, almostThere: 8 } },
+  // Bonus phase: gates nothing (unlockThreshold irrelevant), but keeps a normal
+  // 10-question star display consistent with the other Introdução phases.
+  'fase-repertorios-bonus':   { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
 };
 
 /** Question total for a phase, falling back to its actual activity count. */

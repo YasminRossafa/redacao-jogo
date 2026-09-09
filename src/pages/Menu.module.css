@@ -610,6 +610,28 @@
   padding: 0.1rem 0.4rem;
 }
 
+/* ── "Repertórios" bonus — unlocked & playable variant ── */
+/* Used for the Introdução bonus once its section is reached: full opacity, a
+   solid gold rim, and a filled "Bônus" tag so it reads as a live side-quest
+   rather than a dimmed placeholder. */
+
+.bonusBranchActive {
+  opacity: 1;
+}
+
+.bonusNodeActive {
+  border-style: solid;
+  border-color: rgba(250, 204, 21, 0.6);
+  color: #FDE68A;
+  box-shadow: 0 0 13px 2px rgba(250, 204, 21, 0.32);
+}
+
+.bonusTagActive {
+  color: #0B1224;
+  background: rgba(250, 204, 21, 0.92);
+  border-color: transparent;
+}
+
 /* ── Transient "Em Breve" toast ── */
 
 .toast {
