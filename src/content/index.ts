@@ -24,6 +24,7 @@ import { faseConclusaoRetomadaActivities } from './fase-conclusao-retomada';
 import { faseConclusaoCompletoActivities } from './fase-conclusao-completo';
 import { faseMissaoFinalActivities } from './fase-missao-final';
 import { faseRepertoriosBonusActivities } from './fase-repertorios-bonus';
+import { faseD1RepertoriosBonusActivities } from './fase-d1-repertorios-bonus';
 
 export interface PhaseInfo {
   id: string;
@@ -77,12 +78,18 @@ export const BONUS_PHASES: PhaseInfo[] = [
     label: 'Repertórios',
     subtitle: 'Vários repertórios servem à mesma introdução',
   },
+  {
+    id: 'fase-d1-repertorios-bonus',
+    label: 'Repertórios',
+    subtitle: 'Transforme o texto de apoio em citação sem copiar',
+  },
 ];
 
 /** Which bonus phase (if any) hangs off each section. A section absent here
  *  keeps its placeholder ("Em breve") bonus branch. */
 export const BONUS_PHASE_BY_SECTION: Readonly<Record<string, string>> = {
   'introducao': 'fase-repertorios-bonus',
+  'dev1':       'fase-d1-repertorios-bonus',
 };
 
 export const BONUS_PHASE_IDS: ReadonlySet<string> = new Set(BONUS_PHASES.map((p) => p.id));
@@ -186,6 +193,7 @@ export const CONTENT: Record<string, ActivityData[]> = {
   'fase-conclusao-completo': faseConclusaoCompletoActivities,
   'fase-missao-final': faseMissaoFinalActivities,
   'fase-repertorios-bonus': faseRepertoriosBonusActivities,
+  'fase-d1-repertorios-bonus': faseD1RepertoriosBonusActivities,
 };
 
 export function getNextPhaseId(currentId: string): string | null {
@@ -229,9 +237,10 @@ export const PHASE_CONFIG: Record<string, PhaseConfig> = {
   'fase-conclusao-retomada':  { total: 8,  unlockThreshold: 6,  tiers: { expert: 7,  good: 6,  almostThere: 3 } },
   'fase-conclusao-completo':  { total: 15, unlockThreshold: 12, tiers: { expert: 13, good: 8,  almostThere: 4 } },
   'fase-missao-final':        { total: 30, unlockThreshold: 20, tiers: { expert: 25, good: 17, almostThere: 8 } },
-  // Bonus phase: gates nothing (unlockThreshold irrelevant), but keeps a normal
-  // 10-question star display consistent with the other Introdução phases.
+  // Bonus phases: gate nothing (unlockThreshold irrelevant), but keep a normal
+  // star display consistent with their section's phases.
   'fase-repertorios-bonus':   { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
+  'fase-d1-repertorios-bonus': { total: 5, unlockThreshold: 4,  tiers: { expert: 5,  good: 4,  almostThere: 2 } },
 };
 
 /** Question total for a phase, falling back to its actual activity count. */
