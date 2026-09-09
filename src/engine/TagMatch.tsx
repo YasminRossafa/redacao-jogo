@@ -40,7 +40,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function TagMatch({ activity, onComplete, onSkip }: Props) {
-  const { prompt, sentences, tags, mapping } = activity;
+  const { prompt, sentences, tags, mapping, explanation } = activity;
 
   // True when any tag is required for more than one sentence.
   // Many-to-few mode lifts the bijective constraints in linkPair and tag-tap.
@@ -341,6 +341,13 @@ export function TagMatch({ activity, onComplete, onSkip }: Props) {
         <p className={styles.msgSuccess} role="alert">
           Correto! Todas as associações estão certas.
         </p>
+      )}
+
+      {/* Rationale shown after checking, regardless of correct/incorrect */}
+      {(isSuccess || checkState === 'incorrect') && explanation && (
+        <div className={styles.explanation} role="note">
+          <p className={styles.explanationText}>{explanation}</p>
+        </div>
       )}
 
       {!isSuccess && (

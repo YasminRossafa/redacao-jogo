@@ -377,8 +377,9 @@ const EXPLAINER_ROUTE: Record<string, string> = {
   'fase-d2-formula': '/d2-formula',
   'fase-conclusao-formula': '/conclusao-formula',
   'fase-missao-final': '/missao-final',
-  // Bonus phase opener: the D1 Repertórios rule panel precedes its 5 questions.
+  // Bonus phase openers: the Repertórios rule panels precede their 5 questions.
   'fase-d1-repertorios-bonus': '/d1-repertorios',
+  'fase-d2-repertorios-bonus': '/d2-repertorios',
 };
 
 // CSS class for each section's nebula tint (applied to sectionGroup wrapper).

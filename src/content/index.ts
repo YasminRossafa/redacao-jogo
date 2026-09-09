@@ -25,6 +25,7 @@ import { faseConclusaoCompletoActivities } from './fase-conclusao-completo';
 import { faseMissaoFinalActivities } from './fase-missao-final';
 import { faseRepertoriosBonusActivities } from './fase-repertorios-bonus';
 import { faseD1RepertoriosBonusActivities } from './fase-d1-repertorios-bonus';
+import { faseD2RepertoriosBonusActivities } from './fase-d2-repertorios-bonus';
 
 export interface PhaseInfo {
   id: string;
@@ -83,6 +84,11 @@ export const BONUS_PHASES: PhaseInfo[] = [
     label: 'Repertórios',
     subtitle: 'Transforme o texto de apoio em citação sem copiar',
   },
+  {
+    id: 'fase-d2-repertorios-bonus',
+    label: 'Repertórios',
+    subtitle: 'Uma citação pode servir a mais de um tema',
+  },
 ];
 
 /** Which bonus phase (if any) hangs off each section. A section absent here
@@ -90,6 +96,7 @@ export const BONUS_PHASES: PhaseInfo[] = [
 export const BONUS_PHASE_BY_SECTION: Readonly<Record<string, string>> = {
   'introducao': 'fase-repertorios-bonus',
   'dev1':       'fase-d1-repertorios-bonus',
+  'dev2':       'fase-d2-repertorios-bonus',
 };
 
 export const BONUS_PHASE_IDS: ReadonlySet<string> = new Set(BONUS_PHASES.map((p) => p.id));
@@ -194,6 +201,7 @@ export const CONTENT: Record<string, ActivityData[]> = {
   'fase-missao-final': faseMissaoFinalActivities,
   'fase-repertorios-bonus': faseRepertoriosBonusActivities,
   'fase-d1-repertorios-bonus': faseD1RepertoriosBonusActivities,
+  'fase-d2-repertorios-bonus': faseD2RepertoriosBonusActivities,
 };
 
 export function getNextPhaseId(currentId: string): string | null {
@@ -241,6 +249,7 @@ export const PHASE_CONFIG: Record<string, PhaseConfig> = {
   // star display consistent with their section's phases.
   'fase-repertorios-bonus':   { total: 10, unlockThreshold: 7,  tiers: { expert: 9,  good: 7,  almostThere: 4 } },
   'fase-d1-repertorios-bonus': { total: 5, unlockThreshold: 4,  tiers: { expert: 5,  good: 4,  almostThere: 2 } },
+  'fase-d2-repertorios-bonus': { total: 5, unlockThreshold: 4,  tiers: { expert: 5,  good: 4,  almostThere: 2 } },
 };
 
 /** Question total for a phase, falling back to its actual activity count. */

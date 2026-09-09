@@ -20,6 +20,8 @@ export interface TagMatchActivity {
   tags: { id: string; label: string }[];
   /** Maps sentence id → correct tag id */
   mapping: Record<string, string>;
+  /** Optional rationale shown after checking (like choice/error-spot). */
+  explanation?: string;
 }
 
 export interface ErrorSpotActivity {
