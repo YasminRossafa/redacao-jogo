@@ -836,22 +836,70 @@
   );
 }
 
-/* Left-side step → bonus hangs down-left; connector rotates up-right (~72°). */
+/* Pushed further out from the main trail than the anchor node's own offset
+   (was +6px everywhere) so the curved stardust path — which now threads
+   exactly through every main node's centre — never runs close to a
+   Repertórios circle. Mobile only has ~17px of slack before the branch
+   clips past the viewport edge (its width is fixed regardless of viewport,
+   since .step itself doesn't grow below the 768px breakpoint), so it gets a
+   modest +10px. From 768px up the column is centred with wide empty gutters
+   on both sides, so the offset can grow a lot more without any risk of
+   clipping. The connector's length/angle are recomputed to match at each
+   step: it still spans the same ~47.5px vertical drop down to the anchor
+   node, just over the wider horizontal gap each offset opens up. */
 .bonusOutLeft {
-  right: calc(50% + 6px);
+  right: calc(50% + 16px);
 }
 .bonusOutLeft::before {
   left: 24px;
-  transform: rotate(-72deg);
+  width: 54px;
+  transform: rotate(-61.8deg);
 }
 
-/* Right-side step → bonus hangs down-right; connector rotates up-left (~108°). */
+/* Right-side step → bonus hangs down-right; connector rotates up-left. */
 .bonusOutRight {
-  left: calc(50% + 6px);
+  left: calc(50% + 16px);
 }
 .bonusOutRight::before {
   left: 32px;
-  transform: rotate(-108deg);
+  width: 54px;
+  transform: rotate(-118.2deg);
+}
+
+@media (min-width: 768px) {
+  .bonusOutLeft {
+    right: calc(50% + 60px);
+  }
+  .bonusOutLeft::before {
+    width: 84px;
+    transform: rotate(-34.4deg);
+  }
+
+  .bonusOutRight {
+    left: calc(50% + 60px);
+  }
+  .bonusOutRight::before {
+    width: 84px;
+    transform: rotate(-145.6deg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .bonusOutLeft {
+    right: calc(50% + 70px);
+  }
+  .bonusOutLeft::before {
+    width: 93px;
+    transform: rotate(-30.9deg);
+  }
+
+  .bonusOutRight {
+    left: calc(50% + 70px);
+  }
+  .bonusOutRight::before {
+    width: 93px;
+    transform: rotate(-149.1deg);
+  }
 }
 
 .bonusNode {

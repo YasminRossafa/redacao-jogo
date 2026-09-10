@@ -423,11 +423,10 @@ const SECTION_PEAK_ALPHA = 0.3;
 const START_PEAK = 'rgba(99, 102, 241, 0.22)';  // launch indigo
 const END_PEAK   = 'rgba(139, 92, 246, 0.26)';  // mission purple
 
-interface TrailAnchors {
-  /** y (px, trail-relative) of the start circle's bottom edge. */
-  startY: number;
-  /** y (px, trail-relative) of the final mission circle's top edge. */
-  endY: number;
+/** A single through-point for the stardust trail, in trail-relative px. */
+interface TrailPoint {
+  x: number;
+  y: number;
 }
 
 // ─── Pre-computed trail layout ────────────────────────────────────────────────
@@ -486,8 +485,15 @@ export function Menu() {
   const endCircleRef = useRef<HTMLButtonElement>(null);
   const breakRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // Every primary phase node's own button (excludes the mission — it has its
+  // own endCircleRef). The trail threads through these EXACT measured centres,
+  // so it always passes behind every node regardless of how tall any given
+  // step's content makes that section (star rows, skip ribbons, wrapped
+  // labels) — a fixed-period sine assumption drifted out of phase with real
+  // layout past the first section; anchoring to real positions can't drift.
+  const nodeRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [backdrop, setBackdrop] = useState('');
-  const [anchors, setAnchors] = useState<TrailAnchors | null>(null);
+  const [trailPoints, setTrailPoints] = useState<TrailPoint[]>([]);
 
   useEffect(() => {
     unlockPhase('fase-formula');
@@ -539,7 +545,9 @@ export function Menu() {
     const measure = () => {
       const total = trail.offsetHeight;
       if (total <= 0) return;
-      const trailTop = trail.getBoundingClientRect().top;
+      const trailRect = trail.getBoundingClientRect();
+      const trailTop = trailRect.top;
+      const trailLeft = trailRect.left;
       const pct = (px: number) => `${((px / total) * 100).toFixed(2)}%`;
 
       const stops: string[] = [`${VALLEY_EDGE} 0%`];
@@ -579,14 +587,37 @@ export function Menu() {
       stops.push(`${VALLEY_EDGE} 100%`);
       setBackdrop(`linear-gradient(to bottom, ${stops.join(', ')})`);
 
+      // Thread the trail through the start marker, every primary phase node
+      // (in on-page order), then the final mission marker — its EXACT measured
+      // centre, so the curve always passes behind each node no matter how the
+      // step heights vary between sections.
       if (startEl && endEl) {
-        const startY = startEl.getBoundingClientRect().bottom - trailTop;
-        const endY = endEl.getBoundingClientRect().top - trailTop;
-        setAnchors((prev) =>
-          prev && Math.abs(prev.startY - startY) < 0.5 && Math.abs(prev.endY - endY) < 0.5
-            ? prev
-            : { startY, endY }
-        );
+        const startR = startEl.getBoundingClientRect();
+        const endR = endEl.getBoundingClientRect();
+        const points: TrailPoint[] = [
+          { x: startR.left - trailLeft + startR.width / 2, y: startR.bottom - trailTop },
+        ];
+        for (const phase of PHASES) {
+          if (phase.id === MISSION_ID) continue;
+          const btn = nodeRefs.current[phase.id];
+          if (!btn) continue;
+          const r = btn.getBoundingClientRect();
+          points.push({
+            x: r.left - trailLeft + r.width / 2,
+            y: r.top - trailTop + r.height / 2,
+          });
+        }
+        points.push({ x: endR.left - trailLeft + endR.width / 2, y: endR.top - trailTop });
+
+        setTrailPoints((prev) => {
+          if (
+            prev.length === points.length &&
+            prev.every((p, i) => Math.abs(p.x - points[i].x) < 0.5 && Math.abs(p.y - points[i].y) < 0.5)
+          ) {
+            return prev;
+          }
+          return points;
+        });
       }
     };
 
@@ -606,12 +637,6 @@ export function Menu() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <p className={styles.subtitle}>
-          Embarque na nave e venha aprender a construir uma redação dissertativa-argumentativa para tirar 1000 no ENEM
-        </p>
-      </header>
-
       <div className={styles.trail} ref={trailRef} role="list" aria-label="Fases do jogo">
         {/* Continuous page-height gradient: peaks per section, dips at each break. */}
         <div
@@ -621,8 +646,7 @@ export function Menu() {
         />
         <TrailSVG
           completedFraction={completedFraction}
-          startY={anchors?.startY}
-          endY={anchors?.endY}
+          points={trailPoints}
         />
 
         {/* ── Start marker: the mission title itself, launch pad of the trail ── */}
@@ -740,6 +764,7 @@ export function Menu() {
                     >
                       <div className={styles.nodeWrap}>
                         <button
+                          ref={(el) => { nodeRefs.current[phase.id] = el; }}
                           className={[
                             styles.node,
                             isAstronaut ? styles.nodeBig : '',
