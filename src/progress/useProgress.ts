@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { PHASE_SEQUENCE } from '../content/index';
 
 const STORAGE_KEY = 'redacao-jogo:progress';
 
@@ -58,6 +59,40 @@ function isStorageAvailable(): boolean {
   }
 }
 
+// ─── One-time backfill for a since-fixed skip-mechanic bug ────────────────────
+// A section skip used to unlock every OTHER phase in the section but never the
+// completo phase actually played to trigger it — so a phase could end up with a
+// real, passed score yet still read as locked (fixed going forward in Fase.tsx;
+// see the "Corrige três bugs" commit). Saves written by that older logic still
+// carry the inconsistency, since the forward-fix doesn't touch data already on
+// disk. This restores the intended invariant — reaching or completing any stage
+// implies every stage before it in PHASE_SEQUENCE is unlocked — for any save
+// that still violates it.
+//
+// Only ever ADDS ids to unlockedPhases; phaseScores, skippedPhaseIds and badges
+// are never read for anything but the "was this phase reached" check, and are
+// never written. Idempotent: once the invariant holds, it returns the same
+// object reference so callers can skip a redundant write.
+function reconcileUnlockedPhases(state: ProgressState): ProgressState {
+  let maxReachedIndex = -1;
+  for (let i = 0; i < PHASE_SEQUENCE.length; i++) {
+    const id = PHASE_SEQUENCE[i];
+    const reached =
+      state.unlockedPhases.includes(id) ||
+      state.phaseScores[id] !== undefined ||
+      state.skippedPhaseIds.includes(id);
+    if (reached) maxReachedIndex = i;
+  }
+  if (maxReachedIndex < 0) return state;
+
+  const missing = PHASE_SEQUENCE.slice(0, maxReachedIndex + 1).filter(
+    (id) => !state.unlockedPhases.includes(id)
+  );
+  if (missing.length === 0) return state;
+
+  return { ...state, unlockedPhases: [...state.unlockedPhases, ...missing] };
+}
+
 function loadInitialState(): ProgressState {
   const available = isStorageAvailable();
   if (!available) {
@@ -66,7 +101,15 @@ function loadInitialState(): ProgressState {
     );
     return { ...INITIAL_STATE };
   }
-  return readStorage();
+  const stored = readStorage();
+  const reconciled = reconcileUnlockedPhases(stored);
+  // Persist the backfill immediately so it only ever needs to run once per
+  // affected save; a clean save (the common case) reconciles to the same
+  // reference and skips this write entirely.
+  if (reconciled !== stored) {
+    writeStorage(reconciled);
+  }
+  return reconciled;
 }
 
 export interface ProgressHook {

@@ -330,6 +330,9 @@
   background: rgba(11, 18, 36, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(226, 232, 240, 0.7);
+  /* Also a click target (toggles the lock tooltip), independent of the node
+     button underneath. */
+  cursor: pointer;
 }
 
 .lockBadge svg {
@@ -479,16 +482,6 @@
 .markerLockBadge svg {
   width: 17px;
   height: 17px;
-}
-
-/* Small caption under the closing marker — keeps the "Retorno à Terra" name
-   that the removed section header used to carry. */
-.endMarkerCaption {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.42);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -693,24 +686,9 @@
 /* ── Missão Final ── */
 /* The Missão Final node is rendered with the nebula-marker styles (see the
    Nebula markers section above), so the old gold-disc `.nodeMission` rules were
-   removed. Its lock hint label below is still used. */
-
-/* Locked-mission hint label (replaces the generic "Em breve"). */
-.missionLockLabel {
-  max-width: 130px;
-  text-align: center;
-  font-size: 0.625rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(251, 191, 36, 0.75);
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 10px;
-  padding: 0.2rem 0.5rem;
-  line-height: 1.3;
-  margin-top: -0.125rem;
-}
+   removed. Its former standing lock-hint label is now the click-to-reveal
+   .lockTooltip instead (see below), so nothing renders outside the circle
+   except the star row once the mission has actually been played. */
 
 /* ── Skip state: completo phase available as a shortcut before normal unlock ── */
 /* Cyan / dashed ring — distinct from all section colors and from the mission gold. */
@@ -998,6 +976,56 @@
 
 @media (prefers-reduced-motion: reduce) {
   .toast { animation: none; }
+}
+
+/* ── Lock tooltip (click-to-reveal, every locked node) ──────────────────────── */
+/* Same dark-card language as .toast above: dark backdrop, subtle white border,
+   soft drop shadow. Width is fixed (matches LOCK_TOOLTIP_WIDTH in Menu.tsx) so
+   the JS placement math that keeps it clear of the viewport edges is exact
+   rather than an estimate. Horizontal position and above/below flip both come
+   from an inline style computed at open time; only the fade is animated here
+   (never transform, which would fight the inline translateX centring). */
+
+.lockTooltip {
+  position: absolute;
+  left: 50%;
+  z-index: 10;
+  width: 208px;
+  padding: 0.625rem 0.875rem;
+  border-radius: 12px;
+  background: rgba(17, 24, 44, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(148, 163, 184, 0.08),
+    0 0 18px rgba(148, 163, 184, 0.12);
+  color: #E2E8F0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  /* Decorative text only — clicks pass through so the document-level
+     outside-click handler sees whatever is visually underneath, which is
+     always still within (or clearly outside) the anchor's own node area. */
+  pointer-events: none;
+  animation: lockTooltipIn 0.14s ease;
+}
+
+.lockTooltipAbove {
+  bottom: calc(100% + 10px);
+}
+
+.lockTooltipBelow {
+  top: calc(100% + 10px);
+}
+
+@keyframes lockTooltipIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lockTooltip { animation: none; }
 }
 
 /* ── Responsive: tablet & desktop ───────────────────────────────────────────── */

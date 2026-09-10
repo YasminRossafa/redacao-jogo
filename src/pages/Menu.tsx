@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
 import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, getTierStars } from '../content/index';
@@ -297,6 +297,100 @@ function AstronautIcon() {
   );
 }
 
+// ─── Lock tooltip (click-to-reveal, on every locked node) ────────────────────
+// Reasons a locked node is locked differ by node type (see MISSION_LOCKED_MESSAGE
+// vs PHASE_LOCKED_MESSAGE below), but the popover itself is one shared component.
+
+/** Explains what regular locked phase nodes need — the sequential unlock chain
+ *  requires passing the immediately preceding phase. */
+const PHASE_LOCKED_MESSAGE = 'Complete a fase anterior para desbloquear.';
+/** Reuses the exact copy the mission node used to show as a standing label,
+ *  now surfaced on demand instead of permanently occupying page space. */
+const MISSION_LOCKED_MESSAGE = 'Complete todas as missões anteriores.';
+
+const LOCK_TOOLTIP_WIDTH = 208; // px — fixed, so placement math is exact, not estimated
+const LOCK_TOOLTIP_EST_HEIGHT = 96; // px — generous estimate incl. the gap to the anchor
+const LOCK_TOOLTIP_MARGIN = 12; // px kept clear of the viewport edge
+
+interface LockTooltipPlacement {
+  /** Extra px added on top of the default centred (-50%) horizontal position,
+   *  clamped so the fixed-width box never crosses the viewport edge. */
+  shiftX: number;
+  /** true = render above the anchor (default — keeps clear of the label/stars
+   *  below); false = render below, used when there isn't room above. */
+  above: boolean;
+}
+
+function computeLockTooltipPlacement(anchorRect: DOMRect): LockTooltipPlacement {
+  const viewportW = window.innerWidth;
+  const viewportH = window.innerHeight;
+  const centerX = anchorRect.left + anchorRect.width / 2;
+  const desiredLeft = centerX - LOCK_TOOLTIP_WIDTH / 2;
+  const desiredRight = centerX + LOCK_TOOLTIP_WIDTH / 2;
+
+  let shiftX = 0;
+  if (desiredLeft < LOCK_TOOLTIP_MARGIN) {
+    shiftX = LOCK_TOOLTIP_MARGIN - desiredLeft;
+  } else if (desiredRight > viewportW - LOCK_TOOLTIP_MARGIN) {
+    shiftX = (viewportW - LOCK_TOOLTIP_MARGIN) - desiredRight;
+  }
+
+  const spaceAbove = anchorRect.top;
+  const spaceBelow = viewportH - anchorRect.bottom;
+  const needed = LOCK_TOOLTIP_EST_HEIGHT + LOCK_TOOLTIP_MARGIN;
+  // Prefer above (keeps the label/star row underneath clear); fall back to
+  // below only when there truly isn't room above but there is below.
+  const above = spaceAbove >= needed || spaceBelow < needed;
+
+  return { shiftX, above };
+}
+
+/** Click-to-reveal popover explaining why a node is locked. Rendered as a child
+ *  of the same `position: relative` wrapper as the node it explains, so it
+ *  scrolls naturally with the page; its own position is computed once on open
+ *  from the anchor's viewport rect so it never clips at the screen edges. */
+function LockTooltip({
+  message,
+  getAnchor,
+}: {
+  message: string;
+  /** Reads the current anchor element. Called from an effect (after commit),
+   *  never during render, so it's safe for this to read a ref's `.current`. */
+  getAnchor: () => HTMLElement | null;
+}) {
+  const [placement, setPlacement] = useState<LockTooltipPlacement | null>(null);
+
+  useLayoutEffect(() => {
+    const anchor = getAnchor();
+    if (!anchor) return;
+    setPlacement(computeLockTooltipPlacement(anchor.getBoundingClientRect()));
+    // Intentionally mount-only: this component is freshly mounted each time a
+    // tooltip opens (its parent renders it conditionally), so "run once" here
+    // already means "run once per open" — re-running on every parent render
+    // would re-measure needlessly and risks a render loop, since `getAnchor`
+    // is a new closure each time the parent re-renders.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div
+      role="tooltip"
+      className={[styles.lockTooltip, placement?.above ? styles.lockTooltipAbove : styles.lockTooltipBelow]
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        visibility: placement ? 'visible' : 'hidden',
+        transform: `translateX(calc(-50% + ${placement?.shiftX ?? 0}px))`,
+      }}
+      // Popover has no interactive content of its own — let clicks on it still
+      // count as "outside" so it closes like the rest of the page. A click on
+      // the anchor itself is handled separately by the trigger's own toggle.
+    >
+      {message}
+    </div>
+  );
+}
+
 // ─── Nebula marker (start + end special markers) ──────────────────────────────
 
 /** Decorative star-cloud layers shared by the start and end markers. The glowing
@@ -477,6 +571,32 @@ export function Menu() {
 
   // Transient "Em Breve" toast shown when a placeholder bonus node is tapped.
   const [toast, setToast] = useState<string | null>(null);
+
+  // Click-to-reveal tooltip on locked nodes: at most one open at a time, keyed
+  // by phase.id (or MISSION_ID for the final marker). Toggled by clicking the
+  // node itself or its lock badge; dismissed by clicking elsewhere, pressing
+  // Escape, or clicking the same trigger again.
+  const [openLockId, setOpenLockId] = useState<string | null>(null);
+  const toggleLock = (id: string) => setOpenLockId((prev) => (prev === id ? null : id));
+
+  useEffect(() => {
+    if (!openLockId) return;
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest(`[data-lock-node="${openLockId}"]`)) {
+        setOpenLockId(null);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenLockId(null);
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [openLockId]);
 
   // Live geometry: the backdrop gradient and the trail's end points are derived
   // from the measured layout, so they follow section heights at any breakpoint.
@@ -762,7 +882,10 @@ export function Menu() {
                       ].join(' ')}
                       role="listitem"
                     >
-                      <div className={styles.nodeWrap}>
+                      <div
+                        className={styles.nodeWrap}
+                        data-lock-node={state === 'locked' ? phase.id : undefined}
+                      >
                         <button
                           ref={(el) => { nodeRefs.current[phase.id] = el; }}
                           className={[
@@ -772,8 +895,11 @@ export function Menu() {
                           ]
                             .filter(Boolean)
                             .join(' ')}
-                          onClick={() => (state !== 'locked') && navigate(nodeTarget)}
-                          disabled={state === 'locked'}
+                          onClick={() =>
+                            state === 'locked' ? toggleLock(phase.id) : navigate(nodeTarget)
+                          }
+                          aria-disabled={state === 'locked'}
+                          aria-expanded={state === 'locked' ? openLockId === phase.id : undefined}
                           aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : state === 'skip' ? ' — pular esta etapa' : ''}`}
                         >
                           <span className={styles.nodeIcon}>
@@ -782,7 +908,12 @@ export function Menu() {
                         </button>
 
                         {state === 'locked' && (
-                          <span className={styles.lockBadge} aria-hidden>
+                          <span
+                            className={styles.lockBadge}
+                            role="button"
+                            tabIndex={-1}
+                            onClick={() => toggleLock(phase.id)}
+                          >
                             <LockIcon />
                           </span>
                         )}
@@ -791,6 +922,13 @@ export function Menu() {
                           <span className={styles.astronaut} aria-hidden>
                             <AstronautIcon />
                           </span>
+                        )}
+
+                        {state === 'locked' && openLockId === phase.id && (
+                          <LockTooltip
+                            message={PHASE_LOCKED_MESSAGE}
+                            getAnchor={() => nodeRefs.current[phase.id] ?? null}
+                          />
                         )}
                       </div>
 
@@ -932,9 +1070,16 @@ export function Menu() {
         })}
 
         {/* ── End marker: the Missão Final, closing bookend of the trail ── */}
-        {/* Not a section — no break header; it mirrors the start marker exactly. */}
+        {/* Not a section — no break header; it mirrors the start marker exactly.
+            Shows only the title inside the circle plus the lock icon when
+            locked — the standing caption/warning text moved into the
+            click-to-reveal tooltip below instead of permanently occupying
+            page space. */}
         <div className={styles.endMarkerWrap} role="listitem">
-          <div className={styles.markerCircleWrap}>
+          <div
+            className={styles.markerCircleWrap}
+            data-lock-node={missionUnlocked ? undefined : MISSION_ID}
+          >
             <button
               type="button"
               ref={endCircleRef}
@@ -946,10 +1091,12 @@ export function Menu() {
                 .filter(Boolean)
                 .join(' ')}
               onClick={() =>
-                missionUnlocked &&
-                navigate(EXPLAINER_ROUTE[MISSION_ID] ?? `/fase/${MISSION_ID}`)
+                missionUnlocked
+                  ? navigate(EXPLAINER_ROUTE[MISSION_ID] ?? `/fase/${MISSION_ID}`)
+                  : toggleLock(MISSION_ID)
               }
-              disabled={!missionUnlocked}
+              aria-disabled={!missionUnlocked}
+              aria-expanded={!missionUnlocked ? openLockId === MISSION_ID : undefined}
               aria-label={`Missão Final: Retorno à Terra${missionUnlocked ? '' : ' — bloqueado'}`}
             >
               <NebulaCloud />
@@ -967,21 +1114,20 @@ export function Menu() {
               Missão Final
             </span>
             {!missionUnlocked && (
-              <span className={[styles.lockBadge, styles.markerLockBadge].join(' ')} aria-hidden>
+              <span
+                className={[styles.lockBadge, styles.markerLockBadge].join(' ')}
+                role="button"
+                tabIndex={-1}
+                onClick={() => toggleLock(MISSION_ID)}
+              >
                 <LockIcon />
               </span>
             )}
+
+            {!missionUnlocked && openLockId === MISSION_ID && (
+              <LockTooltip message={MISSION_LOCKED_MESSAGE} getAnchor={() => endCircleRef.current} />
+            )}
           </div>
-
-          <span className={styles.endMarkerCaption} aria-hidden>
-            Retorno à Terra
-          </span>
-
-          {!missionUnlocked && (
-            <span className={styles.missionLockLabel}>
-              Complete todas as missões anteriores
-            </span>
-          )}
 
           {missionStars !== null && (
             <div className={styles.starRow}>
