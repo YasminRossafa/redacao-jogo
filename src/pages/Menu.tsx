@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
 import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, getTierStars } from '../content/index';
@@ -258,21 +258,6 @@ function CometBrightIcon() {
   );
 }
 
-// ─── Icon — Missão Final: nave de retorno ─────────────────────────────────────
-
-/** Rocket/spaceship — the final objective. Distinct from every celestial family. */
-function MissionShipIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
-      <path d="M12 2.4c2.5 2 3.9 4.9 3.9 8.2 0 1.2-.2 2.4-.6 3.6H8.7c-.4-1.2-.6-2.4-.6-3.6C8.1 7.3 9.5 4.4 12 2.4z" />
-      <circle cx="12" cy="9" r="1.6" fill="#0B1224" />
-      <path d="M8.1 12.2 5.2 14.1c-.3.2-.4.5-.3.9l.9 2.7 2.6-1.7z" />
-      <path d="M15.9 12.2 18.8 14.1c.3.2.4.5.3.9l-.9 2.7-2.6-1.7z" />
-      <path d="M10.5 16.6h3l-1.5 3.8z" opacity="0.85" />
-    </svg>
-  );
-}
-
 // ─── Icon — Repertórios bônus (ramo lateral) ──────────────────────────────────
 
 /** Bookmark/ribbon — the "Repertórios" bonus branch (collectible references). */
@@ -356,19 +341,16 @@ const PHASE_ICON: Record<string, () => React.ReactElement> = {
   'fase-conclusao-detalhamento': CometSparkleIcon,
   'fase-conclusao-retomada':  CometTwinIcon,
   'fase-conclusao-completo':  CometBrightIcon,
-  // Missão Final — nave
-  'fase-missao-final':        MissionShipIcon,
 };
 
 // Family fallback icon per section, so every node in a section carries a
 // celestial silhouette matching its family (planeta / lua / estrela / cometa)
 // even if a specific phase has no explicit PHASE_ICON entry.
 const SECTION_FAMILY_ICON: Record<string, () => React.ReactElement> = {
-  'introducao':       PlanetIcon,
-  'dev1':             MoonIcon,
-  'dev2':             StarIcon,
-  'conclusao':        CometIcon,
-  'redacao-completa': MissionShipIcon,
+  'introducao': PlanetIcon,
+  'dev1':       MoonIcon,
+  'dev2':       StarIcon,
+  'conclusao':  CometIcon,
 };
 
 // Which specific phase the bonus node anchors to, per section.
@@ -385,6 +367,12 @@ const MISSION_BADGE = 'comandante-missao-final';
 // Sections that must all be completed before the Missão Final unlocks.
 const MISSION_PREREQ_SECTIONS = ['introducao', 'dev1', 'dev2', 'conclusao'];
 
+// The Missão Final is NOT rendered as a section: it is the trail's closing
+// bookend (a big nebula marker, symmetric with the start marker), so its section
+// is filtered out of the section loop and gets no section-break header.
+const MISSION_SECTION_ID = 'redacao-completa';
+const TRACK_SECTIONS = SECTIONS.filter((s) => s.id !== MISSION_SECTION_ID);
+
 // Guide phases open their explainer page before the quiz.
 const EXPLAINER_ROUTE: Record<string, string> = {
   'fase-formula':    '/formula',
@@ -397,33 +385,50 @@ const EXPLAINER_ROUTE: Record<string, string> = {
   'fase-d2-repertorios-bonus': '/d2-repertorios',
 };
 
-// CSS class for each section's nebula tint (applied to sectionGroup wrapper).
+// CSS class carrying each section's --sec-rgb (drives the per-node glow).
 const SECTION_NEBULA_CLASS: Record<string, string> = {
-  'introducao':       styles.sectionIntroducao,
-  'dev1':             styles.sectionDev1,
-  'dev2':             styles.sectionDev2,
-  'conclusao':        styles.sectionConclusao,
-  'redacao-completa': styles.sectionRedacaoCompleta,
+  'introducao': styles.sectionIntroducao,
+  'dev1':       styles.sectionDev1,
+  'dev2':       styles.sectionDev2,
+  'conclusao':  styles.sectionConclusao,
 };
 
-// Raw RGB for each section (drives inline style on the sectionBreak without
-// inheriting the nebula ::before conflict from the section-color classes).
+// Raw RGB for each section — feeds both the section-break dust/glow custom
+// properties and the continuous page backdrop gradient.
 const SECTION_RGB: Record<string, string> = {
-  'introducao':       '99, 102, 241',
-  'dev1':             '20, 184, 166',
-  'dev2':             '245, 158, 11',
-  'conclusao':        '236, 72, 153',
-  'redacao-completa': '139, 92, 246',
+  'introducao': '99, 102, 241',
+  'dev1':       '20, 184, 166',
+  'dev2':       '245, 158, 11',
+  'conclusao':  '236, 72, 153',
 };
 
 // Celestial names for each section's break header.
 const SECTION_CELESTIAL: Record<string, { primary: string; secondary: string }> = {
-  'introducao':       { primary: 'Sistema Planetário',    secondary: 'Introdução' },
-  'dev1':             { primary: 'Campo Lunar',           secondary: 'Desenvolvimento 1' },
-  'dev2':             { primary: 'Campo Estelar',         secondary: 'Desenvolvimento 2' },
-  'conclusao':        { primary: 'Cinturão de Meteoros',  secondary: 'Conclusão' },
-  'redacao-completa': { primary: 'Missão Final',          secondary: 'Redação Completa' },
+  'introducao': { primary: 'Sistema Planetário',   secondary: 'Introdução' },
+  'dev1':       { primary: 'Campo Lunar',          secondary: 'Desenvolvimento 1' },
+  'dev2':       { primary: 'Campo Estelar',        secondary: 'Desenvolvimento 2' },
+  'conclusao':  { primary: 'Cinturão de Meteoros', secondary: 'Conclusão' },
 };
+
+// ─── Continuous backdrop gradient ─────────────────────────────────────────────
+// A single top-to-bottom linear-gradient spans the whole trail instead of one
+// background block per section. It peaks on each section's hue at that section's
+// vertical centre and dips into a dark, desaturated "valley" across every
+// section transition — a valley between two colour peaks rather than a wall
+// between two flat blocks. The star-cloud (.nebulaDust) sits inside that dip.
+
+const VALLEY_EDGE = 'rgba(11, 17, 36, 0.28)';   // valley shoulders
+const VALLEY_DEEP = 'rgba(7, 11, 24, 0.68)';    // deepest point of the dip
+const SECTION_PEAK_ALPHA = 0.3;
+const START_PEAK = 'rgba(99, 102, 241, 0.22)';  // launch indigo
+const END_PEAK   = 'rgba(139, 92, 246, 0.26)';  // mission purple
+
+interface TrailAnchors {
+  /** y (px, trail-relative) of the start circle's bottom edge. */
+  startY: number;
+  /** y (px, trail-relative) of the final mission circle's top edge. */
+  endY: number;
+}
 
 // ─── Pre-computed trail layout ────────────────────────────────────────────────
 // Computed once at module load (PHASES and SECTIONS are static constants).
@@ -434,7 +439,6 @@ interface PhaseTrailItem {
   phase: PhaseInfo;
   isLeft: boolean;
   sectionId: string;
-  isFinal: boolean;
 }
 
 function buildSectionPhaseItems(
@@ -450,7 +454,6 @@ function buildSectionPhaseItems(
       phase,
       isLeft: (startIdx + i) % 2 === 0,
       sectionId: section.id,
-      isFinal: phaseId === MISSION_ID,
     });
     i++;
   }
@@ -475,6 +478,16 @@ export function Menu() {
 
   // Transient "Em Breve" toast shown when a placeholder bonus node is tapped.
   const [toast, setToast] = useState<string | null>(null);
+
+  // Live geometry: the backdrop gradient and the trail's end points are derived
+  // from the measured layout, so they follow section heights at any breakpoint.
+  const trailRef = useRef<HTMLDivElement>(null);
+  const startCircleRef = useRef<HTMLButtonElement>(null);
+  const endCircleRef = useRef<HTMLButtonElement>(null);
+  const breakRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [backdrop, setBackdrop] = useState('');
+  const [anchors, setAnchors] = useState<TrailAnchors | null>(null);
 
   useEffect(() => {
     unlockPhase('fase-formula');
@@ -515,52 +528,141 @@ export function Menu() {
   ).length;
   const completedFraction = totalContentPhases > 0 ? completedContentPhases / totalContentPhases : 0;
 
+  // Measure the trail once laid out (and on every resize/reflow) to build the
+  // continuous backdrop gradient and to anchor the stardust trail to the two
+  // marker circles. Re-runs when progress changes because star rows and skip
+  // ribbons appear/disappear, which shifts section heights.
+  useEffect(() => {
+    const trail = trailRef.current;
+    if (!trail) return;
+
+    const measure = () => {
+      const total = trail.offsetHeight;
+      if (total <= 0) return;
+      const trailTop = trail.getBoundingClientRect().top;
+      const pct = (px: number) => `${((px / total) * 100).toFixed(2)}%`;
+
+      const stops: string[] = [`${VALLEY_EDGE} 0%`];
+
+      const startEl = startCircleRef.current;
+      if (startEl) {
+        const r = startEl.getBoundingClientRect();
+        stops.push(`${START_PEAK} ${pct(r.top - trailTop + r.height / 2)}`);
+      }
+
+      for (const section of TRACK_SECTIONS) {
+        // Valley: shoulder → deepest point → shoulder, straddling the break.
+        const brk = breakRefs.current[section.id];
+        if (brk) {
+          stops.push(`${VALLEY_EDGE} ${pct(brk.offsetTop)}`);
+          stops.push(`${VALLEY_DEEP} ${pct(brk.offsetTop + brk.offsetHeight / 2)}`);
+          stops.push(`${VALLEY_EDGE} ${pct(brk.offsetTop + brk.offsetHeight)}`);
+        }
+        // Peak: the section's own hue at the section's vertical centre.
+        const grp = groupRefs.current[section.id];
+        if (grp) {
+          const rgb = SECTION_RGB[section.id] ?? '148, 163, 184';
+          stops.push(
+            `rgba(${rgb}, ${SECTION_PEAK_ALPHA}) ${pct(grp.offsetTop + grp.offsetHeight / 2)}`
+          );
+        }
+      }
+
+      const endEl = endCircleRef.current;
+      if (endEl) {
+        const r = endEl.getBoundingClientRect();
+        const endTop = r.top - trailTop;
+        stops.push(`${VALLEY_DEEP} ${pct(endTop - r.height * 0.7)}`);
+        stops.push(`${END_PEAK} ${pct(endTop + r.height / 2)}`);
+      }
+
+      stops.push(`${VALLEY_EDGE} 100%`);
+      setBackdrop(`linear-gradient(to bottom, ${stops.join(', ')})`);
+
+      if (startEl && endEl) {
+        const startY = startEl.getBoundingClientRect().bottom - trailTop;
+        const endY = endEl.getBoundingClientRect().top - trailTop;
+        setAnchors((prev) =>
+          prev && Math.abs(prev.startY - startY) < 0.5 && Math.abs(prev.endY - endY) < 0.5
+            ? prev
+            : { startY, endY }
+        );
+      }
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(trail);
+    return () => ro.disconnect();
+  }, [completedContentPhases, missionUnlocked]);
+
+  // Stars only once the mission is actually open (mirrors the node rule that a
+  // locked disc never shows a score).
+  const missionScore = getPhaseScore(MISSION_ID);
+  const missionStars =
+    missionUnlocked && missionScore
+      ? getTierStars(missionScore.correctCount, MISSION_ID)
+      : null;
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Missão Nota 1000</h1>
         <p className={styles.subtitle}>
           Embarque na nave e venha aprender a construir uma redação dissertativa-argumentativa para tirar 1000 no ENEM
         </p>
       </header>
 
-      <div className={styles.trail} role="list" aria-label="Fases do jogo">
-        <TrailSVG completedFraction={completedFraction} />
+      <div className={styles.trail} ref={trailRef} role="list" aria-label="Fases do jogo">
+        {/* Continuous page-height gradient: peaks per section, dips at each break. */}
+        <div
+          className={styles.trailBackdrop}
+          style={{ backgroundImage: backdrop }}
+          aria-hidden
+        />
+        <TrailSVG
+          completedFraction={completedFraction}
+          startY={anchors?.startY}
+          endY={anchors?.endY}
+        />
 
-        {/* ── Start marker: launch pad at the top of the trail ── */}
+        {/* ── Start marker: the mission title itself, launch pad of the trail ── */}
         <div className={styles.startMarkerWrap}>
-          <button
-            type="button"
-            className={[styles.nebulaMarker, styles.nebulaMarkerStart].join(' ')}
-            onClick={() => {
-              const target = frontierPhaseId
-                ? (EXPLAINER_ROUTE[frontierPhaseId] ?? `/fase/${frontierPhaseId}`)
-                : (EXPLAINER_ROUTE['fase-formula'] ?? '/fase/fase-formula');
-              navigate(target);
-            }}
-            aria-label="Continuar a jornada"
-          >
-            <NebulaCloud />
-            <span className={styles.nebulaMarkerIcon} aria-hidden>
-              <StarBurstIcon />
-            </span>
-          </button>
+          <div className={styles.markerCircleWrap}>
+            <button
+              type="button"
+              ref={startCircleRef}
+              className={[styles.nebulaMarker, styles.nebulaMarkerStart].join(' ')}
+              onClick={() => {
+                const target = frontierPhaseId
+                  ? (EXPLAINER_ROUTE[frontierPhaseId] ?? `/fase/${frontierPhaseId}`)
+                  : (EXPLAINER_ROUTE['fase-formula'] ?? '/fase/fase-formula');
+                navigate(target);
+              }}
+              aria-label="Missão Nota 1000 — continuar a jornada"
+            >
+              <NebulaCloud />
+            </button>
+            {/* Sits outside the button (headings aren't valid button content) but
+                is centred over it and click-through, so the circle reads as the title. */}
+            <h1 className={styles.markerTitle}>Missão Nota 1000</h1>
+          </div>
         </div>
 
-        {SECTIONS.map((section, sectionIdx) => {
+        {TRACK_SECTIONS.map((section, sectionIdx) => {
           const phaseItems = SECTION_PHASE_ITEMS[section.id] ?? [];
           const nebClass = SECTION_NEBULA_CLASS[section.id];
           const currRgb = SECTION_RGB[section.id] ?? '148,163,184';
           const prevRgb = sectionIdx > 0
-            ? (SECTION_RGB[SECTIONS[sectionIdx - 1].id] ?? '0,0,0')
+            ? (SECTION_RGB[TRACK_SECTIONS[sectionIdx - 1].id] ?? '0,0,0')
             : '0,0,0';
           const celestial = SECTION_CELESTIAL[section.id] ?? { primary: section.label, secondary: '' };
 
           return (
             <React.Fragment key={section.id}>
-              {/* ── Section break: covers trail, blends gradients, shows celestial name ── */}
+              {/* ── Section break: the gradient's valley — dust + celestial name ── */}
               <div
                 className={styles.sectionBreak}
+                ref={(el) => { breakRefs.current[section.id] = el; }}
                 role="separator"
                 aria-label={`Seção: ${section.label}`}
                 style={{
@@ -581,10 +683,10 @@ export function Menu() {
               {/* ── Section phases ── */}
               <div
                 className={[styles.sectionGroup, nebClass].filter(Boolean).join(' ')}
+                ref={(el) => { groupRefs.current[section.id] = el; }}
               >
-                {phaseItems.map(({ phase, isLeft, isFinal }) => {
-                  const isMission = phase.id === MISSION_ID;
-                  const unlocked = isMission ? missionUnlocked : isPhaseUnlocked(phase.id);
+                {phaseItems.map(({ phase, isLeft }) => {
+                  const unlocked = isPhaseUnlocked(phase.id);
                   const score = getPhaseScore(phase.id);
 
                   // A completo phase is in 'skip' state when its section has started
@@ -592,7 +694,6 @@ export function Menu() {
                   // unlocked and has never been attempted (no score recorded).
                   const completoSectionId = COMPLETO_SECTION[phase.id];
                   const inSkipState =
-                    !isMission &&
                     !!completoSectionId &&
                     isPhaseUnlocked(section.phaseIds[0]) &&
                     !unlocked &&
@@ -638,38 +739,21 @@ export function Menu() {
                       role="listitem"
                     >
                       <div className={styles.nodeWrap}>
-                        {isFinal && <span className={styles.finaleRing} aria-hidden />}
-
                         <button
-                          className={
-                            isMission
-                              ? [
-                                  styles.nebulaMarker,
-                                  styles.nebulaMarkerEnd,
-                                  state === 'locked' ? styles.nebulaMarkerLocked : '',
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ')
-                              : [
-                                  styles.node,
-                                  isFinal ? styles.nodeFinal : '',
-                                  isAstronaut ? styles.nodeBig : '',
-                                  NODE_STATE_CLASS[state],
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ')
-                          }
+                          className={[
+                            styles.node,
+                            isAstronaut ? styles.nodeBig : '',
+                            NODE_STATE_CLASS[state],
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
                           onClick={() => (state !== 'locked') && navigate(nodeTarget)}
                           disabled={state === 'locked'}
                           aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : state === 'skip' ? ' — pular esta etapa' : ''}`}
                         >
-                          {isMission ? (
-                            <NebulaCloud />
-                          ) : (
-                            <span className={styles.nodeIcon}>
-                              <PhaseNodeIcon />
-                            </span>
-                          )}
+                          <span className={styles.nodeIcon}>
+                            <PhaseNodeIcon />
+                          </span>
                         </button>
 
                         {state === 'locked' && (
@@ -700,12 +784,6 @@ export function Menu() {
                         <span className={styles.comingSoonBadge}>Em breve</span>
                       )}
 
-                      {isMission && state === 'locked' && (
-                        <span className={styles.missionLockLabel}>
-                          Complete todas as missões anteriores
-                        </span>
-                      )}
-
                       {state === 'skip' && (
                         <span className={styles.skipBadge}>Pular esta etapa</span>
                       )}
@@ -726,25 +804,15 @@ export function Menu() {
                               </span>
                             ))}
                           </div>
-                          {isMission
-                            ? hasBadge(MISSION_BADGE) && (
-                                <span
-                                  className={styles.nodeBadge}
-                                  aria-label="Comandante da Missão Final"
-                                  title="Comandante da Missão Final"
-                                >
-                                  🚀
-                                </span>
-                              )
-                            : hasBadge(`sabichao-${phase.id}`) && (
-                                <span
-                                  className={styles.nodeBadge}
-                                  aria-label="Sabichão"
-                                  title="Sabichão"
-                                >
-                                  🏆
-                                </span>
-                              )}
+                          {hasBadge(`sabichao-${phase.id}`) && (
+                            <span
+                              className={styles.nodeBadge}
+                              aria-label="Sabichão"
+                              title="Sabichão"
+                            >
+                              🏆
+                            </span>
+                          )}
                         </div>
                       )}
 
@@ -837,6 +905,84 @@ export function Menu() {
             </React.Fragment>
           );
         })}
+
+        {/* ── End marker: the Missão Final, closing bookend of the trail ── */}
+        {/* Not a section — no break header; it mirrors the start marker exactly. */}
+        <div className={styles.endMarkerWrap} role="listitem">
+          <div className={styles.markerCircleWrap}>
+            <button
+              type="button"
+              ref={endCircleRef}
+              className={[
+                styles.nebulaMarker,
+                styles.nebulaMarkerEnd,
+                missionUnlocked ? '' : styles.nebulaMarkerLocked,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onClick={() =>
+                missionUnlocked &&
+                navigate(EXPLAINER_ROUTE[MISSION_ID] ?? `/fase/${MISSION_ID}`)
+              }
+              disabled={!missionUnlocked}
+              aria-label={`Missão Final: Retorno à Terra${missionUnlocked ? '' : ' — bloqueado'}`}
+            >
+              <NebulaCloud />
+            </button>
+            <span
+              className={[
+                styles.markerTitle,
+                styles.markerTitleEnd,
+                missionUnlocked ? '' : styles.markerTitleLocked,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              aria-hidden
+            >
+              Missão Final
+            </span>
+            {!missionUnlocked && (
+              <span className={[styles.lockBadge, styles.markerLockBadge].join(' ')} aria-hidden>
+                <LockIcon />
+              </span>
+            )}
+          </div>
+
+          <span className={styles.endMarkerCaption} aria-hidden>
+            Retorno à Terra
+          </span>
+
+          {!missionUnlocked && (
+            <span className={styles.missionLockLabel}>
+              Complete todas as missões anteriores
+            </span>
+          )}
+
+          {missionStars !== null && (
+            <div className={styles.starRow}>
+              <div className={styles.stars} aria-label={`${missionStars} de 3 estrelas`}>
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className={i < missionStars ? styles.starOn : styles.starOff}
+                    aria-hidden
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+              {hasBadge(MISSION_BADGE) && (
+                <span
+                  className={styles.nodeBadge}
+                  aria-label="Comandante da Missão Final"
+                  title="Comandante da Missão Final"
+                >
+                  🚀
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {toast && (

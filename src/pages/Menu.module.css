@@ -17,30 +17,11 @@
 
 /* ── Header ─────────────────────────────── */
 
+/* The mission title now lives INSIDE the start marker circle (see .markerTitle),
+   so the header carries only the subtitle. */
 .header {
-  padding: 2rem 1.5rem 0.75rem;
+  padding: 1.75rem 1.5rem 0.25rem;
   text-align: center;
-}
-
-.title {
-  font-family: 'Orbitron', 'Exo 2', system-ui, sans-serif;
-  font-size: clamp(1.5rem, 6.5vw, 2.25rem);
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  /* Gradient text: cyan → indigo → purple */
-  background: linear-gradient(135deg,
-    #38BDF8 0%,
-    #818CF8 38%,
-    #A78BFA 65%,
-    #67E8F9 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  margin: 0 0 0.625rem;
-  will-change: transform;
-  animation: titleFloat 5.2s ease-in-out infinite;
 }
 
 @keyframes titleFloat {
@@ -49,10 +30,6 @@
   48%  { transform: translateY(-3px)  rotate(-0.15deg); }
   72%  { transform: translateY(-9px)  rotate(0.4deg);  }
   100% { transform: translateY(0)     rotate(-0.35deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .title { animation: none; }
 }
 
 .subtitle {
@@ -71,41 +48,66 @@
   display: flex;
   flex-direction: column;
   padding: 0.5rem 0.5rem 4rem;
-  /* TrailSVG (z-index: 0) sits beneath section groups (z-index: 1+) */
+  /* NOTE: no overflow clipping here — .trailBackdrop deliberately bleeds past
+     this column to the viewport edges; #root (index.css) absorbs the overhang.
+     .trailBackdrop then TrailSVG (both z-index: 0, in DOM order) sit beneath
+     the section groups (z-index: 1+). */
 }
 
-/* ── Section break (replaces portal: covers trail + blends gradients) ── */
+/* ── Continuous backdrop ────────────────────────────────────────────────────
+   ONE gradient for the whole page instead of a background block per section.
+   Its stops are generated in Menu.tsx from the measured layout: a colour peak
+   at each section's centre and a dark, desaturated valley over each transition,
+   so the colour dips and rises rather than switching at a hard edge. */
+
+.trailBackdrop {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Full-bleed: the trail column is centred, so 100vw centred on it fills the
+     viewport. Constraining it to the column would put a hard vertical seam down
+     each side of the page on desktop. */
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Section break (the valley: celestial name + star cloud, no block bg) ── */
 
 .sectionBreak {
   position: relative;
-  z-index: 5;               /* above TrailSVG (z-index:0) — creates visual trail gap */
+  z-index: 5;               /* dust + title paint above the trail passing through */
   align-self: stretch;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.75rem 1rem 2.25rem;
-  overflow: hidden;
-  /* Solid backdrop — completely hides trail behind this zone */
-  background: #0B1224;
+  padding: 3.25rem 1rem 2.75rem;
+  /* No background of its own — .trailBackdrop's valley does the darkening. */
 }
 
-/* Transition blend: outgoing section colour (top) → incoming colour (bottom) */
+/* Soft vignette that mutes the trail behind the title without a hard edge.
+   It bleeds vertically past the break's box on purpose, so nothing snaps at the
+   boundary. Kept at inset 0 horizontally — a negative side inset would widen the
+   page and produce a horizontal scrollbar on mobile. */
 .sectionBreak::before {
   content: '';
   position: absolute;
-  inset: 0;
+  top: -16%;
+  bottom: -16%;
+  /* Full-bleed like .trailBackdrop — a column-width vignette would draw a faint
+     dark rectangle around the header on desktop. */
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
   pointer-events: none;
   z-index: 0;
-  background:
-    linear-gradient(to bottom,
-      rgba(var(--sec-rgb-from, 0,0,0), 0.22) 0%,
-      transparent 52%
-    ),
-    linear-gradient(to top,
-      rgba(var(--sec-rgb-to, 0,0,0), 0.30) 0%,
-      transparent 52%
-    );
+  background: radial-gradient(ellipse 46% 58% at 50% 50%,
+    rgba(6, 10, 24, 0.74) 0%,
+    rgba(6, 10, 24, 0.32) 46%,
+    transparent 82%);
 }
 
 /* Dense nebula star cluster in the transition zone */
@@ -194,47 +196,23 @@
   color: rgba(255, 255, 255, 0.35);
 }
 
-/* ── Section group (wraps a section's phase nodes, carries nebula tint) ── */
+/* ── Section group (wraps a section's phase nodes) ── */
+/* The section no longer paints a background of its own — that was the block
+   whose edges snapped at the boundaries. Its colour now comes from the
+   corresponding peak in .trailBackdrop's single page-wide gradient. */
 
 .sectionGroup {
   position: relative;
   display: flex;
   flex-direction: column;
-  /* Subtle inset glow — the pseudo-element keeps it behind everything */
 }
 
-.sectionGroup::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* One color per section, exposed as an RGB triplet so the same hue drives both
-   the section nebula background and the per-node glow. */
-.sectionIntroducao       { --sec-rgb: 99, 102, 241; }   /* indigo — planetas */
-.sectionDev1             { --sec-rgb: 20, 184, 166; }   /* teal   — luas     */
-.sectionDev2             { --sec-rgb: 245, 158, 11; }   /* amber  — estrelas */
-.sectionConclusao        { --sec-rgb: 236, 72, 153; }   /* pink   — cometas  */
-.sectionRedacaoCompleta  { --sec-rgb: 139, 92, 246; }   /* purple — missão   */
-
-/* Nebula tints — one radial gradient per section, now clearly readable. */
-.sectionIntroducao::before,
-.sectionDev1::before,
-.sectionDev2::before,
-.sectionConclusao::before,
-.sectionRedacaoCompleta::before {
-  background: radial-gradient(ellipse 112% 74% at 50% 42%,
-    rgba(var(--sec-rgb), 0.24) 0%,
-    rgba(var(--sec-rgb), 0.07) 55%,
-    transparent 80%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* No animations are used on nebula tints, but gate the rule explicitly. */
-  .sectionGroup::before { animation: none; }
-}
+/* One color per section, exposed as an RGB triplet. It drives the per-node
+   glow here and (via SECTION_RGB in Menu.tsx) that section's gradient peak. */
+.sectionIntroducao { --sec-rgb: 99, 102, 241; }   /* indigo — planetas */
+.sectionDev1       { --sec-rgb: 20, 184, 166; }   /* teal   — luas     */
+.sectionDev2       { --sec-rgb: 245, 158, 11; }   /* amber  — estrelas */
+.sectionConclusao  { --sec-rgb: 236, 72, 153; }   /* pink   — cometas  */
 
 /* ── Trail step ─────────────────────────── */
 
@@ -312,9 +290,8 @@
   transform: scale(0.9);
 }
 
-/* Larger discs for the current phase and the finale */
-.nodeBig,
-.nodeFinal {
+/* Larger disc for the current phase */
+.nodeBig {
   width: 84px;
   height: 84px;
 }
@@ -367,8 +344,7 @@
   height: 2.25rem;
 }
 
-.nodeBig .nodeIcon,
-.nodeFinal .nodeIcon {
+.nodeBig .nodeIcon {
   width: 2.75rem;
   height: 2.75rem;
 }
@@ -388,7 +364,26 @@
 .startMarkerWrap {
   align-self: center;
   z-index: 2;
-  padding: 0.25rem 0 1.75rem;
+  padding: 0.25rem 0 1.5rem;
+}
+
+/* Closing bookend — same treatment as the start marker, never a section. */
+.endMarkerWrap {
+  align-self: center;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0 0.5rem;
+}
+
+/* Positions the in-circle title (and the lock badge) over the marker button. */
+.markerCircleWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nebulaMarker {
@@ -397,30 +392,124 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 116px;
-  height: 116px;
+  width: 176px;
+  height: 176px;
   border-radius: 50%;
   padding: 0;
   border: none;
-  background: transparent;
   cursor: pointer;
   transition: transform 0.16s ease, filter 0.16s ease;
+  /* Dark core under the star cloud so the title inside stays legible. */
+  background: radial-gradient(circle at 50% 50%,
+    rgba(6, 10, 24, 0.86) 0%,
+    rgba(6, 10, 24, 0.6) 56%,
+    rgba(6, 10, 24, 0) 80%);
+}
+
+@media (max-width: 359px) {
+  .nebulaMarker {
+    width: 152px;
+    height: 152px;
+  }
+}
+
+/* ── Title set inside the marker circle ── */
+/* Rendered as a sibling of the button (a heading is not valid button content),
+   centred over it and click-through so the whole circle stays the hit target. */
+
+.markerTitle {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 12%;
+  pointer-events: none;
+  text-align: center;
+  text-wrap: balance;
+  font-family: 'Orbitron', 'Exo 2', system-ui, sans-serif;
+  font-size: clamp(1.05rem, 5.4vw, 1.55rem);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  line-height: 1.18;
+  /* Gradient text: cyan → indigo → purple (unchanged from the page title) */
+  background: linear-gradient(135deg,
+    #38BDF8 0%,
+    #818CF8 38%,
+    #A78BFA 65%,
+    #67E8F9 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 1px 5px rgba(2, 6, 18, 0.9));
+  will-change: transform;
+  animation: titleFloat 5.2s ease-in-out infinite;
+}
+
+/* Mission bookend: warmer end of the same ramp, slightly out of phase so the
+   two markers don't bob in lockstep. */
+.markerTitleEnd {
+  background: linear-gradient(135deg,
+    #C4B5FD 0%,
+    #A78BFA 40%,
+    #F0ABFC 72%,
+    #DDD6FE 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation-delay: -2.4s;
+}
+
+.markerTitleLocked {
+  filter: grayscale(0.55) brightness(0.7) drop-shadow(0 1px 5px rgba(2, 6, 18, 0.9));
+}
+
+/* Lock badge sized/placed for the big marker circle (vs. the small node badge). */
+.markerLockBadge {
+  right: 12px;
+  bottom: 12px;
+  width: 30px;
+  height: 30px;
+}
+
+.markerLockBadge svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Small caption under the closing marker — keeps the "Retorno à Terra" name
+   that the removed section header used to carry. */
+.endMarkerCaption {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.42);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .markerTitle { animation: none; }
 }
 
 /* Star-cloud: a core radial glow + a dense scatter of coloured/white stars.
    Negative inset lets the glow bleed past the ring so the trail fades in. */
 .nebulaMarkerCloud {
   position: absolute;
-  inset: -16px;
+  inset: -9%;
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
   background-image:
-    /* core glow */
+    /* Core glow — held back from the centre so the in-circle title keeps
+       contrast; the cloud reads as a ring of light around the text. */
     radial-gradient(circle at 50% 50%,
-      rgba(var(--marker-rgb, 148, 163, 184), 0.55) 0%,
-      rgba(var(--marker-rgb, 148, 163, 184), 0.28) 38%,
-      transparent 72%),
+      rgba(var(--marker-rgb, 148, 163, 184), 0.16) 0%,
+      rgba(var(--marker-rgb, 148, 163, 184), 0.34) 46%,
+      transparent 74%),
     /* dense coloured stars */
     radial-gradient(circle at 22% 30%, rgba(var(--marker-rgb, 148,163,184), 0.95) 2.2px, transparent 2.8px),
     radial-gradient(circle at 68% 22%, rgba(var(--marker-rgb, 148,163,184), 0.80) 1.6px, transparent 2.2px),
@@ -450,24 +539,6 @@
     0 0 18px 4px rgba(var(--marker-rgb, 148, 163, 184), 0.5),
     inset 0 0 22px rgba(var(--marker-rgb, 148, 163, 184), 0.35);
   animation: markerPulse 3s ease-in-out infinite;
-}
-
-/* Center glyph (start marker only). */
-.nebulaMarkerIcon {
-  position: relative;
-  z-index: 2;
-  display: block;
-  width: 2.5rem;
-  height: 2.5rem;
-  color: #F1F5F9;
-  filter: drop-shadow(0 0 6px rgba(var(--marker-rgb, 148, 163, 184), 0.9));
-  pointer-events: none;
-}
-
-.nebulaMarkerIcon svg {
-  width: 100%;
-  height: 100%;
-  display: block;
 }
 
 /* Interactive affordance: scale up + brighten on hover/focus. */
@@ -537,21 +608,6 @@
   .nebulaMarkerRing {
     animation: none;
   }
-}
-
-/* ── Finale ring (CSS ellipse behind the planet) ────────────── */
-
-.finaleRing {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 128px;
-  height: 46px;
-  transform: translate(-50%, -50%) rotate(-18deg);
-  border: 2px solid rgba(160, 180, 255, 0.55);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
 }
 
 /* ── Astronaut (rides the current node) ─────────────────────── */
@@ -908,10 +964,6 @@
     max-width: 560px;
   }
 
-  .title {
-    font-size: 2.5rem;
-  }
-
   .subtitle {
     font-size: 0.95rem;
     max-width: 34ch;
@@ -939,8 +991,7 @@
     height: 88px;
   }
 
-  .nodeBig,
-  .nodeFinal {
+  .nodeBig {
     width: 96px;
     height: 96px;
   }
@@ -950,30 +1001,24 @@
     height: 2.5rem;
   }
 
-  .nodeBig .nodeIcon,
-  .nodeFinal .nodeIcon {
+  .nodeBig .nodeIcon {
     width: 3rem;
     height: 3rem;
   }
 
   .nebulaMarker {
-    width: 132px;
-    height: 132px;
+    width: 208px;
+    height: 208px;
   }
 
-  .nebulaMarkerIcon {
-    width: 2.85rem;
-    height: 2.85rem;
+  .markerTitle {
+    font-size: 1.5625rem;
   }
 }
 
 @media (min-width: 1024px) {
   .page {
     max-width: 600px;
-  }
-
-  .title {
-    font-size: 2.75rem;
   }
 
   .sectionHeaderPrimary {
@@ -998,19 +1043,17 @@
     height: 92px;
   }
 
-  .nodeBig,
-  .nodeFinal {
+  .nodeBig {
     width: 104px;
     height: 104px;
   }
 
   .nebulaMarker {
-    width: 144px;
-    height: 144px;
+    width: 224px;
+    height: 224px;
   }
 
-  .nebulaMarkerIcon {
-    width: 3.1rem;
-    height: 3.1rem;
+  .markerTitle {
+    font-size: 1.6875rem;
   }
 }
