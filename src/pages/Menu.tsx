@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
-import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, getTierStars, getPhaseRoute } from '../content/index';
+import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, REPERTORIOS_ENABLED, getTierStars, getPhaseRoute } from '../content/index';
 import type { PhaseInfo, SectionInfo } from '../content/index';
 import styles from './Menu.module.css';
 import { TrailSVG } from './TrailSVG';
@@ -1098,8 +1098,12 @@ export function Menu() {
                         // A playable bonus exists only where a bonus phase is
                         // mapped AND its content is built. It unlocks with the
                         // SECTION itself (its first stage becoming available) —
-                        // never gated behind completing any stage.
+                        // never gated behind completing any stage. REPERTORIOS_ENABLED
+                        // is a temporary content gate (content not yet tested) — while
+                        // false, every Repertórios node falls into the same "Em breve"
+                        // placeholder branch below as if it had no CONTENT at all.
                         const bonusReady =
+                          REPERTORIOS_ENABLED &&
                           !!bonusId &&
                           !!CONTENT[bonusId] &&
                           isPhaseUnlocked(section.phaseIds[0]);

@@ -73,6 +73,15 @@ export const PHASE_SEQUENCE: string[] = PHASES.map((p) => p.id);
 // chain / the astronaut frontier. They carry their own PhaseInfo + CONTENT +
 // PHASE_CONFIG so Fase.tsx renders them exactly like any other phase.
 
+/** Temporary content gate: the "Repertórios" bonus questions haven't been
+ *  tested yet, so every Repertórios node stays in its placeholder ("Em
+ *  breve") state — dimmed, non-interactive — regardless of section unlock
+ *  state, exactly like a bonus phase with no CONTENT entry. None of the
+ *  bonus content/logic below is touched; flip this back to `true` once the
+ *  content is verified and ready to ship. Read only by Menu.tsx's
+ *  `bonusReady` check. */
+export const REPERTORIOS_ENABLED = false;
+
 export const BONUS_PHASES: PhaseInfo[] = [
   {
     id: 'fase-repertorios-bonus',
