@@ -879,7 +879,14 @@ export function Menu() {
                       className={[
                         styles.step,
                         isLeft ? styles.stepLeft : styles.stepRight,
-                      ].join(' ')}
+                        // Reserves extra room below this step on mobile only, where
+                        // the Repertórios branch (absolutely positioned, so it never
+                        // contributes to normal flow height) would otherwise overlap
+                        // the next node down — see .stepBonusAnchor.
+                        isAnchor ? styles.stepBonusAnchor : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                       role="listitem"
                     >
                       <div

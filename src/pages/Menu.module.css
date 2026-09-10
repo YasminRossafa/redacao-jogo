@@ -237,6 +237,24 @@
   padding-right: 0.5rem;
 }
 
+/* Mobile-only: reserves extra room below a step that anchors a Repertórios
+   branch. The branch is absolutely positioned (so it never contributes to
+   this step's normal-flow height) and, at the tighter mobile step spacing,
+   its own height doesn't fit in the natural gap before the next node —
+   without this, its circle+label overlaps the node below by ~100px. Desktop
+   and tablet already have enough natural gap between nodes (larger .step
+   padding, larger node sizes) that the same branch never collides, so this
+   is scoped to below the 768px breakpoint only and leaves them untouched.
+   Selector is the compound `.step.stepBonusAnchor` — not just the class
+   alone — so it outranks the plain `.step` padding shorthand below (used
+   from the 600px sub-breakpoint up), which would otherwise reset this same
+   padding-bottom back down since it comes later in the file. */
+@media (max-width: 767px) {
+  .step.stepBonusAnchor {
+    padding-bottom: 145px;
+  }
+}
+
 @media (min-width: 600px) {
   .step {
     padding: 2.25rem 0;
@@ -815,33 +833,37 @@
 }
 
 /* Pushed further out from the main trail than the anchor node's own offset
-   (was +6px everywhere) so the curved stardust path — which now threads
-   exactly through every main node's centre — never runs close to a
-   Repertórios circle. Mobile only has ~17px of slack before the branch
-   clips past the viewport edge (its width is fixed regardless of viewport,
-   since .step itself doesn't grow below the 768px breakpoint), so it gets a
-   modest +10px. From 768px up the column is centred with wide empty gutters
-   on both sides, so the offset can grow a lot more without any risk of
-   clipping. The connector's length/angle are recomputed to match at each
-   step: it still spans the same ~47.5px vertical drop down to the anchor
-   node, just over the wider horizontal gap each offset opens up. */
+   so the curved stardust path — which now threads exactly through every main
+   node's centre — never runs close to a Repertórios circle. On mobile this
+   is the ORIGINAL +6px: the label ("Repertórios", ~67px wide) already
+   overflows the branch's own 58px-wide column by ~4.5px a side, and mobile
+   has only ~17px of slack before that overflow clips past the viewport edge
+   — a previous pass pushed mobile to +16px along with desktop and clipped
+   the label (only ~1px of that slack left). Trail clearance at +6px is still
+   ~110px on mobile (node radius is 24px), so there's no trade-off in going
+   back down. From 768px up the column is centred with wide empty gutters on
+   both sides — plenty of room to push further without any clipping risk —
+   so desktop/tablet keep their own larger offset, untouched by this. The
+   connector's length/angle match each offset: at +6px that's exactly the
+   original 50px / 72° geometry (spans the same ~47.5px vertical drop down to
+   the anchor node over the ~15.5px horizontal gap +6px opens up). */
 .bonusOutLeft {
-  right: calc(50% + 16px);
+  right: calc(50% + 6px);
 }
 .bonusOutLeft::before {
   left: 24px;
-  width: 54px;
-  transform: rotate(-61.8deg);
+  width: 50px;
+  transform: rotate(-72deg);
 }
 
 /* Right-side step → bonus hangs down-right; connector rotates up-left. */
 .bonusOutRight {
-  left: calc(50% + 16px);
+  left: calc(50% + 6px);
 }
 .bonusOutRight::before {
   left: 32px;
-  width: 54px;
-  transform: rotate(-118.2deg);
+  width: 50px;
+  transform: rotate(-108deg);
 }
 
 @media (min-width: 768px) {
