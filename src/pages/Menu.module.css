@@ -379,6 +379,166 @@
   display: block;
 }
 
+/* ── Nebula markers (start launch pad + end Missão Final) ───────────────────── */
+/* A large, intense, interactive star-cloud — richer than the section-transition
+   .nebulaDust clouds and obviously clickable (ring, cursor, hover/focus). The
+   cloud is semi-transparent so the z-index:0 trail fades INTO it rather than
+   crossing as a hard line (contrast with the opaque .sectionBreak). */
+
+.startMarkerWrap {
+  align-self: center;
+  z-index: 2;
+  padding: 0.25rem 0 1.75rem;
+}
+
+.nebulaMarker {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+/* Star-cloud: a core radial glow + a dense scatter of coloured/white stars.
+   Negative inset lets the glow bleed past the ring so the trail fades in. */
+.nebulaMarkerCloud {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    /* core glow */
+    radial-gradient(circle at 50% 50%,
+      rgba(var(--marker-rgb, 148, 163, 184), 0.55) 0%,
+      rgba(var(--marker-rgb, 148, 163, 184), 0.28) 38%,
+      transparent 72%),
+    /* dense coloured stars */
+    radial-gradient(circle at 22% 30%, rgba(var(--marker-rgb, 148,163,184), 0.95) 2.2px, transparent 2.8px),
+    radial-gradient(circle at 68% 22%, rgba(var(--marker-rgb, 148,163,184), 0.80) 1.6px, transparent 2.2px),
+    radial-gradient(circle at 80% 58%, rgba(var(--marker-rgb, 148,163,184), 0.90) 2.0px, transparent 2.6px),
+    radial-gradient(circle at 34% 74%, rgba(var(--marker-rgb, 148,163,184), 0.75) 1.8px, transparent 2.4px),
+    radial-gradient(circle at 54% 48%, rgba(var(--marker-rgb, 148,163,184), 1.00) 2.4px, transparent 3.0px),
+    radial-gradient(circle at 14% 54%, rgba(var(--marker-rgb, 148,163,184), 0.70) 1.4px, transparent 2.0px),
+    radial-gradient(circle at 62% 82%, rgba(var(--marker-rgb, 148,163,184), 0.72) 1.5px, transparent 2.1px),
+    /* white sparkle stars */
+    radial-gradient(circle at 44% 18%, rgba(255,255,255, 0.95) 1.4px, transparent 2.0px),
+    radial-gradient(circle at 84% 38%, rgba(255,255,255, 0.85) 1.1px, transparent 1.6px),
+    radial-gradient(circle at 26% 46%, rgba(255,255,255, 0.80) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 72% 66%, rgba(255,255,255, 0.90) 1.3px, transparent 1.9px),
+    radial-gradient(circle at 48% 88%, rgba(255,255,255, 0.75) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 18% 82%, rgba(255,255,255, 0.70) 0.9px, transparent 1.4px);
+}
+
+/* The visible clickable border/ring. */
+.nebulaMarkerRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  border: 2px solid rgba(var(--marker-rgb, 148, 163, 184), 0.75);
+  box-shadow:
+    0 0 18px 4px rgba(var(--marker-rgb, 148, 163, 184), 0.5),
+    inset 0 0 22px rgba(var(--marker-rgb, 148, 163, 184), 0.35);
+  animation: markerPulse 3s ease-in-out infinite;
+}
+
+/* Center glyph (start marker only). */
+.nebulaMarkerIcon {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #F1F5F9;
+  filter: drop-shadow(0 0 6px rgba(var(--marker-rgb, 148, 163, 184), 0.9));
+  pointer-events: none;
+}
+
+.nebulaMarkerIcon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Interactive affordance: scale up + brighten on hover/focus. */
+.nebulaMarker:hover,
+.nebulaMarker:focus-visible {
+  transform: scale(1.06);
+  outline: none;
+}
+
+.nebulaMarker:hover .nebulaMarkerRing,
+.nebulaMarker:focus-visible .nebulaMarkerRing {
+  border-color: rgba(var(--marker-rgb, 148, 163, 184), 1);
+  box-shadow:
+    0 0 30px 8px rgba(var(--marker-rgb, 148, 163, 184), 0.7),
+    inset 0 0 26px rgba(var(--marker-rgb, 148, 163, 184), 0.5);
+}
+
+.nebulaMarker:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+/* Start marker — launch indigo. End marker — mission purple. */
+.nebulaMarkerStart {
+  --marker-rgb: 99, 102, 241;
+}
+
+.nebulaMarkerEnd {
+  --marker-rgb: 139, 92, 246;
+}
+
+/* Locked Missão Final: dim + desaturate, no hover pop, lock badge stays on top. */
+.nebulaMarkerLocked {
+  cursor: not-allowed;
+  filter: grayscale(0.6) brightness(0.62);
+}
+
+.nebulaMarkerLocked:hover,
+.nebulaMarkerLocked:focus-visible {
+  transform: none;
+}
+
+.nebulaMarkerLocked:hover .nebulaMarkerRing,
+.nebulaMarkerLocked:focus-visible .nebulaMarkerRing {
+  border-color: rgba(var(--marker-rgb, 148, 163, 184), 0.75);
+  box-shadow:
+    0 0 18px 4px rgba(var(--marker-rgb, 148, 163, 184), 0.5),
+    inset 0 0 22px rgba(var(--marker-rgb, 148, 163, 184), 0.35);
+}
+
+@keyframes markerPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 18px 4px rgba(var(--marker-rgb, 148, 163, 184), 0.5),
+      inset 0 0 22px rgba(var(--marker-rgb, 148, 163, 184), 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 26px 6px rgba(var(--marker-rgb, 148, 163, 184), 0.68),
+      inset 0 0 26px rgba(var(--marker-rgb, 148, 163, 184), 0.48);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nebulaMarker {
+    transition: none;
+  }
+  .nebulaMarkerRing {
+    animation: none;
+  }
+}
+
 /* ── Finale ring (CSS ellipse behind the planet) ────────────── */
 
 .finaleRing {
@@ -474,30 +634,10 @@
   line-height: 1;
 }
 
-/* ── Missão Final — distinct gold, pulsing node ── */
-
-.nodeMission {
-  color: #FDE68A;
-  border-color: rgba(251, 191, 36, 0.85);
-  background: radial-gradient(circle at 50% 40%, rgba(245, 158, 11, 0.28), var(--color-backdrop-elev) 70%);
-  animation: missionPulse 2.2s ease-in-out infinite;
-}
-
-@keyframes missionPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.55), 0 0 16px rgba(245, 158, 11, 0.45);
-  }
-  50% {
-    box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.85), 0 0 30px rgba(245, 158, 11, 0.8);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nodeMission {
-    animation: none;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.7), 0 0 22px rgba(245, 158, 11, 0.6);
-  }
-}
+/* ── Missão Final ── */
+/* The Missão Final node is rendered with the nebula-marker styles (see the
+   Nebula markers section above), so the old gold-disc `.nodeMission` rules were
+   removed. Its lock hint label below is still used. */
 
 /* Locked-mission hint label (replaces the generic "Em breve"). */
 .missionLockLabel {
@@ -754,4 +894,123 @@
 
 @media (prefers-reduced-motion: reduce) {
   .toast { animation: none; }
+}
+
+/* ── Responsive: tablet & desktop ───────────────────────────────────────────── */
+/* Mobile (base rules above) is unchanged. On wider viewports the column is
+   constrained to a comfortable reading width and centered; the body starfield
+   + section nebula gradients fill the sides. Node/step/font sizes scale up so
+   the wider column doesn't look sparse. The trail curve tracks the column width
+   in TrailSVG (AMP ∝ width), so it stays aligned with the nodes at every tier. */
+
+@media (min-width: 768px) {
+  .page {
+    max-width: 560px;
+  }
+
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    max-width: 34ch;
+  }
+
+  .sectionHeaderPrimary {
+    font-size: 1.25rem;
+  }
+
+  .step {
+    width: 168px;
+    padding: 2.5rem 0;
+  }
+
+  .stepLeft {
+    margin-left: 2rem;
+  }
+
+  .stepRight {
+    margin-right: 2rem;
+  }
+
+  .node {
+    width: 88px;
+    height: 88px;
+  }
+
+  .nodeBig,
+  .nodeFinal {
+    width: 96px;
+    height: 96px;
+  }
+
+  .nodeIcon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .nodeBig .nodeIcon,
+  .nodeFinal .nodeIcon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .nebulaMarker {
+    width: 132px;
+    height: 132px;
+  }
+
+  .nebulaMarkerIcon {
+    width: 2.85rem;
+    height: 2.85rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    max-width: 600px;
+  }
+
+  .title {
+    font-size: 2.75rem;
+  }
+
+  .sectionHeaderPrimary {
+    font-size: 1.375rem;
+  }
+
+  .step {
+    width: 188px;
+    padding: 2.75rem 0;
+  }
+
+  .stepLeft {
+    margin-left: 2.5rem;
+  }
+
+  .stepRight {
+    margin-right: 2.5rem;
+  }
+
+  .node {
+    width: 92px;
+    height: 92px;
+  }
+
+  .nodeBig,
+  .nodeFinal {
+    width: 104px;
+    height: 104px;
+  }
+
+  .nebulaMarker {
+    width: 144px;
+    height: 144px;
+  }
+
+  .nebulaMarkerIcon {
+    width: 3.1rem;
+    height: 3.1rem;
+  }
 }

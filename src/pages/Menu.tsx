@@ -312,6 +312,20 @@ function AstronautIcon() {
   );
 }
 
+// ─── Nebula marker (start + end special markers) ──────────────────────────────
+
+/** Decorative star-cloud layers shared by the start and end markers. The glowing
+ *  cloud is semi-transparent so the trail beneath fades into it (unlike the
+ *  opaque section breaks). No interactivity here — the wrapping button owns it. */
+function NebulaCloud() {
+  return (
+    <>
+      <span className={styles.nebulaMarkerCloud} aria-hidden />
+      <span className={styles.nebulaMarkerRing} aria-hidden />
+    </>
+  );
+}
+
 // ─── Static lookup tables ─────────────────────────────────────────────────────
 
 const PHASE_ICON: Record<string, () => React.ReactElement> = {
@@ -512,6 +526,27 @@ export function Menu() {
 
       <div className={styles.trail} role="list" aria-label="Fases do jogo">
         <TrailSVG completedFraction={completedFraction} />
+
+        {/* ── Start marker: launch pad at the top of the trail ── */}
+        <div className={styles.startMarkerWrap}>
+          <button
+            type="button"
+            className={[styles.nebulaMarker, styles.nebulaMarkerStart].join(' ')}
+            onClick={() => {
+              const target = frontierPhaseId
+                ? (EXPLAINER_ROUTE[frontierPhaseId] ?? `/fase/${frontierPhaseId}`)
+                : (EXPLAINER_ROUTE['fase-formula'] ?? '/fase/fase-formula');
+              navigate(target);
+            }}
+            aria-label="Continuar a jornada"
+          >
+            <NebulaCloud />
+            <span className={styles.nebulaMarkerIcon} aria-hidden>
+              <StarBurstIcon />
+            </span>
+          </button>
+        </div>
+
         {SECTIONS.map((section, sectionIdx) => {
           const phaseItems = SECTION_PHASE_ITEMS[section.id] ?? [];
           const nebClass = SECTION_NEBULA_CLASS[section.id];
@@ -590,8 +625,6 @@ export function Menu() {
                   // by a small corner badge instead of replacing the whole icon.
                   const PhaseNodeIcon =
                     PHASE_ICON[phase.id] ?? SECTION_FAMILY_ICON[section.id] ?? MoonIcon;
-                  // The mission node glows gold when reachable (never while locked).
-                  const missionActive = isMission && state !== 'locked';
                   // This phase is the anchor for the Repertórios bonus branch.
                   const isAnchor = BONUS_ANCHOR[section.id] === phase.id;
 
@@ -608,22 +641,35 @@ export function Menu() {
                         {isFinal && <span className={styles.finaleRing} aria-hidden />}
 
                         <button
-                          className={[
-                            styles.node,
-                            isFinal ? styles.nodeFinal : '',
-                            isAstronaut ? styles.nodeBig : '',
-                            missionActive ? styles.nodeMission : '',
-                            NODE_STATE_CLASS[state],
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
+                          className={
+                            isMission
+                              ? [
+                                  styles.nebulaMarker,
+                                  styles.nebulaMarkerEnd,
+                                  state === 'locked' ? styles.nebulaMarkerLocked : '',
+                                ]
+                                  .filter(Boolean)
+                                  .join(' ')
+                              : [
+                                  styles.node,
+                                  isFinal ? styles.nodeFinal : '',
+                                  isAstronaut ? styles.nodeBig : '',
+                                  NODE_STATE_CLASS[state],
+                                ]
+                                  .filter(Boolean)
+                                  .join(' ')
+                          }
                           onClick={() => (state !== 'locked') && navigate(nodeTarget)}
                           disabled={state === 'locked'}
                           aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : state === 'skip' ? ' — pular esta etapa' : ''}`}
                         >
-                          <span className={styles.nodeIcon}>
-                            <PhaseNodeIcon />
-                          </span>
+                          {isMission ? (
+                            <NebulaCloud />
+                          ) : (
+                            <span className={styles.nodeIcon}>
+                              <PhaseNodeIcon />
+                            </span>
+                          )}
                         </button>
 
                         {state === 'locked' && (

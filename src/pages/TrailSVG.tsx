@@ -6,18 +6,24 @@ interface Props {
   completedFraction: number;
 }
 
-const W = 320; // viewBox width (px-equivalent units)
-const AMP = 88; // oscillation amplitude from center
+// The viewBox width now tracks the actual rendered column width (px), so the
+// serpentine curve scales to fill the column at every breakpoint instead of
+// staying a fixed 320px-wide ribbon floating in a wider desktop column.
+// AMP is derived as a fraction of the width (AMP_K), calibrated so that at the
+// 375px mobile viewport (.trail offsetWidth = 375) the amplitude is exactly the
+// previous fixed 88px — keeping mobile pixel-identical (same amplitude, centre,
+// dash distribution). Wider columns scale the curve up proportionally.
+const AMP_K = 88 / 375; // ≈ 0.2347 — matches the previous fixed AMP at 375px
 const HALF_PERIOD = 270; // height per half-wave (one left or one right swing)
 
-function buildPath(height: number): string {
-  const cx = W / 2;
+function buildPath(height: number, w: number, amp: number): string {
+  const cx = w / 2;
   const steps = Math.ceil(height / HALF_PERIOD) + 1;
   let d = `M ${cx} 0`;
   for (let i = 0; i < steps; i++) {
     const y0 = i * HALF_PERIOD;
     const y1 = Math.min((i + 1) * HALF_PERIOD, height + HALF_PERIOD);
-    const xPeak = i % 2 === 0 ? cx - AMP : cx + AMP;
+    const xPeak = i % 2 === 0 ? cx - amp : cx + amp;
     const span = y1 - y0;
     d += ` C ${xPeak} ${y0 + span * 0.35} ${xPeak} ${y0 + span * 0.65} ${cx} ${y1}`;
   }
@@ -28,36 +34,43 @@ export function TrailSVG({ completedFraction }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const [containerH, setContainerH] = useState(0);
+  const [containerW, setContainerW] = useState(0);
   const [pathLen, setPathLen] = useState(0);
 
   useEffect(() => {
     const parent = wrapRef.current?.parentElement;
     if (!parent) return;
-    const ro = new ResizeObserver(() => setContainerH(parent.offsetHeight));
+    const ro = new ResizeObserver(() => {
+      setContainerH(parent.offsetHeight);
+      setContainerW(parent.offsetWidth);
+    });
     ro.observe(parent);
     setContainerH(parent.offsetHeight);
+    setContainerW(parent.offsetWidth);
     return () => ro.disconnect();
   }, []);
 
   useEffect(() => {
-    if (pathRef.current && containerH > 0) {
+    if (pathRef.current && containerH > 0 && containerW > 0) {
       setPathLen(pathRef.current.getTotalLength());
     }
-  }, [containerH]);
+  }, [containerH, containerW]);
 
   const H = containerH || 800;
-  const pathD = buildPath(H);
+  const W = containerW || 320;
+  const AMP = W * AMP_K;
+  const pathD = buildPath(H, W, AMP);
   const cometDash = 38;
   const cometGap = pathLen > 0 ? pathLen - cometDash : 9999;
 
   return (
     <div ref={wrapRef} className={styles.wrapper} aria-hidden>
-      {H > 0 && (
+      {W > 0 && H > 0 && (
         <svg
           viewBox={`0 0 ${W} ${H}`}
           width="100%"
           height={H}
-          preserveAspectRatio="xMidYMin meet"
+          preserveAspectRatio="none"
           className={styles.svg}
           aria-hidden
         >
