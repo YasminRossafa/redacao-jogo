@@ -523,6 +523,16 @@ interface TrailPoint {
   y: number;
 }
 
+/** Geometry for a Repertórios connector line, in the anchor step's own
+ *  (position: relative) coordinate frame. `top`/`left` are the line's start
+ *  point — the pivot `rotate()` turns around — not its bounding box. */
+interface ConnectorGeometry {
+  top: number;
+  left: number;
+  width: number;
+  angleDeg: number;
+}
+
 // ─── Pre-computed trail layout ────────────────────────────────────────────────
 // Computed once at module load (PHASES and SECTIONS are static constants).
 // Each phase gets a stable isLeft flag so the zigzag is consistent even after
@@ -614,6 +624,21 @@ export function Menu() {
   const nodeRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [backdrop, setBackdrop] = useState('');
   const [trailPoints, setTrailPoints] = useState<TrailPoint[]>([]);
+
+  // Repertórios connector line: measured, not guessed, so it always visibly
+  // starts from a real element on the anchor node instead of floating in
+  // whatever empty space a fixed pixel offset happened to assume. Keyed by
+  // anchor phase.id (the 3 entries in BONUS_ANCHOR); refs only ever get
+  // attached for those phases. stepRefs is the coordinate frame (each
+  // anchor's own position:relative .step); connectorOriginRefs points at
+  // whichever element is the node's real "bottom" — the star row once it has
+  // been played, else the label — so the line's start point automatically
+  // follows whichever is actually showing; bonusCircleRefs is the line's
+  // other end, the Repertórios circle itself.
+  const stepRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const connectorOriginRefs = useRef<Record<string, HTMLElement | null>>({});
+  const bonusCircleRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [connectorGeom, setConnectorGeom] = useState<Record<string, ConnectorGeometry>>({});
 
   useEffect(() => {
     unlockPhase('fase-formula');
@@ -739,6 +764,54 @@ export function Menu() {
           return points;
         });
       }
+
+      // Repertórios connector lines: one straight segment per anchor, from
+      // the real measured bottom-centre of its origin element (star row or
+      // label) to the real measured centre of its bonus circle. Both ends
+      // are exact, so the line can never "float" in an assumed gap — and it
+      // self-corrects whenever the origin changes (e.g. the star row
+      // appearing for the first time after the anchor phase is played).
+      const nextGeom: Record<string, ConnectorGeometry> = {};
+      for (const phaseId of Object.values(BONUS_ANCHOR)) {
+        const stepEl = stepRefs.current[phaseId];
+        const originEl = connectorOriginRefs.current[phaseId];
+        const circleEl = bonusCircleRefs.current[phaseId];
+        if (!stepEl || !originEl || !circleEl) continue;
+        const stepR = stepEl.getBoundingClientRect();
+        const originR = originEl.getBoundingClientRect();
+        const circleR = circleEl.getBoundingClientRect();
+
+        const originX = originR.left + originR.width / 2 - stepR.left;
+        const originY = originR.bottom - stepR.top;
+        const targetX = circleR.left + circleR.width / 2 - stepR.left;
+        const targetY = circleR.top + circleR.height / 2 - stepR.top;
+        const dx = targetX - originX;
+        const dy = targetY - originY;
+
+        nextGeom[phaseId] = {
+          top: originY,
+          left: originX,
+          width: Math.hypot(dx, dy),
+          angleDeg: (Math.atan2(dy, dx) * 180) / Math.PI,
+        };
+      }
+      setConnectorGeom((prev) => {
+        const keys = Object.keys(nextGeom);
+        const unchanged =
+          keys.length === Object.keys(prev).length &&
+          keys.every((k) => {
+            const a = prev[k];
+            const b = nextGeom[k];
+            return (
+              a &&
+              Math.abs(a.top - b.top) < 0.5 &&
+              Math.abs(a.left - b.left) < 0.5 &&
+              Math.abs(a.width - b.width) < 0.5 &&
+              Math.abs(a.angleDeg - b.angleDeg) < 0.5
+            );
+          });
+        return unchanged ? prev : nextGeom;
+      });
     };
 
     measure();
@@ -876,6 +949,7 @@ export function Menu() {
                   return (
                     <div
                       key={phase.id}
+                      ref={isAnchor ? (el) => { stepRefs.current[phase.id] = el; } : undefined}
                       className={[
                         styles.step,
                         isLeft ? styles.stepLeft : styles.stepRight,
@@ -940,6 +1014,11 @@ export function Menu() {
                       </div>
 
                       <span
+                        ref={
+                          isAnchor && stars === null
+                            ? (el) => { connectorOriginRefs.current[phase.id] = el; }
+                            : undefined
+                        }
                         className={[
                           styles.nodeLabel,
                           state === 'locked' ? styles.nodeLabelMuted : '',
@@ -959,7 +1038,10 @@ export function Menu() {
                       )}
 
                       {stars !== null && (
-                        <div className={styles.starRow}>
+                        <div
+                          ref={isAnchor ? (el) => { connectorOriginRefs.current[phase.id] = el; } : undefined}
+                          className={styles.starRow}
+                        >
                           <div
                             className={styles.stars}
                             aria-label={`${stars} de 3 estrelas`}
@@ -986,6 +1068,23 @@ export function Menu() {
                         </div>
                       )}
 
+                      {/* ── Repertórios connector: a straight line from this node's
+                          real bottom-most element (star row, else label) to the
+                          bonus circle — both ends measured, so it always visibly
+                          starts from real content instead of an assumed offset. ── */}
+                      {isAnchor && connectorGeom[phase.id] && (
+                        <span
+                          className={styles.bonusConnectorLine}
+                          style={{
+                            top: connectorGeom[phase.id].top,
+                            left: connectorGeom[phase.id].left,
+                            width: connectorGeom[phase.id].width,
+                            transform: `rotate(${connectorGeom[phase.id].angleDeg}deg)`,
+                          }}
+                          aria-hidden
+                        />
+                      )}
+
                       {/* ── Repertórios bonus side-branch: hangs below this node ── */}
                       {isAnchor && (() => {
                         const bonusId = BONUS_PHASE_BY_SECTION[section.id];
@@ -1010,7 +1109,10 @@ export function Menu() {
                               onClick={() => setToast('Em Breve')}
                               aria-label="Repertórios — em breve"
                             >
-                              <span className={styles.bonusNode}>
+                              <span
+                                ref={(el) => { bonusCircleRefs.current[phase.id] = el; }}
+                                className={styles.bonusNode}
+                              >
                                 <span className={styles.bonusIcon} aria-hidden>
                                   <RepertoriosIcon />
                                 </span>
@@ -1039,7 +1141,10 @@ export function Menu() {
                             }
                             aria-label="Repertórios — fase bônus"
                           >
-                            <span className={[styles.bonusNode, styles.bonusNodeActive].join(' ')}>
+                            <span
+                              ref={(el) => { bonusCircleRefs.current[phase.id] = el; }}
+                              className={[styles.bonusNode, styles.bonusNodeActive].join(' ')}
+                            >
                               <span className={styles.bonusIcon} aria-hidden>
                                 <RepertoriosIcon />
                               </span>

@@ -780,18 +780,19 @@
 
 /* ── "Repertórios" bonus side-branch (placeholder) ── */
 /* Hangs BELOW the anchor phase node as a small extra branch (not part of the
-   track). A diagonal dashed connector (::before) runs from the anchor node's
-   edge down toward the nearest screen corner, so it reads as a branch off that
-   specific node rather than a second line beside the central track.
-   Dimmed to read as "not yet available". */
+   track). A diagonal dashed connector (.bonusConnectorLine, a real sibling
+   element in the .step — see below) runs from that node's own star row or
+   label down to the branch, so it reads as a branch off that specific node
+   rather than a second line beside the central track. Dimmed to read as
+   "not yet available". */
 
 .bonusBranch {
   position: absolute;
   /* Hangs below the anchor node's full content area: 72px circle + 8px gap +
-     ~17px label + 8px gap + ~20px star row = ~125px. Using 185px keeps the
-     bonus circle ~60px below the star row, and the connector's upper end stays
-     ~14px below the star row's bottom edge (connector origin at 185+2=187px in
-     step coords; top end at 207−50×sin72°≈159px; star row bottom at ~145px). */
+     ~17px label + 8px gap + ~20px star row = ~125px. 185px keeps the bonus
+     circle a comfortable distance below that, for BOTH the placeholder and
+     unlocked variants; the connector's own start point is measured
+     independently (see .bonusConnectorLine), so it isn't tied to this value. */
   top: calc(1.25rem + 185px);
   z-index: 2;
   display: flex;
@@ -812,19 +813,21 @@
   opacity: 0.9;
 }
 
-/* Diagonal dashed connector spanning the clear gap between the star row and
-   the Repertórios circle. Shortened to 50px so the connector's upper end sits
-   ~14px below the anchor node's star row (step y≈159) and the lower end tucks
-   2px inside the Repertórios circle top (masked by bonusNode's z-index:1).
-   Angle unchanged at ±72° from horizontal; state-independent for the same
-   reason as before. */
-.bonusBranch::before {
-  content: '';
+/* Diagonal dashed connector: a straight line from the anchor node's own star
+   row (once played) or label (before that) to the Repertórios circle. Unlike
+   the branch above, this is positioned directly in the .step's own
+   coordinate frame — not nested inside .bonusBranch — because its two
+   endpoints are measured independently in Menu.tsx (connectorOriginRefs /
+   bonusCircleRefs) and set here via inline style (top/left/width/rotate).
+   That measurement is what makes it always visibly start FROM real content:
+   a fixed pixel guess can't know whether the star row exists yet, so it
+   either floats above real content (no stars) or lands short of it. */
+.bonusConnectorLine {
   position: absolute;
-  top: 2px;
-  width: 50px;
+  z-index: 1; /* under .bonusBranch (z-index: 2) — its circle tucks over the end */
   height: 2px;
   transform-origin: left center;
+  pointer-events: none;
   background: repeating-linear-gradient(
     to right,
     rgba(255, 255, 255, 0.4) 0px, rgba(255, 255, 255, 0.4) 4px,
@@ -843,44 +846,23 @@
    ~110px on mobile (node radius is 24px), so there's no trade-off in going
    back down. From 768px up the column is centred with wide empty gutters on
    both sides — plenty of room to push further without any clipping risk —
-   so desktop/tablet keep their own larger offset, untouched by this. The
-   connector's length/angle match each offset: at +6px that's exactly the
-   original 50px / 72° geometry (spans the same ~47.5px vertical drop down to
-   the anchor node over the ~15.5px horizontal gap +6px opens up). */
+   so desktop/tablet keep their own larger offset, untouched by this. */
 .bonusOutLeft {
   right: calc(50% + 6px);
 }
-.bonusOutLeft::before {
-  left: 24px;
-  width: 50px;
-  transform: rotate(-72deg);
-}
 
-/* Right-side step → bonus hangs down-right; connector rotates up-left. */
+/* Right-side step → bonus hangs down-right. */
 .bonusOutRight {
   left: calc(50% + 6px);
-}
-.bonusOutRight::before {
-  left: 32px;
-  width: 50px;
-  transform: rotate(-108deg);
 }
 
 @media (min-width: 768px) {
   .bonusOutLeft {
     right: calc(50% + 60px);
   }
-  .bonusOutLeft::before {
-    width: 84px;
-    transform: rotate(-34.4deg);
-  }
 
   .bonusOutRight {
     left: calc(50% + 60px);
-  }
-  .bonusOutRight::before {
-    width: 84px;
-    transform: rotate(-145.6deg);
   }
 }
 
@@ -888,17 +870,9 @@
   .bonusOutLeft {
     right: calc(50% + 70px);
   }
-  .bonusOutLeft::before {
-    width: 93px;
-    transform: rotate(-30.9deg);
-  }
 
   .bonusOutRight {
     left: calc(50% + 70px);
-  }
-  .bonusOutRight::before {
-    width: 93px;
-    transform: rotate(-149.1deg);
   }
 }
 
