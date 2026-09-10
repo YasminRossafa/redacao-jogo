@@ -28,7 +28,8 @@
   }
 }
 
-:global(html.tab-hidden) .root {
+:global(html.tab-hidden) .root,
+:global(html.is-scrolling) .root {
   animation-play-state: paused;
 }
 

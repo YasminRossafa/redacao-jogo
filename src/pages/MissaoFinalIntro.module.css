@@ -83,7 +83,8 @@
   .icon { animation: none; }
 }
 
-:global(html.tab-hidden) .icon {
+:global(html.tab-hidden) .icon,
+:global(html.is-scrolling) .icon {
   animation-play-state: paused;
 }
 

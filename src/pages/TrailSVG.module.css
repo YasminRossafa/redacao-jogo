@@ -39,9 +39,14 @@
   }
 }
 
-/* Tab/app backgrounded: pause instead of animating unseen. Resumes from the
-   same offset (no reset), so nothing jumps when the tab comes back. */
+/* Tab/app backgrounded, or the page is actively being scrolled: pause instead
+   of animating unseen/unnoticed. Resumes from the same offset (no reset), so
+   nothing jumps when the tab comes back or scrolling stops. Profiling showed
+   this stroke-dashoffset animation is one of several concurrently-running
+   ones that, combined, are the actual cause of scroll jank — see main.tsx. */
 :global(html.tab-hidden) .comet,
-:global(html.tab-hidden) .cometTail {
+:global(html.tab-hidden) .cometTail,
+:global(html.is-scrolling) .comet,
+:global(html.is-scrolling) .cometTail {
   animation-play-state: paused;
 }

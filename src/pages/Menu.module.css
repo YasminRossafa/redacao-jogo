@@ -509,7 +509,8 @@
 /* Tab/app backgrounded: pause continuous decorative animations instead of
    animating unseen. animation-play-state resumes from the same offset, so
    nothing jumps when the tab becomes visible again. */
-:global(html.tab-hidden) .markerTitle {
+:global(html.tab-hidden) .markerTitle,
+:global(html.is-scrolling) .markerTitle {
   animation-play-state: paused;
 }
 
@@ -628,7 +629,8 @@
   }
 }
 
-:global(html.tab-hidden) .nebulaMarkerRing {
+:global(html.tab-hidden) .nebulaMarkerRing,
+:global(html.is-scrolling) .nebulaMarkerRing {
   animation-play-state: paused;
 }
 
@@ -670,7 +672,8 @@
   }
 }
 
-:global(html.tab-hidden) .astronaut {
+:global(html.tab-hidden) .astronaut,
+:global(html.is-scrolling) .astronaut {
   animation-play-state: paused;
 }
 
@@ -761,7 +764,8 @@
   }
 }
 
-:global(html.tab-hidden) .nodeSkip {
+:global(html.tab-hidden) .nodeSkip,
+:global(html.is-scrolling) .nodeSkip {
   animation-play-state: paused;
 }
 
