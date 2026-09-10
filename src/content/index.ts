@@ -210,6 +210,27 @@ export function getNextPhaseId(currentId: string): string | null {
   return PHASE_SEQUENCE[idx + 1];
 }
 
+// Guide phases open their explainer page before the quiz. Shared between Menu
+// (which node to navigate to on tap) and Fase (the results screen's "Próximo"
+// button), so both always send the player through the same route for a given
+// phase rather than Fase re-deriving — and risking drifting from — its own copy.
+export const EXPLAINER_ROUTE: Record<string, string> = {
+  'fase-formula':    '/formula',
+  'fase-d1-formula': '/d1-formula',
+  'fase-d2-formula': '/d2-formula',
+  'fase-conclusao-formula': '/conclusao-formula',
+  'fase-missao-final': '/missao-final',
+  // Bonus phase openers: the Repertórios rule panels precede their 5 questions.
+  'fase-d1-repertorios-bonus': '/d1-repertorios',
+  'fase-d2-repertorios-bonus': '/d2-repertorios',
+};
+
+/** The route to open a given phase: its explainer page if it has one, else
+ *  straight to the quiz. */
+export function getPhaseRoute(phaseId: string): string {
+  return EXPLAINER_ROUTE[phaseId] ?? `/fase/${phaseId}`;
+}
+
 // ─── Per-phase configuration ──────────────────────────────────────────────────
 // Each phase declares its own question total, unlock threshold, and tier cutoffs,
 // so results/stars/unlock logic scales with phase size instead of assuming 18.

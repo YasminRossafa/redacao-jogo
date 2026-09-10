@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
-import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, getTierStars } from '../content/index';
+import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, getTierStars, getPhaseRoute } from '../content/index';
 import type { PhaseInfo, SectionInfo } from '../content/index';
 import styles from './Menu.module.css';
 import { TrailSVG } from './TrailSVG';
@@ -467,18 +467,6 @@ const MISSION_PREREQ_SECTIONS = ['introducao', 'dev1', 'dev2', 'conclusao'];
 const MISSION_SECTION_ID = 'redacao-completa';
 const TRACK_SECTIONS = SECTIONS.filter((s) => s.id !== MISSION_SECTION_ID);
 
-// Guide phases open their explainer page before the quiz.
-const EXPLAINER_ROUTE: Record<string, string> = {
-  'fase-formula':    '/formula',
-  'fase-d1-formula': '/d1-formula',
-  'fase-d2-formula': '/d2-formula',
-  'fase-conclusao-formula': '/conclusao-formula',
-  'fase-missao-final': '/missao-final',
-  // Bonus phase openers: the Repertórios rule panels precede their 5 questions.
-  'fase-d1-repertorios-bonus': '/d1-repertorios',
-  'fase-d2-repertorios-bonus': '/d2-repertorios',
-};
-
 // CSS class carrying each section's --sec-rgb (drives the per-node glow).
 const SECTION_NEBULA_CLASS: Record<string, string> = {
   'introducao': styles.sectionIntroducao,
@@ -662,6 +650,28 @@ export function Menu() {
     const lastUnlocked = [...PHASES].reverse().find((p) => isPhaseUnlocked(p.id));
     return lastUnlocked?.id ?? null;
   })();
+
+  // Auto-scroll to the player's current position once, on mount — covers both
+  // returning from a phase (Menu remounts fresh each time the route becomes
+  // "/", whether via the header's "← Menu" or a completed phase's buttons)
+  // and a first-ever visit (frontierPhaseId is 'fase-formula' there, right at
+  // the top, so the scroll is a harmless no-op). frontierPhaseId is read from
+  // the FIRST render only (empty deps) — it already reflects the reconciled
+  // progress state, since useProgress()'s one-time unlockedPhases backfill
+  // runs synchronously inside the lazy useState initializer, before this
+  // component's first render ever happens, not after it. Falls back to
+  // endCircleRef when the frontier is the mission itself, which — unlike
+  // every other phase — isn't rendered in the main loop nodeRefs populates.
+  useEffect(() => {
+    const target =
+      frontierPhaseId === MISSION_ID
+        ? endCircleRef.current
+        : nodeRefs.current[frontierPhaseId ?? ''];
+    if (!target) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- intentionally mount-only
+  }, []);
 
   // The Missão Final ignores the sequential unlock chain: it opens only once every
   // content phase of all four prior sections has been played OR skipped.
@@ -850,10 +860,7 @@ export function Menu() {
               ref={startCircleRef}
               className={[styles.nebulaMarker, styles.nebulaMarkerStart].join(' ')}
               onClick={() => {
-                const target = frontierPhaseId
-                  ? (EXPLAINER_ROUTE[frontierPhaseId] ?? `/fase/${frontierPhaseId}`)
-                  : (EXPLAINER_ROUTE['fase-formula'] ?? '/fase/fase-formula');
-                navigate(target);
+                navigate(getPhaseRoute(frontierPhaseId ?? 'fase-formula'));
               }}
               aria-label="Missão Nota 1000 — continuar a jornada"
             >
@@ -936,7 +943,7 @@ export function Menu() {
                   const isAstronaut = phase.id === frontierPhaseId;
                   // Phases without content entries are "em breve" placeholders.
                   const isComingSoon = !CONTENT[phase.id];
-                  const baseTarget = EXPLAINER_ROUTE[phase.id] ?? `/fase/${phase.id}`;
+                  const baseTarget = getPhaseRoute(phase.id);
                   const nodeTarget = inSkipState ? `${baseTarget}?skip=1` : baseTarget;
                   // Always show the family/celestial icon (dimmed when locked), so
                   // each section's family reads at a glance; the lock state is shown
@@ -1137,7 +1144,7 @@ export function Menu() {
                               isLeft ? styles.bonusOutLeft : styles.bonusOutRight,
                             ].join(' ')}
                             onClick={() =>
-                              navigate(EXPLAINER_ROUTE[bonusId] ?? `/fase/${bonusId}`)
+                              navigate(getPhaseRoute(bonusId))
                             }
                             aria-label="Repertórios — fase bônus"
                           >
@@ -1204,7 +1211,7 @@ export function Menu() {
                 .join(' ')}
               onClick={() =>
                 missionUnlocked
-                  ? navigate(EXPLAINER_ROUTE[MISSION_ID] ?? `/fase/${MISSION_ID}`)
+                  ? navigate(getPhaseRoute(MISSION_ID))
                   : toggleLock(MISSION_ID)
               }
               aria-disabled={!missionUnlocked}

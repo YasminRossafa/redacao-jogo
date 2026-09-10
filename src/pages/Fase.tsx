@@ -12,6 +12,7 @@ import {
   getTier,
   getPhaseTotal,
   getUnlockThreshold,
+  getPhaseRoute,
 } from '../content/index';
 import { OrderPuzzle } from '../engine/OrderPuzzle';
 import { TagMatch } from '../engine/TagMatch';
@@ -651,9 +652,29 @@ export function Fase() {
             </ul>
           )}
 
-          <button className={styles.restartBtn} onClick={restart}>
-            Tentar novamente
-          </button>
+          {meetsThreshold && nextId ? (
+            <>
+              {/* Only shown once the same threshold that unlocks nextId is met
+                  (reuses getUnlockThreshold — see meetsThreshold above), so it
+                  never appears alongside a failing score. Takes the primary
+                  accent slot "Tentar novamente" otherwise occupies; retrying
+                  for a better score is still available, just demoted to the
+                  secondary spot below it. */}
+              <button
+                className={styles.nextPhaseBtn}
+                onClick={() => navigate(getPhaseRoute(nextId))}
+              >
+                Próximo →
+              </button>
+              <button className={styles.restartBtnSecondary} onClick={restart}>
+                Tentar novamente
+              </button>
+            </>
+          ) : (
+            <button className={styles.restartBtn} onClick={restart}>
+              Tentar novamente
+            </button>
+          )}
         </div>
       </div>
     );

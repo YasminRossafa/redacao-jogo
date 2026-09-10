@@ -411,6 +411,53 @@
   background: var(--color-primary-hover);
 }
 
+/* Primary action once the phase is passed: same accent treatment .restartBtn
+   uses on its own (the app's one "main action" button style — see .menuBtn),
+   just under a name that reads as "go forward" rather than "redo". Named
+   .nextPhaseBtn, not .nextBtn — that name is already the in-activity
+   "Próxima atividade →" button above (a CSS Module class is a single global
+   rule per key; reusing .nextBtn here would have applied this one's
+   properties to that unrelated button too, and vice versa. */
+.nextPhaseBtn {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 0 1.75rem;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.nextPhaseBtn:active {
+  background: var(--color-primary-hover);
+}
+
+/* "Tentar novamente" demoted to this outline style whenever .nextBtn is
+   shown alongside it — retrying for a better score is still one tap away,
+   it just isn't the primary action anymore. Matches .reviewToggleBtn's
+   existing neutral/outline language rather than inventing a new one. */
+.restartBtnSecondary {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 0 1.75rem;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.restartBtnSecondary:active {
+  background: var(--color-border);
+}
+
 /* ── Missão Final — results backdrop tint ── */
 
 .missionRoot {
