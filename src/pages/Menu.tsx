@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgress } from '../progress/useProgress';
 import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, REPERTORIOS_ENABLED, getTierStars, getPhaseRoute } from '../content/index';
@@ -561,6 +561,311 @@ const SECTION_PHASE_ITEMS: Record<string, PhaseTrailItem[]> = (() => {
   return result;
 })();
 
+// ─── Phase node (memoized) ─────────────────────────────────────────────────
+// Split out of Menu's render so an update that only affects a FEW nodes (a
+// lock tooltip toggling, a toast appearing, the measured connector geometry
+// for one anchor) doesn't force React to re-render and re-diff all ~27 phase
+// nodes — each with its own box-shadow/glow node, label, star row and
+// (for 3 of them) a bonus branch. React.memo bails out whenever a given
+// node's own props are unchanged, which is the common case for any update
+// that isn't a progress change. Props are kept to primitives/stable
+// references (not the raw `openLockId` string or the whole `connectorGeom`
+// map) specifically so that bail-out actually triggers for the nodes an
+// update doesn't concern.
+interface PhaseNodeProps {
+  phase: PhaseInfo;
+  isLeft: boolean;
+  isAnchor: boolean;
+  sectionId: string;
+  sectionFirstPhaseId: string;
+  state: NodeState;
+  stars: number | null;
+  isAstronaut: boolean;
+  isComingSoon: boolean;
+  isLockOpen: boolean;
+  hasSabichaoBadge: boolean;
+  nodeTarget: string;
+  PhaseIcon: () => React.ReactElement;
+  connectorGeom: ConnectorGeometry | undefined;
+  toggleLock: (id: string) => void;
+  navigate: (path: string) => void;
+  setToast: (msg: string | null) => void;
+  isPhaseUnlocked: (id: string) => boolean;
+  getPhaseScore: (id: string) => { correctCount: number; total: number; bestCombo: number } | null;
+  /** Reads the node button el registered for a given phase id — used only by
+   *  the lock tooltip to find its anchor once open. */
+  getNodeEl: (id: string) => HTMLElement | null;
+  // Refs are registered through small setter callbacks (stable, owned by
+  // Menu) rather than by handing the ref objects themselves down as props —
+  // writing into someone else's prop value is exactly the mutation pattern
+  // oxlint's react(immutability) rule flags, even though .current is the one
+  // part of a ref that's meant to be mutated. Routing the write through a
+  // callback keeps the mutation inside the code that owns the ref.
+  setNodeRef: (id: string, el: HTMLButtonElement | null) => void;
+  setStepRef: (id: string, el: HTMLDivElement | null) => void;
+  setConnectorOriginRef: (id: string, el: HTMLElement | null) => void;
+  setBonusCircleRef: (id: string, el: HTMLElement | null) => void;
+}
+
+const PhaseNode = React.memo(function PhaseNode({
+  phase,
+  isLeft,
+  isAnchor,
+  sectionId,
+  sectionFirstPhaseId,
+  state,
+  stars,
+  isAstronaut,
+  isComingSoon,
+  isLockOpen,
+  hasSabichaoBadge,
+  nodeTarget,
+  PhaseIcon,
+  connectorGeom,
+  toggleLock,
+  navigate,
+  setToast,
+  isPhaseUnlocked,
+  getPhaseScore,
+  getNodeEl,
+  setNodeRef,
+  setStepRef,
+  setConnectorOriginRef,
+  setBonusCircleRef,
+}: PhaseNodeProps) {
+  return (
+    <div
+      ref={isAnchor ? (el) => setStepRef(phase.id, el) : undefined}
+      className={[
+        styles.step,
+        isLeft ? styles.stepLeft : styles.stepRight,
+        // Reserves extra room below this step on mobile only, where
+        // the Repertórios branch (absolutely positioned, so it never
+        // contributes to normal flow height) would otherwise overlap
+        // the next node down — see .stepBonusAnchor.
+        isAnchor ? styles.stepBonusAnchor : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      role="listitem"
+    >
+      <div
+        className={styles.nodeWrap}
+        data-lock-node={state === 'locked' ? phase.id : undefined}
+      >
+        <button
+          ref={(el) => setNodeRef(phase.id, el)}
+          className={[
+            styles.node,
+            isAstronaut ? styles.nodeBig : '',
+            NODE_STATE_CLASS[state],
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={() =>
+            state === 'locked' ? toggleLock(phase.id) : navigate(nodeTarget)
+          }
+          aria-disabled={state === 'locked'}
+          aria-expanded={state === 'locked' ? isLockOpen : undefined}
+          aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : state === 'skip' ? ' — pular esta etapa' : ''}`}
+        >
+          <span className={styles.nodeIcon}>
+            <PhaseIcon />
+          </span>
+        </button>
+
+        {state === 'locked' && (
+          <span
+            className={styles.lockBadge}
+            role="button"
+            tabIndex={-1}
+            onClick={() => toggleLock(phase.id)}
+          >
+            <LockIcon />
+          </span>
+        )}
+
+        {isAstronaut && (
+          <span className={styles.astronaut} aria-hidden>
+            <AstronautIcon />
+          </span>
+        )}
+
+        {state === 'locked' && isLockOpen && (
+          <LockTooltip
+            message={PHASE_LOCKED_MESSAGE}
+            getAnchor={() => getNodeEl(phase.id)}
+          />
+        )}
+      </div>
+
+      <span
+        ref={
+          isAnchor && stars === null
+            ? (el) => setConnectorOriginRef(phase.id, el)
+            : undefined
+        }
+        className={[
+          styles.nodeLabel,
+          state === 'locked' ? styles.nodeLabelMuted : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {phase.label}
+      </span>
+
+      {isComingSoon && state === 'locked' && (
+        <span className={styles.comingSoonBadge}>Em breve</span>
+      )}
+
+      {state === 'skip' && (
+        <span className={styles.skipBadge}>Pular esta etapa</span>
+      )}
+
+      {stars !== null && (
+        <div
+          ref={isAnchor ? (el) => setConnectorOriginRef(phase.id, el) : undefined}
+          className={styles.starRow}
+        >
+          <div
+            className={styles.stars}
+            aria-label={`${stars} de 3 estrelas`}
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={i < stars ? styles.starOn : styles.starOff}
+                aria-hidden
+              >
+                ★
+              </span>
+            ))}
+          </div>
+          {hasSabichaoBadge && (
+            <span
+              className={styles.nodeBadge}
+              aria-label="Sabichão"
+              title="Sabichão"
+            >
+              🏆
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* ── Repertórios connector: a straight line from this node's
+          real bottom-most element (star row, else label) to the
+          bonus circle — both ends measured, so it always visibly
+          starts from real content instead of an assumed offset. ── */}
+      {isAnchor && connectorGeom && (
+        <span
+          className={styles.bonusConnectorLine}
+          style={{
+            top: connectorGeom.top,
+            left: connectorGeom.left,
+            width: connectorGeom.width,
+            transform: `rotate(${connectorGeom.angleDeg}deg)`,
+          }}
+          aria-hidden
+        />
+      )}
+
+      {/* ── Repertórios bonus side-branch: hangs below this node ── */}
+      {isAnchor && (() => {
+        const bonusId = BONUS_PHASE_BY_SECTION[sectionId];
+        // A playable bonus exists only where a bonus phase is
+        // mapped AND its content is built. It unlocks with the
+        // SECTION itself (its first stage becoming available) —
+        // never gated behind completing any stage. REPERTORIOS_ENABLED
+        // is a temporary content gate (content not yet tested) — while
+        // false, every Repertórios node falls into the same "Em breve"
+        // placeholder branch below as if it had no CONTENT at all.
+        const bonusReady =
+          REPERTORIOS_ENABLED &&
+          !!bonusId &&
+          !!CONTENT[bonusId] &&
+          isPhaseUnlocked(sectionFirstPhaseId);
+
+        if (!bonusReady) {
+          // Placeholder branch — dimmed; taps show an "Em Breve" toast.
+          return (
+            <button
+              type="button"
+              className={[
+                styles.bonusBranch,
+                isLeft ? styles.bonusOutLeft : styles.bonusOutRight,
+              ].join(' ')}
+              onClick={() => setToast('Em Breve')}
+              aria-label="Repertórios — em breve"
+            >
+              <span
+                ref={(el) => setBonusCircleRef(phase.id, el)}
+                className={styles.bonusNode}
+              >
+                <span className={styles.bonusIcon} aria-hidden>
+                  <RepertoriosIcon />
+                </span>
+              </span>
+              <span className={styles.bonusLabel}>Repertórios</span>
+              <span className={styles.bonusTag}>Em breve</span>
+            </button>
+          );
+        }
+
+        const bonusScore = getPhaseScore(bonusId);
+        const bonusStars = bonusScore
+          ? getTierStars(bonusScore.correctCount, bonusId)
+          : null;
+
+        return (
+          <button
+            type="button"
+            className={[
+              styles.bonusBranch,
+              styles.bonusBranchActive,
+              isLeft ? styles.bonusOutLeft : styles.bonusOutRight,
+            ].join(' ')}
+            onClick={() =>
+              navigate(getPhaseRoute(bonusId))
+            }
+            aria-label="Repertórios — fase bônus"
+          >
+            <span
+              ref={(el) => setBonusCircleRef(phase.id, el)}
+              className={[styles.bonusNode, styles.bonusNodeActive].join(' ')}
+            >
+              <span className={styles.bonusIcon} aria-hidden>
+                <RepertoriosIcon />
+              </span>
+            </span>
+            <span className={styles.bonusLabel}>Repertórios</span>
+            <span className={[styles.bonusTag, styles.bonusTagActive].join(' ')}>
+              Bônus
+            </span>
+            {bonusStars !== null && (
+              <div
+                className={styles.stars}
+                aria-label={`${bonusStars} de 3 estrelas`}
+              >
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className={i < bonusStars ? styles.starOn : styles.starOff}
+                    aria-hidden
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+            )}
+          </button>
+        );
+      })()}
+    </div>
+  );
+});
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function Menu() {
@@ -575,7 +880,10 @@ export function Menu() {
   // node itself or its lock badge; dismissed by clicking elsewhere, pressing
   // Escape, or clicking the same trigger again.
   const [openLockId, setOpenLockId] = useState<string | null>(null);
-  const toggleLock = (id: string) => setOpenLockId((prev) => (prev === id ? null : id));
+  const toggleLock = useCallback(
+    (id: string) => setOpenLockId((prev) => (prev === id ? null : id)),
+    []
+  );
 
   useEffect(() => {
     if (!openLockId) return;
@@ -627,6 +935,29 @@ export function Menu() {
   const connectorOriginRefs = useRef<Record<string, HTMLElement | null>>({});
   const bonusCircleRefs = useRef<Record<string, HTMLElement | null>>({});
   const [connectorGeom, setConnectorGeom] = useState<Record<string, ConnectorGeometry>>({});
+
+  // Stable setters for the per-phase ref maps above, handed to PhaseNode
+  // instead of the ref objects themselves — see the comment on PhaseNodeProps.
+  const getNodeEl = useCallback(
+    (id: string) => nodeRefs.current[id] ?? null,
+    []
+  );
+  const setNodeRef = useCallback(
+    (id: string, el: HTMLButtonElement | null) => { nodeRefs.current[id] = el; },
+    []
+  );
+  const setStepRef = useCallback(
+    (id: string, el: HTMLDivElement | null) => { stepRefs.current[id] = el; },
+    []
+  );
+  const setConnectorOriginRef = useCallback(
+    (id: string, el: HTMLElement | null) => { connectorOriginRefs.current[id] = el; },
+    []
+  );
+  const setBonusCircleRef = useCallback(
+    (id: string, el: HTMLElement | null) => { bonusCircleRefs.current[id] = el; },
+    []
+  );
 
   useEffect(() => {
     unlockPhase('fase-formula');
@@ -954,236 +1285,33 @@ export function Menu() {
                   const isAnchor = BONUS_ANCHOR[section.id] === phase.id;
 
                   return (
-                    <div
+                    <PhaseNode
                       key={phase.id}
-                      ref={isAnchor ? (el) => { stepRefs.current[phase.id] = el; } : undefined}
-                      className={[
-                        styles.step,
-                        isLeft ? styles.stepLeft : styles.stepRight,
-                        // Reserves extra room below this step on mobile only, where
-                        // the Repertórios branch (absolutely positioned, so it never
-                        // contributes to normal flow height) would otherwise overlap
-                        // the next node down — see .stepBonusAnchor.
-                        isAnchor ? styles.stepBonusAnchor : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      role="listitem"
-                    >
-                      <div
-                        className={styles.nodeWrap}
-                        data-lock-node={state === 'locked' ? phase.id : undefined}
-                      >
-                        <button
-                          ref={(el) => { nodeRefs.current[phase.id] = el; }}
-                          className={[
-                            styles.node,
-                            isAstronaut ? styles.nodeBig : '',
-                            NODE_STATE_CLASS[state],
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                          onClick={() =>
-                            state === 'locked' ? toggleLock(phase.id) : navigate(nodeTarget)
-                          }
-                          aria-disabled={state === 'locked'}
-                          aria-expanded={state === 'locked' ? openLockId === phase.id : undefined}
-                          aria-label={`${phase.label}${state === 'locked' ? ' — bloqueado' : state === 'skip' ? ' — pular esta etapa' : ''}`}
-                        >
-                          <span className={styles.nodeIcon}>
-                            <PhaseNodeIcon />
-                          </span>
-                        </button>
-
-                        {state === 'locked' && (
-                          <span
-                            className={styles.lockBadge}
-                            role="button"
-                            tabIndex={-1}
-                            onClick={() => toggleLock(phase.id)}
-                          >
-                            <LockIcon />
-                          </span>
-                        )}
-
-                        {isAstronaut && (
-                          <span className={styles.astronaut} aria-hidden>
-                            <AstronautIcon />
-                          </span>
-                        )}
-
-                        {state === 'locked' && openLockId === phase.id && (
-                          <LockTooltip
-                            message={PHASE_LOCKED_MESSAGE}
-                            getAnchor={() => nodeRefs.current[phase.id] ?? null}
-                          />
-                        )}
-                      </div>
-
-                      <span
-                        ref={
-                          isAnchor && stars === null
-                            ? (el) => { connectorOriginRefs.current[phase.id] = el; }
-                            : undefined
-                        }
-                        className={[
-                          styles.nodeLabel,
-                          state === 'locked' ? styles.nodeLabelMuted : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                      >
-                        {phase.label}
-                      </span>
-
-                      {isComingSoon && state === 'locked' && (
-                        <span className={styles.comingSoonBadge}>Em breve</span>
-                      )}
-
-                      {state === 'skip' && (
-                        <span className={styles.skipBadge}>Pular esta etapa</span>
-                      )}
-
-                      {stars !== null && (
-                        <div
-                          ref={isAnchor ? (el) => { connectorOriginRefs.current[phase.id] = el; } : undefined}
-                          className={styles.starRow}
-                        >
-                          <div
-                            className={styles.stars}
-                            aria-label={`${stars} de 3 estrelas`}
-                          >
-                            {[0, 1, 2].map((i) => (
-                              <span
-                                key={i}
-                                className={i < stars ? styles.starOn : styles.starOff}
-                                aria-hidden
-                              >
-                                ★
-                              </span>
-                            ))}
-                          </div>
-                          {hasBadge(`sabichao-${phase.id}`) && (
-                            <span
-                              className={styles.nodeBadge}
-                              aria-label="Sabichão"
-                              title="Sabichão"
-                            >
-                              🏆
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* ── Repertórios connector: a straight line from this node's
-                          real bottom-most element (star row, else label) to the
-                          bonus circle — both ends measured, so it always visibly
-                          starts from real content instead of an assumed offset. ── */}
-                      {isAnchor && connectorGeom[phase.id] && (
-                        <span
-                          className={styles.bonusConnectorLine}
-                          style={{
-                            top: connectorGeom[phase.id].top,
-                            left: connectorGeom[phase.id].left,
-                            width: connectorGeom[phase.id].width,
-                            transform: `rotate(${connectorGeom[phase.id].angleDeg}deg)`,
-                          }}
-                          aria-hidden
-                        />
-                      )}
-
-                      {/* ── Repertórios bonus side-branch: hangs below this node ── */}
-                      {isAnchor && (() => {
-                        const bonusId = BONUS_PHASE_BY_SECTION[section.id];
-                        // A playable bonus exists only where a bonus phase is
-                        // mapped AND its content is built. It unlocks with the
-                        // SECTION itself (its first stage becoming available) —
-                        // never gated behind completing any stage. REPERTORIOS_ENABLED
-                        // is a temporary content gate (content not yet tested) — while
-                        // false, every Repertórios node falls into the same "Em breve"
-                        // placeholder branch below as if it had no CONTENT at all.
-                        const bonusReady =
-                          REPERTORIOS_ENABLED &&
-                          !!bonusId &&
-                          !!CONTENT[bonusId] &&
-                          isPhaseUnlocked(section.phaseIds[0]);
-
-                        if (!bonusReady) {
-                          // Placeholder branch — dimmed; taps show an "Em Breve" toast.
-                          return (
-                            <button
-                              type="button"
-                              className={[
-                                styles.bonusBranch,
-                                isLeft ? styles.bonusOutLeft : styles.bonusOutRight,
-                              ].join(' ')}
-                              onClick={() => setToast('Em Breve')}
-                              aria-label="Repertórios — em breve"
-                            >
-                              <span
-                                ref={(el) => { bonusCircleRefs.current[phase.id] = el; }}
-                                className={styles.bonusNode}
-                              >
-                                <span className={styles.bonusIcon} aria-hidden>
-                                  <RepertoriosIcon />
-                                </span>
-                              </span>
-                              <span className={styles.bonusLabel}>Repertórios</span>
-                              <span className={styles.bonusTag}>Em breve</span>
-                            </button>
-                          );
-                        }
-
-                        const bonusScore = getPhaseScore(bonusId);
-                        const bonusStars = bonusScore
-                          ? getTierStars(bonusScore.correctCount, bonusId)
-                          : null;
-
-                        return (
-                          <button
-                            type="button"
-                            className={[
-                              styles.bonusBranch,
-                              styles.bonusBranchActive,
-                              isLeft ? styles.bonusOutLeft : styles.bonusOutRight,
-                            ].join(' ')}
-                            onClick={() =>
-                              navigate(getPhaseRoute(bonusId))
-                            }
-                            aria-label="Repertórios — fase bônus"
-                          >
-                            <span
-                              ref={(el) => { bonusCircleRefs.current[phase.id] = el; }}
-                              className={[styles.bonusNode, styles.bonusNodeActive].join(' ')}
-                            >
-                              <span className={styles.bonusIcon} aria-hidden>
-                                <RepertoriosIcon />
-                              </span>
-                            </span>
-                            <span className={styles.bonusLabel}>Repertórios</span>
-                            <span className={[styles.bonusTag, styles.bonusTagActive].join(' ')}>
-                              Bônus
-                            </span>
-                            {bonusStars !== null && (
-                              <div
-                                className={styles.stars}
-                                aria-label={`${bonusStars} de 3 estrelas`}
-                              >
-                                {[0, 1, 2].map((i) => (
-                                  <span
-                                    key={i}
-                                    className={i < bonusStars ? styles.starOn : styles.starOff}
-                                    aria-hidden
-                                  >
-                                    ★
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })()}
-                    </div>
+                      phase={phase}
+                      isLeft={isLeft}
+                      isAnchor={isAnchor}
+                      sectionId={section.id}
+                      sectionFirstPhaseId={section.phaseIds[0]}
+                      state={state}
+                      stars={stars}
+                      isAstronaut={isAstronaut}
+                      isComingSoon={isComingSoon}
+                      isLockOpen={openLockId === phase.id}
+                      hasSabichaoBadge={hasBadge(`sabichao-${phase.id}`)}
+                      nodeTarget={nodeTarget}
+                      PhaseIcon={PhaseNodeIcon}
+                      connectorGeom={connectorGeom[phase.id]}
+                      toggleLock={toggleLock}
+                      navigate={navigate}
+                      setToast={setToast}
+                      isPhaseUnlocked={isPhaseUnlocked}
+                      getPhaseScore={getPhaseScore}
+                      getNodeEl={getNodeEl}
+                      setNodeRef={setNodeRef}
+                      setStepRef={setStepRef}
+                      setConnectorOriginRef={setConnectorOriginRef}
+                      setBonusCircleRef={setBonusCircleRef}
+                    />
                   );
                 })}
 

@@ -38,3 +38,10 @@
     opacity: 0;
   }
 }
+
+/* Tab/app backgrounded: pause instead of animating unseen. Resumes from the
+   same offset (no reset), so nothing jumps when the tab comes back. */
+:global(html.tab-hidden) .comet,
+:global(html.tab-hidden) .cometTail {
+  animation-play-state: paused;
+}

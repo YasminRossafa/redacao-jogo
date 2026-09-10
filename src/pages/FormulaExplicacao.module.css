@@ -22,6 +22,10 @@
   .root { animation: none; }
 }
 
+:global(html.tab-hidden) .root {
+  animation-play-state: paused;
+}
+
 /* ── Header bar ────────────────────────────────────────── */
 
 .header {

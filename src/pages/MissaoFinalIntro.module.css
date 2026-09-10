@@ -83,6 +83,10 @@
   .icon { animation: none; }
 }
 
+:global(html.tab-hidden) .icon {
+  animation-play-state: paused;
+}
+
 .title {
   margin: 0;
   font-size: clamp(1.375rem, 5.5vw, 1.875rem);

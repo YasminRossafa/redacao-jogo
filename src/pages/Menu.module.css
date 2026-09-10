@@ -506,6 +506,13 @@
   .markerTitle { animation: none; }
 }
 
+/* Tab/app backgrounded: pause continuous decorative animations instead of
+   animating unseen. animation-play-state resumes from the same offset, so
+   nothing jumps when the tab becomes visible again. */
+:global(html.tab-hidden) .markerTitle {
+  animation-play-state: paused;
+}
+
 /* Star-cloud: a core radial glow + a dense scatter of coloured/white stars.
    Negative inset lets the glow bleed past the ring so the trail fades in. */
 .nebulaMarkerCloud {
@@ -621,6 +628,10 @@
   }
 }
 
+:global(html.tab-hidden) .nebulaMarkerRing {
+  animation-play-state: paused;
+}
+
 /* ── Astronaut (rides the current node) ─────────────────────── */
 
 .astronaut {
@@ -657,6 +668,10 @@
   .astronaut {
     animation: none;
   }
+}
+
+:global(html.tab-hidden) .astronaut {
+  animation-play-state: paused;
 }
 
 /* ── Label & stars ──────────────────────── */
@@ -744,6 +759,10 @@
       0 0 0 2px rgba(6, 182, 212, 0.6),
       0 0 16px rgba(6, 182, 212, 0.4);
   }
+}
+
+:global(html.tab-hidden) .nodeSkip {
+  animation-play-state: paused;
 }
 
 /* "Pular esta etapa" ribbon below the skip node */
