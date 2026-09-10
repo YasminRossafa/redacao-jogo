@@ -1,7 +1,7 @@
 {
-  "name": "Jogo da Redação",
-  "short_name": "Redação",
-  "description": "Pratique a estrutura da dissertação-argumentativa para o ENEM.",
+  "name": "Missão Nota 1000",
+  "short_name": "Nota 1000",
+  "description": "Embarque na nave e venha aprender a construir uma redação dissertativa-argumentativa para tirar 1000 no ENEM.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F1F5F9",

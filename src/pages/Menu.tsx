@@ -4,6 +4,7 @@ import { useProgress } from '../progress/useProgress';
 import { PHASES, SECTIONS, CONTENT, COMPLETO_SECTION, BONUS_PHASE_BY_SECTION, getTierStars } from '../content/index';
 import type { PhaseInfo, SectionInfo } from '../content/index';
 import styles from './Menu.module.css';
+import { TrailSVG } from './TrailSVG';
 
 // ─── Node states ──────────────────────────────────────────────────────────────
 
@@ -475,14 +476,23 @@ export function Menu() {
       .every((id) => getPhaseScore(id) !== null || isPhaseSkipped(id));
   });
 
+  const totalContentPhases = PHASES.filter(p => CONTENT[p.id]).length;
+  const completedContentPhases = PHASES.filter(
+    p => CONTENT[p.id] && (getPhaseScore(p.id) !== null || isPhaseSkipped(p.id))
+  ).length;
+  const completedFraction = totalContentPhases > 0 ? completedContentPhases / totalContentPhases : 0;
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Jogo da Redação</h1>
-        <p className={styles.subtitle}>Pratique a estrutura da dissertação-argumentativa.</p>
+        <h1 className={styles.title}>Missão Nota 1000</h1>
+        <p className={styles.subtitle}>
+          Embarque na nave e venha aprender a construir uma redação dissertativa-argumentativa para tirar 1000 no ENEM
+        </p>
       </header>
 
       <div className={styles.trail} role="list" aria-label="Fases do jogo">
+        <TrailSVG completedFraction={completedFraction} />
         {SECTIONS.map((section) => {
           const phaseItems = SECTION_PHASE_ITEMS[section.id] ?? [];
           const nebClass = SECTION_NEBULA_CLASS[section.id];
