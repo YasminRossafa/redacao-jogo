@@ -74,39 +74,124 @@
   /* TrailSVG (z-index: 0) sits beneath section groups (z-index: 1+) */
 }
 
-/* ── Section portal (divider between sections) ── */
+/* ── Section break (replaces portal: covers trail + blends gradients) ── */
 
-.portal {
+.sectionBreak {
   position: relative;
-  z-index: 2;
+  z-index: 5;               /* above TrailSVG (z-index:0) — creates visual trail gap */
   align-self: stretch;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.625rem;
-  padding: 1.75rem 1rem 0.75rem;
+  justify-content: center;
+  padding: 2.75rem 1rem 2.25rem;
+  overflow: hidden;
+  /* Solid backdrop — completely hides trail behind this zone */
+  background: #0B1224;
 }
 
-.portalLine {
-  flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.14);
+/* Transition blend: outgoing section colour (top) → incoming colour (bottom) */
+.sectionBreak::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(to bottom,
+      rgba(var(--sec-rgb-from, 0,0,0), 0.22) 0%,
+      transparent 52%
+    ),
+    linear-gradient(to top,
+      rgba(var(--sec-rgb-to, 0,0,0), 0.30) 0%,
+      transparent 52%
+    );
 }
 
-.portalNode {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 20px;
-  padding: 0.25rem 0.875rem;
-  flex-shrink: 0;
+/* Dense nebula star cluster in the transition zone */
+.nebulaDust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image:
+    /* Coloured stars — incoming section hue */
+    radial-gradient(circle at  7% 28%, rgba(var(--sec-rgb-to,148,163,184), 0.85) 1.5px, transparent 2px),
+    radial-gradient(circle at 15% 72%, rgba(var(--sec-rgb-to,148,163,184), 0.60) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 24% 45%, rgba(var(--sec-rgb-to,148,163,184), 0.75) 1.8px, transparent 2.5px),
+    radial-gradient(circle at 34% 18%, rgba(var(--sec-rgb-to,148,163,184), 0.50) 0.8px, transparent 1.2px),
+    radial-gradient(circle at 46% 60%, rgba(var(--sec-rgb-to,148,163,184), 0.90) 2.0px, transparent 3.0px),
+    radial-gradient(circle at 53% 85%, rgba(var(--sec-rgb-to,148,163,184), 0.55) 1.2px, transparent 1.8px),
+    radial-gradient(circle at 61% 38%, rgba(var(--sec-rgb-to,148,163,184), 0.70) 1.5px, transparent 2.0px),
+    radial-gradient(circle at 70% 68%, rgba(var(--sec-rgb-to,148,163,184), 0.80) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 79% 22%, rgba(var(--sec-rgb-to,148,163,184), 0.65) 1.8px, transparent 2.5px),
+    radial-gradient(circle at 88% 55%, rgba(var(--sec-rgb-to,148,163,184), 0.55) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 94% 80%, rgba(var(--sec-rgb-to,148,163,184), 0.70) 0.8px, transparent 1.2px),
+    /* Outgoing section hue — fading edge at the top */
+    radial-gradient(circle at 28%  8%, rgba(var(--sec-rgb-from,148,163,184), 0.65) 1.2px, transparent 2.0px),
+    radial-gradient(circle at 68% 12%, rgba(var(--sec-rgb-from,148,163,184), 0.50) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 48%  5%, rgba(var(--sec-rgb-from,148,163,184), 0.55) 0.8px, transparent 1.2px),
+    /* White neutral stars */
+    radial-gradient(circle at 11% 52%, rgba(255,255,255, 0.75) 0.8px, transparent 1.2px),
+    radial-gradient(circle at 20% 15%, rgba(255,255,255, 0.60) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 29% 82%, rgba(255,255,255, 0.80) 0.6px, transparent 1.0px),
+    radial-gradient(circle at 41% 35%, rgba(255,255,255, 0.70) 0.8px, transparent 1.2px),
+    radial-gradient(circle at 50%  8%, rgba(255,255,255, 0.65) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 58% 65%, rgba(255,255,255, 0.55) 0.7px, transparent 1.0px),
+    radial-gradient(circle at 66% 92%, rgba(255,255,255, 0.75) 1.2px, transparent 1.8px),
+    radial-gradient(circle at 75% 42%, rgba(255,255,255, 0.60) 0.8px, transparent 1.2px),
+    radial-gradient(circle at 83% 15%, rgba(255,255,255, 0.70) 1.0px, transparent 1.5px),
+    radial-gradient(circle at 92% 62%, rgba(255,255,255, 0.65) 0.6px, transparent 1.0px);
 }
 
-.portalLabel {
-  font-size: 0.625rem;
-  font-weight: 700;
+/* Text wrapper */
+.sectionHeader {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.275rem;
+  text-align: center;
+}
+
+/* Diffuse colour glow behind the primary title */
+.sectionHeaderGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 240px;
+  height: 80px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center,
+    rgba(var(--sec-rgb-to, 148,163,184), 0.55) 0%,
+    transparent 68%);
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Primary: celestial region name */
+.sectionHeaderPrimary {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  letter-spacing: 0.13em;
-  color: rgba(255, 255, 255, 0.5);
-  white-space: nowrap;
+  color: #F1F5F9;
+  text-shadow:
+    0 0 10px rgba(var(--sec-rgb-to, 148,163,184), 0.95),
+    0 0 26px rgba(var(--sec-rgb-to, 148,163,184), 0.55),
+    0 0 52px rgba(var(--sec-rgb-to, 148,163,184), 0.25);
+  line-height: 1.2;
+}
+
+/* Secondary: technical name */
+.sectionHeaderSecondary {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 /* ── Section group (wraps a section's phase nodes, carries nebula tint) ── */
@@ -122,7 +207,6 @@
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 16px;
   pointer-events: none;
   z-index: 0;
 }

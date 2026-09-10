@@ -392,6 +392,25 @@ const SECTION_NEBULA_CLASS: Record<string, string> = {
   'redacao-completa': styles.sectionRedacaoCompleta,
 };
 
+// Raw RGB for each section (drives inline style on the sectionBreak without
+// inheriting the nebula ::before conflict from the section-color classes).
+const SECTION_RGB: Record<string, string> = {
+  'introducao':       '99, 102, 241',
+  'dev1':             '20, 184, 166',
+  'dev2':             '245, 158, 11',
+  'conclusao':        '236, 72, 153',
+  'redacao-completa': '139, 92, 246',
+};
+
+// Celestial names for each section's break header.
+const SECTION_CELESTIAL: Record<string, { primary: string; secondary: string }> = {
+  'introducao':       { primary: 'Sistema Planetário',    secondary: 'Introdução' },
+  'dev1':             { primary: 'Campo Lunar',           secondary: 'Desenvolvimento 1' },
+  'dev2':             { primary: 'Campo Estelar',         secondary: 'Desenvolvimento 2' },
+  'conclusao':        { primary: 'Cinturão de Meteoros',  secondary: 'Conclusão' },
+  'redacao-completa': { primary: 'Missão Final',          secondary: 'Redação Completa' },
+};
+
 // ─── Pre-computed trail layout ────────────────────────────────────────────────
 // Computed once at module load (PHASES and SECTIONS are static constants).
 // Each phase gets a stable isLeft flag so the zigzag is consistent even after
@@ -493,23 +512,35 @@ export function Menu() {
 
       <div className={styles.trail} role="list" aria-label="Fases do jogo">
         <TrailSVG completedFraction={completedFraction} />
-        {SECTIONS.map((section) => {
+        {SECTIONS.map((section, sectionIdx) => {
           const phaseItems = SECTION_PHASE_ITEMS[section.id] ?? [];
           const nebClass = SECTION_NEBULA_CLASS[section.id];
+          const currRgb = SECTION_RGB[section.id] ?? '148,163,184';
+          const prevRgb = sectionIdx > 0
+            ? (SECTION_RGB[SECTIONS[sectionIdx - 1].id] ?? '0,0,0')
+            : '0,0,0';
+          const celestial = SECTION_CELESTIAL[section.id] ?? { primary: section.label, secondary: '' };
 
           return (
             <React.Fragment key={section.id}>
-              {/* ── Section portal ── */}
+              {/* ── Section break: covers trail, blends gradients, shows celestial name ── */}
               <div
-                className={styles.portal}
+                className={styles.sectionBreak}
                 role="separator"
                 aria-label={`Seção: ${section.label}`}
+                style={{
+                  '--sec-rgb-from': prevRgb,
+                  '--sec-rgb-to':   currRgb,
+                } as React.CSSProperties}
               >
-                <span className={styles.portalLine} aria-hidden />
-                <span className={styles.portalNode}>
-                  <span className={styles.portalLabel}>{section.label}</span>
-                </span>
-                <span className={styles.portalLine} aria-hidden />
+                <div className={styles.nebulaDust} aria-hidden />
+                <div className={styles.sectionHeader}>
+                  <span className={styles.sectionHeaderGlow} aria-hidden />
+                  <span className={styles.sectionHeaderPrimary}>{celestial.primary}</span>
+                  {celestial.secondary && (
+                    <span className={styles.sectionHeaderSecondary}>{celestial.secondary}</span>
+                  )}
+                </div>
               </div>
 
               {/* ── Section phases ── */}
