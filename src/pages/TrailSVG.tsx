@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import styles from './TrailSVG.module.css';
 
 interface TrailPoint {
@@ -39,9 +39,65 @@ function buildPath(points: TrailPoint[]): string {
   return d;
 }
 
+// ─── Comet: composited HTML overlay, not an animated SVG stroke ───────────────
+// Previously the comet was an SVG <path> animating `stroke-dashoffset` across
+// the entire multi-thousand-px trail path, wrapped in an feGaussianBlur
+// filter. `stroke-dashoffset` isn't a compositable property, so every frame
+// forced a full-path repaint — and a GPU-process raster of every visible
+// tile — regardless of scroll position. Measured as the dominant cause of
+// mobile scroll jank: GPU raster 94–96% busy / 49–66% of frames dropped from
+// this one animation alone, while the page sat completely idle (see the
+// scroll-jank audit, "Fix 1").
+//
+// The head/tail are now plain HTML <div>s with a STATIC box-shadow glow
+// (rasterized once) whose only animated property is `transform` — a Web
+// Animations API animation built from points sampled along the same SVG path
+// via getPointAtLength(). A transform-only animation on a `will-change:
+// transform` layer runs entirely on the compositor thread: the browser moves
+// the already-rasterized layer instead of re-drawing it every frame.
+const COMET_DURATION_MS = 7000;   // matches the old cometTravel keyframe duration
+const COMET_TAIL_DELAY_MS = -150; // tail lags 0.15s behind the head, same as before
+const COMET_SAMPLE_STEP_PX = 16;  // arc-length spacing between sampled keyframes
+const COMET_TANGENT_EPS_PX = 2;   // arc-length delta used to estimate local direction
+
+/** Builds one WAAPI keyframe list by walking the path's arc length at a fixed
+ *  step and reading the tangent direction at each sample, so a single
+ *  keyframe set can drive both the head and the (time-delayed) tail. */
+function buildCometKeyframes(path: SVGPathElement, pathLen: number): Keyframe[] {
+  const steps = Math.max(2, Math.round(pathLen / COMET_SAMPLE_STEP_PX));
+  const keyframes: Keyframe[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const s = (i / steps) * pathLen;
+    const p = path.getPointAtLength(s);
+    const p2 = path.getPointAtLength(Math.min(pathLen, s + COMET_TANGENT_EPS_PX));
+    const angle = (Math.atan2(p2.y - p.y, p2.x - p.x) * 180) / Math.PI;
+    keyframes.push({
+      transform: `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${angle}deg)`,
+      offset: i / steps,
+    });
+  }
+  return keyframes;
+}
+
+/** True while the comet should hold still: mirrors the same two triggers
+ *  (`html.tab-hidden`, `html.is-scrolling`) the rest of the app's decorative
+ *  animations pause on — see main.tsx. WAAPI Animations created via
+ *  `.animate()` aren't CSS `animation`s, so `animation-play-state` in CSS
+ *  can't reach them; pausing/playing the Animation objects directly from a
+ *  MutationObserver keeps the exact same paused/resumed behaviour (resuming
+ *  from the same point, no jump). */
+function shouldPauseComet(): boolean {
+  const root = document.documentElement.classList;
+  return root.contains('is-scrolling') || root.contains('tab-hidden');
+}
+
 export function TrailSVG({ completedFraction, points }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
+  const cometHeadRef = useRef<HTMLDivElement>(null);
+  const cometTailRef = useRef<HTMLDivElement>(null);
+  const cometHeadAnimRef = useRef<Animation | null>(null);
+  const cometTailAnimRef = useRef<Animation | null>(null);
   const [containerH, setContainerH] = useState(0);
   const [containerW, setContainerW] = useState(0);
   const [pathLen, setPathLen] = useState(0);
@@ -70,14 +126,66 @@ export function TrailSVG({ completedFraction, points }: Props) {
   const y0 = activePoints[0].y;
   const y1 = activePoints[activePoints.length - 1].y;
   const pathD = buildPath(activePoints);
-  const cometDash = 38;
-  const cometGap = pathLen > 0 ? pathLen - cometDash : 9999;
 
   useEffect(() => {
     if (pathRef.current && containerH > 0 && containerW > 0) {
       setPathLen(pathRef.current.getTotalLength());
     }
   }, [containerH, containerW, pathD]);
+
+  // (Re)builds the comet's WAAPI animation whenever the curve's geometry
+  // changes. Reads the SVG <path> element's live, current shape via
+  // getPointAtLength rather than recomputing geometry from pathD/points
+  // directly, so it's always consistent with whatever actually rendered.
+  // Carries the previous animation's currentTime across a rebuild so a
+  // layout change (e.g. completing a phase, resizing) never visibly restarts
+  // the comet from the top.
+  useEffect(() => {
+    const path = pathRef.current;
+    const head = cometHeadRef.current;
+    const tail = cometTailRef.current;
+    if (!path || !head || !tail || pathLen <= 0) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const keyframes = buildCometKeyframes(path, pathLen);
+    const prevHeadTime = cometHeadAnimRef.current?.currentTime ?? null;
+    const prevTailTime = cometTailAnimRef.current?.currentTime ?? null;
+    cometHeadAnimRef.current?.cancel();
+    cometTailAnimRef.current?.cancel();
+
+    const headAnim = head.animate(keyframes, {
+      duration: COMET_DURATION_MS,
+      iterations: Infinity,
+      easing: 'linear',
+    });
+    const tailAnim = tail.animate(keyframes, {
+      duration: COMET_DURATION_MS,
+      iterations: Infinity,
+      easing: 'linear',
+      delay: COMET_TAIL_DELAY_MS,
+    });
+    if (prevHeadTime !== null) headAnim.currentTime = prevHeadTime;
+    if (prevTailTime !== null) tailAnim.currentTime = prevTailTime;
+    cometHeadAnimRef.current = headAnim;
+    cometTailAnimRef.current = tailAnim;
+
+    const applyPauseState = () => {
+      const pause = shouldPauseComet();
+      for (const anim of [headAnim, tailAnim]) {
+        if (pause && anim.playState === 'running') anim.pause();
+        else if (!pause && anim.playState === 'paused') anim.play();
+      }
+    };
+    applyPauseState();
+    const observer = new MutationObserver(applyPauseState);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => {
+      observer.disconnect();
+      headAnim.cancel();
+      tailAnim.cancel();
+    };
+  }, [pathLen, pathD]);
 
   return (
     <div ref={wrapRef} className={styles.wrapper} aria-hidden>
@@ -91,18 +199,10 @@ export function TrailSVG({ completedFraction, points }: Props) {
           aria-hidden
         >
           <defs>
-            {/* Soft glow filter */}
+            {/* Soft glow filter — used only by the static diffuse-glow
+                underlayer below; the comet no longer uses SVG filters. */}
             <filter id="trail-glow-soft" x="-40%" y="-40%" width="180%" height="180%">
               <feGaussianBlur stdDeviation="4" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            {/* Strong glow for the comet */}
-            <filter id="trail-glow-comet" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="7" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
@@ -190,37 +290,15 @@ export function TrailSVG({ completedFraction, points }: Props) {
               filter="url(#trail-glow-soft)"
             />
           </g>
-
-          {/* ── Animated comet traveling along the trail ── */}
-          {pathLen > 0 && (
-            <path
-              d={pathD}
-              fill="none"
-              stroke="rgba(224,242,254,0.95)"
-              strokeWidth="5"
-              strokeDasharray={`${cometDash} ${cometGap}`}
-              strokeLinecap="round"
-              filter="url(#trail-glow-comet)"
-              className={styles.comet}
-              style={{ '--trail-len': `${pathLen}` } as React.CSSProperties}
-            />
-          )}
-
-          {/* Secondary comet tail (softer, slightly behind) */}
-          {pathLen > 0 && (
-            <path
-              d={pathD}
-              fill="none"
-              stroke="rgba(147,197,253,0.5)"
-              strokeWidth="9"
-              strokeDasharray={`${cometDash * 1.4} ${cometGap}`}
-              strokeLinecap="round"
-              filter="url(#trail-glow-soft)"
-              className={styles.cometTail}
-              style={{ '--trail-len': `${pathLen}` } as React.CSSProperties}
-            />
-          )}
         </svg>
+      )}
+
+      {/* ── Animated comet traveling along the trail (HTML, not SVG) ── */}
+      {pathLen > 0 && (
+        <>
+          <div ref={cometTailRef} className={styles.cometTail} />
+          <div ref={cometHeadRef} className={styles.comet} />
+        </>
       )}
     </div>
   );

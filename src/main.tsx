@@ -21,29 +21,32 @@ document.addEventListener('visibilitychange', () => {
   document.documentElement.classList.toggle('tab-hidden', document.hidden);
 });
 
-// Same mechanism, for the same continuous animations, but for active scroll:
-// profiling (CPU-throttled trace of a real scroll gesture) showed these CSS
-// animations running is the dominant cause of scroll jank — not scroll itself,
-// not a scroll listener, not DOM size. Disabling them raised a throttled
-// scroll from ~10fps/97% missed frames to ~53fps/46% missed. The Page
-// Visibility pause above never helps here since the tab stays visible the
-// whole time you're scrolling it.
-// The listener is passive (never blocks the scroll) and rAF-coalesced (at
-// most one class toggle per animation frame, not one per raw scroll event).
-// `is-scrolling` goes on 150ms after the last scroll event stops, restoring
-// the exact same idle animation — nothing about the paused/resumed look
-// differs from a plain `animation-play-state` pause.
-let scrollRafId: number | null = null;
+// Same mechanism, for the same continuous animations, but for active scroll.
+// A follow-up GPU-process-raster profile (see the scroll-jank audit) found
+// the actual dominant cost was two specific animations — the trail's comet
+// and the marker/skip-node pulse glows — which are now fixed at the source
+// (an HTML/WAAPI transform-driven comet in TrailSVG.tsx, opacity-crossfade
+// pulses in Menu.module.css) instead of leaning on this pause to hide their
+// cost. This toggle remains as a safety net for anything else that opts into
+// `:global(html.is-scrolling) ...{ animation-play-state: paused }`.
+//
+// The previous version added the class from a requestAnimationFrame queued
+// by the first scroll event, so on a raster-saturated pipeline it could take
+// 200-440ms to actually engage — most of a phone flick's dropped frames
+// landed in exactly that window (see the audit, "Fix 3"). `classList.add()`
+// is a cheap no-op when the class is already present, so there's no need to
+// coalesce it through a rAF: add it synchronously on every scroll event and
+// let the browser's own event coalescing bound how often this runs. The stop
+// timer is re-armed on every event unconditionally (previously it was only
+// re-armed when a rAF wasn't already pending), fixing a related bug where
+// two scroll events landing in the same animation frame could leave
+// `is-scrolling` stuck on until the next scroll gesture cleared it.
 let scrollStopTimer: ReturnType<typeof setTimeout> | null = null;
 window.addEventListener(
   'scroll',
   () => {
+    document.documentElement.classList.add('is-scrolling');
     if (scrollStopTimer) clearTimeout(scrollStopTimer);
-    if (scrollRafId !== null) return;
-    scrollRafId = requestAnimationFrame(() => {
-      scrollRafId = null;
-      document.documentElement.classList.add('is-scrolling');
-    });
     scrollStopTimer = setTimeout(() => {
       document.documentElement.classList.remove('is-scrolling');
     }, 150);

@@ -15,38 +15,61 @@
   overflow: visible;
 }
 
-/* Comet: dash animates from start to end of path, then loops */
-.comet {
-  animation: cometTravel 7s linear infinite;
-}
-
+/* ── Comet head/tail ──────────────────────────────────────────────────────────
+   Plain HTML elements, not SVG strokes: a static box-shadow glow (rasterized
+   once) positioned/rotated purely via `transform`, driven by a Web Animations
+   API animation built in TrailSVG.tsx from the trail's own curve. Because
+   `transform` is the only thing that changes frame to frame, the browser runs
+   this entirely on the compositor thread instead of re-rastering the glow on
+   every frame — see the scroll-jank audit, "Fix 1". The previous version
+   animated `stroke-dashoffset` on a blurred SVG stroke spanning the whole
+   path, which forced a full-path repaint 60x/s regardless of scroll position
+   or viewport. */
+.comet,
 .cometTail {
-  animation: cometTravel 7s linear infinite;
-  animation-delay: -0.15s; /* tail lags slightly behind */
-  opacity: 0.6;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 999px;
+  pointer-events: none;
+  will-change: transform;
+  transform-origin: 50% 50%;
 }
 
-@keyframes cometTravel {
-  from { stroke-dashoffset: 0; }
-  to   { stroke-dashoffset: calc(var(--trail-len) * -1px); }
+/* Bright head — same length/thickness/colour as the old 5px-wide, 38px-long
+   stroke; the layered box-shadow approximates the old feGaussianBlur(7) glow
+   without animating anything but transform. */
+.comet {
+  width: 38px;
+  height: 5px;
+  background: rgba(224, 242, 254, 0.95);
+  box-shadow:
+    0 0 6px 1px rgba(224, 242, 254, 0.9),
+    0 0 14px 4px rgba(224, 242, 254, 0.55),
+    0 0 26px 9px rgba(147, 197, 253, 0.3);
+}
+
+/* Softer, thicker, dimmer trailing tail — same proportions as the old 9px-wide,
+   ~53px-long stroke at 0.6 opacity with the weaker feGaussianBlur(4) glow. */
+.cometTail {
+  width: 53px;
+  height: 9px;
+  background: rgba(147, 197, 253, 0.5);
+  opacity: 0.6;
+  box-shadow:
+    0 0 8px 2px rgba(147, 197, 253, 0.4),
+    0 0 18px 6px rgba(147, 197, 253, 0.22);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .comet,
   .cometTail {
-    animation: none;
     opacity: 0;
   }
 }
 
-/* Tab/app backgrounded, or the page is actively being scrolled: pause instead
-   of animating unseen/unnoticed. Resumes from the same offset (no reset), so
-   nothing jumps when the tab comes back or scrolling stops. Profiling showed
-   this stroke-dashoffset animation is one of several concurrently-running
-   ones that, combined, are the actual cause of scroll jank — see main.tsx. */
-:global(html.tab-hidden) .comet,
-:global(html.tab-hidden) .cometTail,
-:global(html.is-scrolling) .comet,
-:global(html.is-scrolling) .cometTail {
-  animation-play-state: paused;
-}
+/* Note: pausing while backgrounded/scrolling is handled in TrailSVG.tsx by
+   pausing/playing the WAAPI Animation objects directly (a MutationObserver on
+   html.tab-hidden / html.is-scrolling) — `animation-play-state` in CSS has no
+   effect on animations created via element.animate(), which aren't CSS
+   `animation`s. */
