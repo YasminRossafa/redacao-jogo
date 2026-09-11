@@ -546,7 +546,8 @@
     radial-gradient(circle at 18% 82%, rgba(255,255,255, 0.70) 0.9px, transparent 1.4px);
 }
 
-/* The visible clickable border/ring. */
+/* The visible clickable border/ring. Box-shadow itself is static (never
+   animated) — see .nebulaMarkerRing::after below for the pulsing glow. */
 .nebulaMarkerRing {
   position: absolute;
   inset: 0;
@@ -557,7 +558,31 @@
   box-shadow:
     0 0 18px 4px rgba(var(--marker-rgb, 148, 163, 184), 0.5),
     inset 0 0 22px rgba(var(--marker-rgb, 148, 163, 184), 0.35);
-  animation: markerPulse 3s ease-in-out infinite;
+}
+
+/* Pulsing glow: a second, brighter halo layered on via ::after and
+   cross-faded in/out purely by animating opacity, instead of animating the
+   box-shadow above directly. An animated box-shadow forces a full repaint
+   (and GPU-process raster) of the shadow's extent every frame; animating the
+   opacity of an already-rasterized layer is compositor-only. Alone, this
+   animated box-shadow measured ~85-89% of GPU raster time while the page sat
+   completely idle — see the scroll-jank audit, "Fix 2". Overlay alphas are
+   derived so base + overlay (at opacity 1) approximates the old peak
+   keyframe: for two stacked shadows of the same colour, overlay_alpha ≈
+   (peak_alpha - base_alpha) / (1 - base_alpha); overlay radius/spread match
+   the old peak values so the falloff shape matches too. */
+.nebulaMarkerRing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    0 0 26px 6px rgba(var(--marker-rgb, 148, 163, 184), 0.36),
+    inset 0 0 26px rgba(var(--marker-rgb, 148, 163, 184), 0.2);
+  opacity: 0;
+  will-change: opacity;
+  animation: markerPulseFade 3s ease-in-out infinite;
 }
 
 /* Interactive affordance: scale up + brighten on hover/focus. */
@@ -607,30 +632,23 @@
     inset 0 0 22px rgba(var(--marker-rgb, 148, 163, 184), 0.35);
 }
 
-@keyframes markerPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 18px 4px rgba(var(--marker-rgb, 148, 163, 184), 0.5),
-      inset 0 0 22px rgba(var(--marker-rgb, 148, 163, 184), 0.35);
-  }
-  50% {
-    box-shadow:
-      0 0 26px 6px rgba(var(--marker-rgb, 148, 163, 184), 0.68),
-      inset 0 0 26px rgba(var(--marker-rgb, 148, 163, 184), 0.48);
-  }
+@keyframes markerPulseFade {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nebulaMarker {
     transition: none;
   }
-  .nebulaMarkerRing {
+  .nebulaMarkerRing::after {
     animation: none;
+    opacity: 0;
   }
 }
 
-:global(html.tab-hidden) .nebulaMarkerRing,
-:global(html.is-scrolling) .nebulaMarkerRing {
+:global(html.tab-hidden) .nebulaMarkerRing::after,
+:global(html.is-scrolling) .nebulaMarkerRing::after {
   animation-play-state: paused;
 }
 
@@ -734,38 +752,50 @@
   border-style: dashed;
   border-color: rgba(6, 182, 212, 0.65);
   cursor: pointer;
-  animation: skipPulse 2.8s ease-in-out infinite;
+  /* Static cyan ring/glow, composed into .node's own --state-ring (the same
+     mechanism .nodeCompleted/.nodeCurrent use) — these are the old skipPulse
+     keyframes' 0%/100% (low) values. The pulse itself now lives on ::after
+     below, animating only opacity; the section-colour glow layers from .node
+     never changed between the old low/peak keyframes, so they don't need to
+     be touched at all. */
+  --state-ring: 0 0 0 2px rgba(6, 182, 212, 0.38), 0 0 14px rgba(6, 182, 212, 0.28);
 }
 
-@keyframes skipPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 22px 5px rgba(var(--sec-rgb, 148, 163, 184), 0.5),
-      0 0 7px 1px rgba(var(--sec-rgb, 148, 163, 184), 0.4),
-      0 0 0 2px rgba(6, 182, 212, 0.38),
-      0 0 14px rgba(6, 182, 212, 0.28);
-  }
-  50% {
-    box-shadow:
-      0 0 22px 5px rgba(var(--sec-rgb, 148, 163, 184), 0.5),
-      0 0 7px 1px rgba(var(--sec-rgb, 148, 163, 184), 0.4),
-      0 0 0 3px rgba(6, 182, 212, 0.7),
-      0 0 26px rgba(6, 182, 212, 0.55);
-  }
+/* Pulsing glow: same technique and rationale as .nebulaMarkerRing::after
+   above (animated opacity, not animated box-shadow) — see the scroll-jank
+   audit, "Fix 2". Only carries the cyan layers since those are the only ones
+   that changed in the old keyframes. */
+.nodeSkip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 3px rgba(6, 182, 212, 0.52),
+    0 0 26px rgba(6, 182, 212, 0.38);
+  opacity: 0;
+  will-change: opacity;
+  animation: skipPulseFade 2.8s ease-in-out infinite;
+}
+
+@keyframes skipPulseFade {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nodeSkip {
+    --state-ring: 0 0 0 2px rgba(6, 182, 212, 0.6), 0 0 16px rgba(6, 182, 212, 0.4);
+  }
+  .nodeSkip::after {
     animation: none;
-    box-shadow:
-      0 0 22px 5px rgba(var(--sec-rgb, 148, 163, 184), 0.5),
-      0 0 0 2px rgba(6, 182, 212, 0.6),
-      0 0 16px rgba(6, 182, 212, 0.4);
+    opacity: 0;
   }
 }
 
-:global(html.tab-hidden) .nodeSkip,
-:global(html.is-scrolling) .nodeSkip {
+:global(html.tab-hidden) .nodeSkip::after,
+:global(html.is-scrolling) .nodeSkip::after {
   animation-play-state: paused;
 }
 
